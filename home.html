@@ -1,1 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Flying 64th – Home</title>
+  <meta name="description" content="The Flying 64th Flying Club – affordable general aviation in East Tennessee based at Oliver Springs Airport (Braden Field). Operates Cessna 172 & 150." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
+  <style>
+    :root{
+      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
+      --card:#0f1722cc; /* translucent for glass effect */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+
+    /* ====== NAV ====== */
+    .site-header{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
+    }
+    .nav{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--ink);text-decoration:none}
+    .brand img{height:34px;width:auto}
+    nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
+      transition:all .18s ease;
+    }
+    nav a:hover{color:var(--ink); background:rgba(255,255,255,.06)}
+    nav a.active{color:#001a33;background:var(--accent);}
+
+    /* ====== HERO ====== */
+    .hero{
+      position:relative;min-height:56vh;display:grid;place-items:end;
+      isolation:isolate;
+      background:#000 url("images/bothplanes_homepage.jpg") center/cover no-repeat;
+    }
+    .hero::after{
+      content:"";position:absolute;inset:0;z-index:0;
+      background:linear-gradient(180deg, rgba(11,17,23,.15) 0%, rgba(11,17,23,.65) 55%, rgba(11,17,23,1) 100%);
+    }
+    .hero-inner{
+      position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 18px 24px;
+      width:100%;
+    }
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
+    .hero p{margin:0;color:#d0d9e3;max-width:900px}
+    .cta-row{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+    .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
+    .btn:hover{transform:translateY(-1px)}
+
+    /* ====== CONTENT CARDS ====== */
+    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
+    .grid{display:grid;gap:16px}
+    .grid.two{grid-template-columns:1.4fr 1fr}
+    @media (max-width:960px){ .grid.two{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 18px;
+    }
+    .card h2{margin:0 0 8px;font-size:1.25rem}
+    .muted{color:var(--muted)}
+    .list{padding-left:18px;margin:8px 0}
+    .list li{margin:6px 0}
+
+    /* ====== QUICK LINKS ====== */
+    .links{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+    @media (max-width:960px){ .links{grid-template-columns:1fr 1fr} }
+    @media (max-width:520px){ .links{grid-template-columns:1fr} }
+    .link{
+      background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:14px;
+      text-decoration:none;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px;
+      transition:transform .18s ease, background .18s ease;
+    }
+    .link:hover{transform:translateY(-2px);background:#0d1520}
+    .tag{font-size:.8rem;color:#001a33;background:var(--accent);padding:4px 8px;border-radius:999px}
+
+    /* ====== FOOTER ====== */
+    .site-footer{border-top:1px solid var(--rule);margin-top:28px}
+    .foot{max-width:1100px;margin:0 auto;padding:18px;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="home.html">
+      <img src="images/logo.png" alt="The Flying 64th logo" />
+      <span>The Flying 64th</span>
+    </a>
+    <nav>
+      <a class="active" href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="becomeamember.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="pohmanuals.html">POH &amp; Manuals</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Affordable General Aviation in East Tennessee</h1>
+    <p>The Flying 64th is a member-owned flying club based at Oliver Springs Airport (Braden Field). We operate a Cessna 172K and a Cessna 150L, both ADS-B equipped and maintained to FAA standards.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="becomeamember.html">Become a Member</a>
+      <a class="btn" href="calendar.html">View Calendar</a>
+      <a class="btn" href="pohmanuals.html">POH &amp; Manuals</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTENT ===== -->
+<main class="container">
+  <div class="grid two">
+    <article class="card">
+      <h2>About the Club</h2>
+      <p class="muted">The Flying 64th is a general aviation flying club offering the most affordable flying in East Tennessee. Convenient to Oak Ridge, West Knoxville, Lenoir City, Harriman, and Oliver Springs, members buy into the club rather than simply renting from a pool. Every member is an owner in each aircraft.</p>
+      <p class="muted">The club has a <strong>Cessna 172K</strong> and a <strong>Cessna 150L</strong>. Both planes are equipped with ADSB-IN/OUT. The 172 is equipped with Garmin 355 GPS Navigation.</p>
+      <p class="muted">The Flying 64th has been operating out of Oliver Springs Airport as a club for pilots of all ages and skill levels since its formation in 1954 by the merger of two smaller clubs which trace their roots to 1946. The name originated from the association of charter members with the 9964th local Air Force Reserve Squadron.</p>
+    </article>
+
+    <aside class="card">
+      <h2>Why Join?</h2>
+      <ul class="list">
+        <li>Shared ownership keeps costs low</li>
+        <li>Two well-equipped aircraft (2-seat & 4-seat)</li>
+        <li>Supportive pilot community & mentorship</li>
+        <li>Great for training and time-building</li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="links">
+    <a class="link" href="becomeamember.html">
+      <span>Membership Details</span><span class="tag">Start here</span>
+    </a>
+    <a class="link" href="calendar.html">
+      <span>Club Calendar & Scheduling</span><span class="tag">View</span>
+    </a>
+    <a class="link" href="pohmanuals.html">
+      <span>POH & Manuals</span><span class="tag">Docs</span>
+    </a>
+    <a class="link" href="photos.html">
+      <span>Photo Gallery</span><span class="tag">Browse</span>
+    </a>
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="foot">
+    © <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee
+  </div>
+</footer>
+
+<script>
+  document.getElementById("y").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
