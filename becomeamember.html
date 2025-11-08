@@ -2,257 +2,258 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Become a Member – The Flying 64th</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Flying 64th – Become a Member</title>
+  <meta name="description" content="Join The Flying 64th Flying Club. See dues, rates, and submit your membership application. Based at Oliver Springs Airport (Braden Field).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#0e1116; --panel:#161b22; --panelSoft:#12171e;
-      --accent:#6aa5ff; --ink:#e9eef6; --ink-dim:#b9c2cf; --ink-soft:#9aa3ad;
-      --border:rgba(255,255,255,.12); --ring:rgba(102,153,255,.35);
-      --radius:14px;
+      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
+      --card:#0f1722cc; /* translucent glass */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
     }
     *{box-sizing:border-box}
-    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink)}
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 
-    /* ===== HEADER WITH CENTERED PAGE TITLE ===== */
-    header{
-      background:#1a1a1a; border-bottom:1px solid var(--border);
+    /* ===== NAV (matches home) ===== */
+    .site-header{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
     }
-    .bar{
-      display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
-      gap:16px; padding:12px 24px;
+    .nav{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--ink);text-decoration:none}
+    .brand img{height:34px;width:auto}
+    nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
+      transition:all .18s ease;
     }
-    .brand{display:flex; align-items:center; gap:12px; justify-self:start}
-    .brand img{width:56px; height:auto}
-    .brand span{font-weight:700; letter-spacing:.3px}
+    nav a:hover{color:var(--ink); background:rgba(255,255,255,.06)}
+    nav a.active{color:#001a33;background:var(--accent);}
 
-    .page-title{
-      justify-self:center; color:#fff; font-weight:800; font-size:1.2rem;
-      text-align:center; white-space:nowrap;
-    }
-
-    nav{display:flex; align-items:center; gap:1rem; justify-self:end; flex-wrap:wrap}
-    nav a{color:#d9e2ef; text-decoration:none; font-weight:500}
-    nav a:hover{color:var(--accent)}
-
-    /* ===== HERO (image not blown up; full plane visible) ===== */
+    /* ===== HERO (same treatment as home) ===== */
     .hero{
-      background:var(--bg); display:flex; justify-content:center; align-items:center;
-      border-bottom:1px solid var(--border);
+      position:relative;min-height:48vh;display:grid;place-items:end;
+      isolation:isolate;
+      background:#000 url("images/planesc172.1.jpg") center/cover no-repeat;
     }
-    .hero-img{
+    .hero::after{
+      content:"";position:absolute;inset:0;z-index:0;
+      background:linear-gradient(180deg, rgba(11,17,23,.15) 0%, rgba(11,17,23,.65) 55%, rgba(11,17,23,1) 100%);
+    }
+    .hero-inner{
+      position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 18px 24px;
       width:100%;
-      max-height:220px;           /* shallow banner */
-      object-fit:contain;         /* show entire plane */
-      object-position:center;
-      display:block;
-      background:#0e1116;         /* fills letterbox bars */
     }
-    @media (max-width:900px){ .hero-img{ max-height:200px } }
-    @media (max-width:600px){ .hero-img{ max-height:180px } }
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
+    .hero p{margin:0;color:#d0d9e3;max-width:900px}
 
-    /* ===== LAYOUT ===== */
-    .container{max-width:980px; margin:2.2rem auto; padding:0 1.2rem}
+    /* ===== CONTENT ===== */
+    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
     .card{
-      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
-      padding:1.6rem 2rem; box-shadow:0 10px 25px rgba(0,0,0,.25); margin-bottom:2rem;
+      background:var(--card);
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 18px;
+      margin-bottom:16px;
     }
-    h2{margin:0 0 1rem 0; font-size:1.4rem}
-    .muted{color:var(--ink-soft)}
-    a.link{color:var(--accent); text-decoration:none; font-weight:600}
+    .card h2{margin:0 0 8px;font-size:1.25rem}
+    .muted{color:var(--muted)}
+    a.link{color:var(--accent);text-decoration:none;font-weight:600}
     a.link:hover{text-decoration:underline}
 
     /* ===== FORM ===== */
-    .form-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
-    @media (max-width:720px){ .form-grid{grid-template-columns:1fr} }
-    label{display:block; font-size:.9rem; color:var(--ink-dim); margin-bottom:6px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    @media (max-width:900px){ .form-grid{grid-template-columns:1fr} }
+    label{display:block;font-size:.9rem;color:#c6d3df;margin-bottom:6px}
     input[type="text"],input[type="email"],input[type="tel"],input[type="date"],select,textarea{
-      width:100%; background:var(--panelSoft); color:var(--ink);
-      border:1px solid var(--border); border-radius:10px; padding:10px 12px; outline:none;
+      width:100%;background:#0c141f;color:var(--ink);
+      border:1px solid var(--rule);border-radius:12px;padding:10px 12px;outline:none;
       transition:border-color .15s, box-shadow .15s;
     }
-    textarea{min-height:90px}
-    input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
+    textarea{min-height:100px}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(88,166,255,.25)}
     .full{grid-column:1 / -1}
-    .agree{display:flex; align-items:center; gap:10px; background:var(--panelSoft); border:1px solid var(--border); padding:12px; border-radius:10px; margin-top:4px}
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-    .btn{appearance:none; border:0; cursor:pointer; padding:12px 16px; border-radius:12px; font-weight:700; transition:transform .06s ease, box-shadow .2s, opacity .2s}
-    .btn-primary{background:var(--accent); color:#0b1020; box-shadow:0 10px 20px rgba(106,165,255,.25)}
-    .btn-primary:disabled{opacity:.5; cursor:not-allowed}
-    .btn-outline{background:transparent; color:var(--ink); border:1px solid var(--border)}
+    .agree{display:flex;align-items:center;gap:10px;background:#0c141f;border:1px solid var(--rule);padding:12px;border-radius:12px;margin-top:4px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{appearance:none;border:0;cursor:pointer;padding:12px 16px;border-radius:12px;font-weight:700;transition:transform .06s ease, box-shadow .2s, opacity .2s}
+    .btn.primary{background:var(--accent);color:#001a33}
+    .btn.primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
     .btn:active{transform:translateY(1px)}
 
     /* ===== FOOTER ===== */
-    footer{text-align:center; color:var(--ink-soft); padding:20px 0; border-top:1px solid var(--border); margin-top:40px}
+    .site-footer{border-top:1px solid var(--rule);margin-top:28px}
+    .foot{max-width:1100px;margin:0 auto;padding:18px;color:var(--muted);text-align:center}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="bar">
-      <div class="brand">
-        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" />
-        <span>The Flying 64th</span>
-      </div>
+<!-- ===== NAV ===== -->
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="home.html">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
+      <span>The Flying 64th</span>
+    </a>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a class="active" href="becomeamember.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="pohmanuals.html">POH &amp; Manuals</a>
+    </nav>
+  </div>
+</header>
 
-      <!-- centered page title in the bar -->
-      <div class="page-title">Become a Member</div>
+<!-- ===== HERO (same pattern as home) ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Become a Member</h1>
+    <p>Shared ownership. Two well-equipped Cessnas. A supportive flying community at Oliver Springs Airport.</p>
+  </div>
+</section>
 
-      <nav>
-        <a href="home.html">Home</a>
-        <a href="calendar.html">Calendar</a>
-        <a href="photos.html">Photos</a>
-        <a href="poh&manuals.html">POH & Manuals</a>
-      </nav>
-    </div>
-  </header>
+<!-- ===== CONTENT ===== -->
+<main class="container">
+  <!-- Membership details -->
+  <section class="card">
+    <h2>Membership Details</h2>
+    <p><strong>Share Price:</strong> $700</p>
+    <p><strong>Monthly Dues:</strong> $55</p>
+    <p><strong>Semi-Annual Airport User Fee:</strong> $12</p>
 
-  <!-- Slim hero (no text here; image not zoomed) -->
-  <section class="hero">
-    <img src="images/planesc172.1.jpg" alt="Cessna 172 on the field" class="hero-img" />
+    <p><strong>Cessna 150:</strong> Garmin GTR 225 Com and Flighbox Pro ADSB-In — <strong>$85/hr Wet</strong> (includes fuel)</p>
+    <p><strong>Cessna 172:</strong> Garmin GNC 355 GPS IFR Nav/Com and Flighbox Pro ADSB-In — <strong>$130/hr Wet</strong> (includes fuel)</p>
+
+    <p class="muted"><em>Minimum work requirement for maintenance is currently two hours per year.</em></p>
+
+    <p><strong>Contact:</strong> Call (865) 236-0640 or
+      <a class="link" href="mailto:theflying64@gmail.com">Email The Flying 64th</a>
+    </p>
+
+    <p>Please review the club
+      <a class="link" href="documents/Flying64th_By-Laws_11012024.pdf" target="_blank" rel="noopener">Bylaws (PDF)</a>.
+    </p>
   </section>
 
-  <main class="container">
-    <!-- Membership details -->
-    <section class="card">
-      <h2>Membership Details</h2>
-      <p><strong>Share Price:</strong> $700</p>
-      <p><strong>Monthly Dues:</strong> $55</p>
-      <p><strong>Semi-Annual Airport User Fee:</strong> $12</p>
+  <!-- Application (inline form) -->
+  <section class="card">
+    <h2>Membership Application</h2>
 
-      <p><strong>Cessna 150:</strong> Garmin GTR 225 Com and Flighbox Pro ADSB-In — <strong>$85/hr Wet</strong> (includes fuel)</p>
-      <p><strong>Cessna 172:</strong> Garmin GNC 355 GPS IFR Nav/Com and Flighbox Pro ADSB-In — <strong>$130/hr Wet</strong> (includes fuel)</p>
+    <form id="appForm" onsubmit="return sendApplicationEmail(event)">
+      <div class="form-grid">
+        <div><label for="first">First Name *</label><input id="first" name="first" type="text" required></div>
+        <div><label for="last">Last Name *</label><input id="last" name="last" type="text" required></div>
 
-      <p class="muted"><em>Minimum work requirement for maintenance is currently two hours per year.</em></p>
+        <div class="full"><label for="street">Street Address *</label><input id="street" name="street" type="text" required></div>
 
-      <p><strong>Contact:</strong> Call (865) 236-0640 or
-        <a class="link" href="mailto:theflying64@gmail.com">Email The Flying 64th</a>
-      </p>
+        <div><label for="city">City *</label><input id="city" name="city" type="text" required></div>
+        <div><label for="state">State *</label><input id="state" name="state" type="text" maxlength="2" placeholder="TN" required></div>
+        <div><label for="zip">Zip Code *</label><input id="zip" name="zip" type="text" required></div>
+        <div><label for="email">Email Address *</label><input id="email" name="email" type="email" required></div>
 
-      <p>Please review the club
-        <a class="link" href="documents/Flying64th_By-Laws_11012024.pdf" target="_blank" rel="noopener">Bylaws (PDF)</a>.
-      </p>
-    </section>
+        <div><label for="cell">Cell Number</label><input id="cell" name="cell" type="tel" placeholder="(###) ###-####"></div>
+        <div><label for="home">Home Number</label><input id="home" name="home" type="tel"></div>
+        <div><label for="work">Work Number</label><input id="work" name="work" type="tel"></div>
 
-    <!-- Application (inline form) -->
-    <section class="card">
-      <h2>Membership Application</h2>
+        <div class="full"><label for="employer">Employer</label><input id="employer" name="employer" type="text"></div>
 
-      <form id="appForm" onsubmit="return sendApplicationEmail(event)">
-        <div class="form-grid">
-          <div><label for="first">First Name *</label><input id="first" name="first" type="text" required></div>
-          <div><label for="last">Last Name *</label><input id="last" name="last" type="text" required></div>
+        <div><label for="dob">Date of Birth</label><input id="dob" name="dob" type="date"></div>
 
-          <div class="full"><label for="street">Street Address *</label><input id="street" name="street" type="text" required></div>
-
-          <div><label for="city">City *</label><input id="city" name="city" type="text" required></div>
-          <div><label for="state">State *</label><input id="state" name="state" type="text" maxlength="2" placeholder="TN" required></div>
-          <div><label for="zip">Zip Code *</label><input id="zip" name="zip" type="text" required></div>
-          <div><label for="email">Email Address *</label><input id="email" name="email" type="email" required></div>
-
-          <div><label for="cell">Cell Number</label><input id="cell" name="cell" type="tel" placeholder="(###) ###-####"></div>
-          <div><label for="home">Home Number</label><input id="home" name="home" type="tel"></div>
-          <div><label for="work">Work Number</label><input id="work" name="work" type="tel"></div>
-
-          <div class="full"><label for="employer">Employer</label><input id="employer" name="employer" type="text"></div>
-
-          <div><label for="dob">Date of Birth</label><input id="dob" name="dob" type="date"></div>
-
-          <div>
-            <label for="pilotType">Pilot Type</label>
-            <select id="pilotType" name="pilotType">
-              <option value="">Select…</option>
-              <option>Student</option><option>Sport</option><option>Recreational</option>
-              <option>Private</option><option>Commercial</option><option>ATP</option><option>Other</option>
-            </select>
-          </div>
-
-          <div><label for="hours">Approximate Number of Hours</label><input id="hours" name="hours" type="text"></div>
-
-          <div>
-            <label for="medical">Do you have a medical certificate?</label>
-            <select id="medical" name="medical">
-              <option value="">Select…</option>
-              <option>Yes</option><option>No</option><option>BasicMed</option><option>Not Applicable</option>
-            </select>
-          </div>
-
-          <div><label for="ref1">Reference 1 Name and Phone</label><input id="ref1" name="ref1" type="text"></div>
-          <div><label for="ref2">Reference 2 Name and Phone</label><input id="ref2" name="ref2" type="text"></div>
-
-          <div class="full">
-            <label for="notes">Anything else you'd like us to know?</label>
-            <textarea id="notes" name="notes" placeholder="Optional"></textarea>
-          </div>
-
-          <div class="full">
-            <div class="agree">
-              <input id="agree" type="checkbox">
-              <label for="agree" style="margin:0;">
-                I am familiar with the <a class="link" href="documents/Flying64th_By-Laws_11012024.pdf" target="_blank" rel="noopener">Bylaws</a> of The Flying 64th, Inc. and agree to abide by them if elected to membership.
-              </label>
-            </div>
-          </div>
+        <div>
+          <label for="pilotType">Pilot Type</label>
+          <select id="pilotType" name="pilotType">
+            <option value="">Select…</option>
+            <option>Student</option><option>Sport</option><option>Recreational</option>
+            <option>Private</option><option>Commercial</option><option>ATP</option><option>Other</option>
+          </select>
         </div>
 
-        <div class="actions">
-          <button id="submitBtn" class="btn btn-primary" type="submit" disabled>Submit Application</button>
-          <button class="btn btn-outline" type="reset">Clear</button>
+        <div><label for="hours">Approximate Number of Hours</label><input id="hours" name="hours" type="text"></div>
+
+        <div>
+          <label for="medical">Do you have a medical certificate?</label>
+          <select id="medical" name="medical">
+            <option value="">Select…</option>
+            <option>Yes</option><option>No</option><option>BasicMed</option><option>Not Applicable</option>
+          </select>
         </div>
-      </form>
 
-      <p class="muted" style="margin-top:10px;">
-        Submitting opens your email client with your application pre-filled and addressed to <strong>theflying64@gmail.com</strong>.
-      </p>
-    </section>
-  </main>
+        <div><label for="ref1">Reference 1 Name and Phone</label><input id="ref1" name="ref1" type="text"></div>
+        <div><label for="ref2">Reference 2 Name and Phone</label><input id="ref2" name="ref2" type="text"></div>
 
-  <footer>
+        <div class="full">
+          <label for="notes">Anything else you'd like us to know?</label>
+          <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+        </div>
+
+        <div class="full">
+          <div class="agree">
+            <input id="agree" type="checkbox">
+            <label for="agree" style="margin:0;">
+              I am familiar with the <a class="link" href="documents/Flying64th_By-Laws_11012024.pdf" target="_blank" rel="noopener">Bylaws</a> of The Flying 64th, Inc. and agree to abide by them if elected to membership.
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="submitBtn" class="btn primary" type="submit" disabled>Submit Application</button>
+        <button class="btn ghost" type="reset">Clear</button>
+      </div>
+    </form>
+
+    <p class="muted" style="margin-top:10px;">
+      Submitting opens your email client with your application pre-filled and addressed to <strong>tristanstuff@denjess.com</strong>.
+    </p>
+  </section>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="foot">
     © <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee
-  </footer>
+  </div>
+</footer>
 
-  <script>
-    // enable submit when bylaws checkbox is checked
-    const agree = document.getElementById('agree');
-    const submitBtn = document.getElementById('submitBtn');
-    agree.addEventListener('change', () => submitBtn.disabled = !agree.checked);
+<script>
+  // enable submit only when bylaws checkbox is checked
+  const agree = document.getElementById('agree');
+  const submitBtn = document.getElementById('submitBtn');
+  agree.addEventListener('change', () => submitBtn.disabled = !agree.checked);
 
-    // build mailto with all fields
-    function sendApplicationEmail(e){
-      e.preventDefault();
-      const v = id => (document.getElementById(id)?.value || '').trim();
+  // build mailto with all fields
+  function sendApplicationEmail(e){
+    e.preventDefault();
+    const v = id => (document.getElementById(id)?.value || '').trim();
 
-      const subject = `Membership Application – ${v('first')} ${v('last')}`;
-      const body = [
-        `Name: ${v('first')} ${v('last')}`,
-        `Address: ${v('street')}, ${v('city')}, ${v('state')} ${v('zip')}`,
-        `Email: ${v('email')}`,
-        `Cell: ${v('cell')}`,
-        `Home: ${v('home')}`,
-        `Work: ${v('work')}`,
-        `Employer: ${v('employer')}`,
-        `Date of Birth: ${v('dob')}`,
-        `Pilot Type: ${v('pilotType')}`,
-        `Approx. Hours: ${v('hours')}`,
-        `Medical Certificate: ${v('medical')}`,
-        `Reference 1: ${v('ref1')}`,
-        `Reference 2: ${v('ref2')}`,
-        ``,
-        `Acknowledgement: I have reviewed the Bylaws and agree to abide by them if elected to membership.`,
-        ``,
-        `Additional Notes:`,
-        `${v('notes')}`
-      ].join('\n');
+    const subject = `Membership Application – ${v('first')} ${v('last')}`;
+    const body = [
+      `Name: ${v('first')} ${v('last')}`,
+      `Address: ${v('street')}, ${v('city')}, ${v('state')} ${v('zip')}`,
+      `Email: ${v('email')}`,
+      `Cell: ${v('cell')}`, `Home: ${v('home')}`, `Work: ${v('work')}`,
+      `Employer: ${v('employer')}`, `Date of Birth: ${v('dob')}`,
+      `Pilot Type: ${v('pilotType')}`, `Approx. Hours: ${v('hours')}`,
+      `Medical Certificate: ${v('medical')}`,
+      `Reference 1: ${v('ref1')}`, `Reference 2: ${v('ref2')}`,
+      ``, `Acknowledgement: I have reviewed the Bylaws and agree to abide by them if elected to membership.`,
+      ``, `Additional Notes:`, `${v('notes')}`
+    ].join('\n');
 
-      window.location.href =
-        `mailto:theflying64@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      return false;
-    }
+    window.location.href = `mailto:tristanstuff@denjess.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return false;
+  }
 
-    document.getElementById('y').textContent = new Date().getFullYear();
-  </script>
-
+  document.getElementById("y").textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
