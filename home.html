@@ -183,13 +183,10 @@
 
     <!-- ===== MEMBER MESSAGE BOARD ===== -->
     <section class="card" id="board">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <h2 style="margin:0;">Member Message Board</h2>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button id="newPostBtn" class="btn primary" style="display:none;">New Post</button>
-          <button id="notifyBtn" class="btn" style="display:none;">Submit &amp; Notify</button>
-        </div>
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+  <h2 style="margin:0;">Member Message Board</h2>
+  <button id="newPostBtn" class="btn primary" style="display:none;">Submit &amp; Notify</button>
+</div>
       <p id="msgHint" class="muted" style="margin-top:8px;">Board notices and member updates appear here.</p>
 
       <!-- Scrollable feed -->
@@ -254,12 +251,11 @@
     <label class="post-label" for="postText">Message</label>
     <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
 
-    <div class="post-row">
-      <button id="postCancel" class="post-btn">Cancel</button>
-      <button id="postSubmitOnly" class="post-btn">Submit Only</button>
-      <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
-    </div>
-    <p id="postMsg" class="auth-msg"></p>
+  <div class="post-row">
+  <button id="postCancel" class="post-btn">Cancel</button>
+  <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
+</div>
+ <p id="postMsg" class="auth-msg"></p>
   </div>
 </div>
 
@@ -395,30 +391,28 @@
   }
 
   // Auth state
-  onAuthStateChanged(auth, async (user)=>{
-    currentUser = user || null;
-    await reloadRole();
-    const verified = !!user?.emailVerified;
+onAuthStateChanged(auth, async (user)=>{
+  currentUser = user || null;
+  const verified = !!user?.emailVerified;
 
-    if (user) {
-      const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
-      openBtn.textContent = verified
-        ? `Account – ${shortEmail}`
-        : `Unverified – ${shortEmail}`;
+  if (user) {
+    const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
+    document.getElementById('signinBtn').textContent = verified
+      ? `Account – ${shortEmail}`
+      : `Unverified – ${shortEmail}`;
 
-      newPostBtn.style.display = verified ? "inline-block" : "none";
-      notifyBtn.style.display  = (verified && isAdmin) ? "inline-block" : "none";
+    // Any verified member can submit & notify
+    newPostBtn.style.display = verified ? "inline-block" : "none";
 
-      hintEl.textContent = verified
-        ? "Share updates with the club."
-        : "Please verify your email to post.";
-    } else {
-      openBtn.textContent = "Sign In";
-      newPostBtn.style.display = "none";
-      notifyBtn.style.display  = "none";
-      hintEl.textContent = "Board notices and member updates appear here.";
-    }
-  });
+    hintEl.textContent = verified
+      ? "Share updates with the club."
+      : "Please verify your email to post.";
+  } else {
+    document.getElementById('signinBtn').textContent = "Sign In";
+    newPostBtn.style.display = "none";
+    hintEl.textContent = "Board notices and member updates appear here.";
+  }
+});
 
   // Sign in / up / reset / out
   doSignIn.addEventListener('click', async ()=>{
