@@ -12,7 +12,7 @@
   <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
-      --card:#0f1722cc; /* translucent for glass effect */
+      --card:#0f1722cc;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius:16px;
     }
@@ -45,6 +45,9 @@
     }
     header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
     header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--rule);text-decoration:none;color:var(--ink);cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
+    .btn:hover{transform:translateY(-1px)}
     @media (max-width:900px){
       .nav{ padding:10px 14px; flex-wrap:wrap }
       header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
@@ -68,16 +71,13 @@
     }
     .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
     .hero p{margin:0;color:#d0d9e3;max-width:900px}
-    .cta-row{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
-    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--rule);text-decoration:none;color:var(--ink);cursor:pointer}
-    .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
-    .btn:hover{transform:translateY(-1px)}
 
-    /* ===== CONTENT CARDS ===== */
+    /* ===== CONTENT ===== */
     .container{max-width:1100px;margin:0 auto;padding:28px 18px}
     .grid{display:grid;gap:16px}
-    .grid.two{grid-template-columns:1.4fr 1fr}
-    @media (max-width:960px){ .grid.two{grid-template-columns:1fr} }
+    .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
+    @media (max-width:760px){ .grid.cols-3{grid-template-columns:1fr} }
 
     .card{
       background:var(--card);
@@ -90,10 +90,8 @@
     .muted{color:var(--muted)}
     .list{padding-left:18px;margin:8px 0}
     .list li{margin:6px 0}
-
-    /* ===== FOOTER ===== */
-    .site-footer{border-top:1px solid var(--rule);margin-top:28px}
-    .foot{max-width:1100px;margin:0 auto;padding:18px;color:var(--muted);text-align:center}
+    .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
+    .iconbtn:hover{background:rgba(255,255,255,.06)}
 
     /* ===== AUTH MODAL ===== */
     .auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
@@ -109,6 +107,11 @@
     .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
     .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
     .invite-wrap{margin-top:6px}
+
+    /* Messages */
+    .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;margin:10px 0;background:#0e1520}
+    .msg-top{display:flex;justify-content:space-between;gap:10px}
+    .msg-meta{font-size:12px;color:#9fb1c3}
   </style>
 </head>
 <body>
@@ -141,7 +144,7 @@
 
 <!-- ===== CONTENT ===== -->
 <main class="container">
-  <div class="grid two">
+  <div class="grid cols-3">
     <article class="card">
       <h2>About the Club</h2>
       <p class="muted">The Flying 64th is a general aviation flying club offering the most affordable flying in East Tennessee. Convenient to Oak Ridge, West Knoxville, Lenoir City, Harriman, and Oliver Springs, members buy into the club rather than simply renting from a pool. Every member is an owner in each aircraft.</p>
@@ -158,6 +161,23 @@
         <li>Great for training and time-building</li>
       </ul>
     </aside>
+
+    <!-- ===== MEMBER MESSAGE BOARD ===== -->
+    <section class="card" id="board">
+      <h2>Member Message Board</h2>
+      <p id="msgHint" class="muted">Board notices and member updates appear here.</p>
+
+      <!-- Composer (visible when signed-in & verified) -->
+      <div id="composer" style="display:none; margin:12px 0 16px;">
+        <textarea id="newMsg" class="auth-input" rows="3" placeholder="Post an update to members…"></textarea>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+          <button id="postBtn" class="auth-btn primary" style="max-width:160px;">Post Message</button>
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div id="messages" style="display:grid; gap:12px;"></div>
+    </section>
   </div>
 </main>
 
@@ -181,8 +201,8 @@
     <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
 
     <div class="invite-wrap">
-      <label class="auth-label" for="invite">Membership Access Code (Only for New Accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Admin will provide invite code.">
+      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
+      <input id="invite" class="auth-input" type="text" placeholder="F64-CHRIS-2025-9QK7ATJ3">
     </div>
 
     <div class="auth-row">
@@ -203,9 +223,9 @@
   document.getElementById("y").textContent = new Date().getFullYear();
 </script>
 
-<!-- ===== Firebase + Auth Logic ===== -->
+<!-- ===== Firebase + Auth + Board Logic ===== -->
 <script type="module">
-  // Firebase SDKs
+  // --- Firebase SDKs
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
   import {
     getAuth, onAuthStateChanged,
@@ -213,62 +233,75 @@
     sendPasswordResetEmail, sendEmailVerification, signOut
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, updateDoc, serverTimestamp
+    getFirestore, collection, addDoc, onSnapshot, query, orderBy,
+    doc, getDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-  // Your Firebase config (from Firebase console)
+  // --- Your Firebase config (use EXACTLY what Console shows; replace if different)
   const firebaseConfig = {
-  apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
-  authDomain: "flying64th-b7813.firebaseapp.com",
-  projectId: "flying64th-b7813",
-  storageBucket: "flying64th-b7813.firebasestorage.app",
-  messagingSenderId: "244940935157",
-  appId: "1:244940935157:web:58e7305541377ba743dabc"
-};
+    apiKey: "AIzaSyAI5lbnXxAiBQThX6Y4tEuqqQ1cY6bn74",
+    authDomain: "flying64th-b7813.firebaseapp.com",
+    projectId: "flying64th-b7813",
+    storageBucket: "flying64th-b7813.appspot.com",
+    messagingSenderId: "244940935157",
+    appId: "1:244940935157:web:58e7305541377ba743dabc"
+  };
 
-  // Init
+  // --- Init
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // UI refs
-  const openBtn   = document.getElementById('signinBtn');
-  const modal     = document.getElementById('authModal');
-  const closeBtn  = document.getElementById('closeModal');
-  const emailEl   = document.getElementById('email');
-  const passEl    = document.getElementById('password');
-  const inviteEl  = document.getElementById('invite');
-  const doSignIn  = document.getElementById('doSignIn');
-  const doSignUp  = document.getElementById('doSignUp');
-  const doReset   = document.getElementById('doReset');
-  const signOutBtn= document.getElementById('signOutBtn');
-  const msgEl     = document.getElementById('authMsg');
+  // --- Board officers (can delete any post)
+  const BOARD_EMAILS = ["theflying64@gmail.com"];
 
-  // Modal open/close
+  // --- UI refs
+  const openBtn    = document.getElementById('signinBtn');
+  const modal      = document.getElementById('authModal');
+  const closeBtn   = document.getElementById('closeModal');
+  const emailEl    = document.getElementById('email');
+  const passEl     = document.getElementById('password');
+  const inviteEl   = document.getElementById('invite');
+  const doSignIn   = document.getElementById('doSignIn');
+  const doSignUp   = document.getElementById('doSignUp');
+  const doReset    = document.getElementById('doReset');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const msgEl      = document.getElementById('authMsg');
+
+  const composer   = document.getElementById('composer');
+  const newMsgEl   = document.getElementById('newMsg');
+  const postBtn    = document.getElementById('postBtn');
+  const feedEl     = document.getElementById('messages');
+  const hintEl     = document.getElementById('msgHint');
+
+  let currentUser = null;
+
+  // --- Modal open/close
   function openModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); msgEl.textContent=""; }
   function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
   openBtn?.addEventListener('click', openModal);
   closeBtn?.addEventListener('click', closeModal);
   modal?.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // Helper to show messages
+  // --- Helper to show messages
   const say = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
 
-  // Auth state → update button label
+  // --- Auth state
   onAuthStateChanged(auth, (user)=>{
-    if (user?.emailVerified){
-      if (openBtn) openBtn.textContent = "Account";
-      say("Signed in as " + (user.email || "member"));
-    } else if (user) {
-      if (openBtn) openBtn.textContent = "Account";
-      say("Please verify your email to access member features.");
+    currentUser = user || null;
+    const verified = !!user?.emailVerified;
+    if (user){
+      openBtn.textContent = "Account";
+      composer.style.display = verified ? "block" : "none";
+      hintEl.textContent = verified ? "Share updates with the club." : "Please verify your email to post.";
     } else {
-      if (openBtn) openBtn.textContent = "Sign In";
-      say("");
+      openBtn.textContent = "Sign In";
+      composer.style.display = "none";
+      hintEl.textContent = "Board notices and member updates appear here.";
     }
   });
 
-  // Sign in
+  // --- Sign in
   doSignIn.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
@@ -279,7 +312,7 @@
     } catch(err){ say(err.message, true); }
   });
 
-  // Create account (requires a valid, unused invite code)
+  // --- Create account (requires valid invite code)
   doSignUp.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
@@ -287,29 +320,29 @@
     if (!email || !pass || !code) return say("Email, password, and invite code are required.", true);
 
     try {
-      // 1) Check invite exists & unused
       const inviteRef  = doc(db, "invites", code);
       const inviteSnap = await getDoc(inviteRef);
       if (!inviteSnap.exists()) return say("Invalid invite code.", true);
-      
-      // 2) Create user
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const d = inviteSnap.data();
+      if (d.disabled === true) return say("This invite code is disabled.", true);
+      // If single-use semantics are still desired for some codes:
+      if (d.used === true && d.multi !== true) return say("This invite code has already been used.", true);
 
-      // 3) Send verify email
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await sendEmailVerification(cred.user);
 
-      // 4) Mark invite as used
+      // Mark as used (or track count)
       await updateDoc(inviteRef, {
         used: true,
-        usedBy: cred.user.uid,
-        usedAt: serverTimestamp()
+        usedByLast: cred.user.uid,
+        usedAtLast: serverTimestamp()
       });
 
       say("Account created! Check your inbox to verify your email.");
     } catch(err){ say(err.message, true); }
   });
 
-  // Reset password
+  // --- Reset password
   doReset.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     if (!email) return say("Enter your email first.", true);
@@ -319,11 +352,76 @@
     } catch(err){ say(err.message, true); }
   });
 
-  // Sign out
+  // --- Sign out
   signOutBtn.addEventListener('click', async ()=>{
     await signOut(auth);
     say("Signed out.");
   });
+
+  // --- Post a message
+  postBtn.addEventListener('click', async ()=>{
+    try{
+      if (!currentUser) return alert("Please sign in.");
+      if (!currentUser.emailVerified) return alert("Verify your email first.");
+      const text = (newMsgEl.value || "").trim();
+      if (!text) return;
+      await addDoc(collection(db,"board"), {
+        text,
+        authorEmail: currentUser.email || "",
+        authorName: (currentUser.email || "").split("@")[0] || "Member",
+        authorUid: currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+      newMsgEl.value = "";
+    }catch(err){ alert(err.message); }
+  });
+
+  // --- Live feed
+  const q = query(collection(db,"board"), orderBy("createdAt","desc"));
+  onSnapshot(q, (snap)=>{
+    const isBoard = currentUser?.email && BOARD_EMAILS.includes(currentUser.email);
+    feedEl.innerHTML = "";
+    snap.forEach(d=>{
+      const m = d.data();
+      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+      const when = ts ? ts.toLocaleString() : "…";
+      const canDelete = currentUser && currentUser.emailVerified && (isBoard || currentUser.uid === m.authorUid);
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `
+        <div class="msg-top">
+          <div class="msg-meta">
+            <strong>${m.authorName || "Member"}</strong>
+            <span> • ${when}</span>
+            <div style="color:#9fb1c3;font-size:12px">${m.authorEmail || ""}</div>
+          </div>
+          ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
+        </div>
+        <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
+      `;
+      feedEl.appendChild(div);
+    });
+
+    // wire delete buttons
+    [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const id = btn.getAttribute("data-del");
+        if (!id) return;
+        if (!confirm("Delete this message?")) return;
+        try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
+      });
+    });
+  });
+
+  // --- util: escape HTML
+  function escapeHtml(s){
+    return (s||"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
 </script>
 </body>
 </html>
