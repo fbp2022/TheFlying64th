@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>POH & Manuals – The Flying 64th</title>
+  <title>POH &amp; Manuals – The Flying 64th</title>
 
   <style>
     :root{
+      /* base palette + fallbacks for vars referenced by Home nav */
       --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
       --panel:#151924; --panel2:#0d1018;
-      --accent:#4da3ff; --border:rgba(255,255,255,.1);
+      --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
       --radius:14px;
     }
     *{box-sizing:border-box}
@@ -20,142 +21,56 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-   <!-- ===== NAV BAR (matches home.html style) ===== -->
-<header class="site-header">
-  <div class="nav">
-    <a href="home.html" class="brand">
-      <img src="flying64thlogo.png" alt="The Flying 64th Logo">
-      <span>The Flying 64th</span>
-    </a>
-    <nav>
-      <a href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
-    </nav>
-  </div>
-</header>
-
-<style>
-  /* ===== NAV STYLES (copied from home.html, with responsive tweaks) ===== */
-  .site-header{
-    position:sticky;top:0;z-index:50;
-    backdrop-filter:saturate(160%) blur(8px);
-    background:rgba(11,17,23,.75);
-    border-bottom:1px solid var(--rule,rgba(255,255,255,.1));
-  }
-
-  .nav{
-    max-width:1200px;
-    margin:0 auto;
-    padding:12px 18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-  }
-
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:800;
-    letter-spacing:.2px;
-    color:var(--ink,#fff);
-    text-decoration:none;
-    font-size:22px;
-    white-space:nowrap;
-  }
-
-  .brand img{
-    height:34px;
-    width:auto;
-  }
-
-  nav{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    flex-wrap:nowrap;
-  }
-
-  nav a{
-    color:var(--muted,#c3c9d4);
-    text-decoration:none;
-    padding:8px 12px;
-    border-radius:10px;
-    transition:all .18s ease;
-  }
-
-  nav a:hover{
-    color:var(--ink,#fff);
-    background:rgba(255,255,255,.06);
-  }
-
-  nav a.active{
-    color:#001a33;
-    background:var(--accent,#4da3ff);
-    font-weight:700;
-  }
-
-  /* ===== MOBILE TWEAKS ===== */
-  @media (max-width:900px){
+    /* ===== NAV (matches home.html) ===== */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
+    }
     .nav{
-      padding:10px 14px;
-      flex-wrap:wrap;
+      max-width:1200px; margin:0 auto; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
-    nav{
-      width:100%;
-      justify-content:flex-start;
-      gap:10px;
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
+      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
     }
-    nav::-webkit-scrollbar{display:none;}
-    nav a{
-      padding:8px 10px;
-      font-size:15px;
+    .brand img{ height:34px; width:auto }
+    header nav{
+      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
     }
-  }
-</style>
-
-<script>
-  // Auto-highlight active page (works across all pages)
-  (function(){
-    const current = location.pathname.split('/').pop().toLowerCase();
-    document.querySelectorAll('header nav a').forEach(a=>{
-      const href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      if(href && href === current) a.classList.add('active');
-    });
-  })();
-</script>
-
+    header nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
+      transition:all .18s ease;
+    }
+    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
+    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    @media (max-width:900px){
+      .nav{ padding:10px 14px; flex-wrap:wrap }
+      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+      header nav::-webkit-scrollbar{ display:none }
+      header nav a{ padding:8px 10px; font-size:15px }
+    }
 
     /* ===== HERO ===== */
-    .hero{
-      position:relative; isolation:isolate; background:#0c0f17;
-    }
+    .hero{ position:relative; isolation:isolate; background:#0c0f17 }
     .hero::before{
       content:""; position:absolute; inset:0; z-index:-1;
-      background:url("images/planesc172.1.jpg") center/cover no-repeat;
-      opacity:.22;
+      background:url("images/planesc172.1.jpg") center/cover no-repeat; opacity:.22;
     }
-    @media (min-width: 900px){ .hero::before{ background-attachment: fixed; } }
-    .hero-inner{
-      max-width:1200px; margin:0 auto; padding:28px 14px 20px;
-    }
-    .hero h1{ margin:0 0 6px; font-size:clamp(24px, 4vw, 38px) }
-    .hero p{ margin:0; color:var(--muted); font-size:14px }
+    @media (min-width:900px){ .hero::before{ background-attachment:fixed } }
+    .hero-inner{ max-width:1200px; margin:0 auto; padding:28px 18px 20px }
+    .hero h1{ margin:0 0 6px; font-size:clamp(24px,4vw,38px) }
+    .hero p{ margin:0; color:var(--muted) }
 
     /* ===== LAYOUT ===== */
     .container{
-      max-width:1200px; margin:16px auto 60px; padding:0 14px;
-      display:grid; grid-template-columns: 320px 1fr; gap:16px;
+      max-width:1200px; margin:16px auto 60px; padding:0 18px;
+      display:grid; grid-template-columns:320px 1fr; gap:16px;
     }
 
-    /* Desktop sidebar (hidden on mobile) */
+    /* Desktop sidebar list */
     .panel{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
@@ -164,7 +79,7 @@
       margin:0; padding:12px 12px 10px; font-size:16px; color:#cfe1ff;
       border-bottom:1px solid var(--border);
     }
-    .search-wrap{ padding:10px 10px; border-bottom:1px solid var(--border); }
+    .search-wrap{ padding:10px 10px; border-bottom:1px solid var(--border) }
     .search{
       width:100%; padding:10px 12px; border-radius:10px; background:#0b0e15; color:var(--ink);
       border:1px solid var(--border); outline:none;
@@ -179,11 +94,11 @@
     .file-name{ font-weight:600; font-size:14.5px }
     .file-sub{ color:var(--muted); font-size:12px }
     .pdf-icon{ width:26px; height:26px; flex:0 0 26px; display:grid; place-content:center;
-      border-radius:6px; background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.35); }
+      border-radius:6px; background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.35) }
     .pdf-icon svg{ width:16px; height:16px; opacity:.9 }
 
     /* Viewer */
-    .viewer{ display:grid; grid-template-rows:auto 1fr; gap:10px; min-height:70vh; }
+    .viewer{ display:grid; grid-template-rows:auto 1fr; gap:10px; min-height:70vh }
     .viewer-actions{
       display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
@@ -197,116 +112,60 @@
       display:inline-flex; align-items:center; gap:8px;
     }
     .btn:hover{ border-color:rgba(77,163,255,.45); background:#0e1630 }
-    .btn.primary{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1; }
+    .btn.primary{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1 }
 
     .iframe-wrap{
       background:#0b0f1a; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
       min-height:60vh;
     }
-    iframe{ display:block; width:100%; height:70vh; border:0; background:#0b0f1a; }
+    iframe{ display:block; width:100%; height:70vh; border:0; background:#0b0f1a }
     .placeholder{ padding:22px; color:var(--muted) }
     .placeholder h3{ margin:0 0 6px }
 
-    /* ===== MOBILE FIRST CLEANUP ===== */
-    /* Stack layout, hide sidebar, use simple select */
+    /* Mobile: hide sidebar, show dropdown, make PDF tall */
     .mobile-picker{
       display:none; gap:8px; align-items:center; background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border); border-radius:var(--radius); padding:10px;
     }
-    .mobile-picker label{ font-size:14px; color:#cfe1ff; white-space:nowrap; }
+    .mobile-picker label{ font-size:14px; color:#cfe1ff; white-space:nowrap }
     .mobile-select{
       flex:1; padding:10px 12px; border-radius:10px; background:#0b0e15; color:var(--ink);
       border:1px solid var(--border); outline:none;
     }
-
-    @media (max-width: 900px){
-      .container{
-        display:block; /* single column */
-      }
-      .panel{ display:none; }          /* hide crowded sidebar on phones */
-      .mobile-picker{ display:flex; margin-bottom:10px; }
-      .viewer-actions{ gap:8px; }
-      .btn{ padding:10px 12px; }
-      .hero-inner{ padding:22px 14px 16px; }
-      nav a{ padding:8px 10px; }       /* better fit in top bar */
-      iframe{ height: calc(100vh - 270px); } /* fill most of the screen on phones */
+    @media (max-width:900px){
+      .container{ display:block }
+      .panel{ display:none }
+      .mobile-picker{ display:flex; margin-bottom:10px }
+      .viewer-actions{ gap:8px }
+      .btn{ padding:10px 12px }
+      .hero-inner{ padding:22px 18px 16px }
+      iframe{ height:calc(100vh - 270px) }
     }
-
-    /* iOS viewport fix when URL bar hides/shows */
     @supports (-webkit-touch-callout: none) {
       @media (max-width:900px){
-        iframe{ height: calc(100svh - 270px); }
+        iframe{ height:calc(100svh - 270px) }
       }
     }
   </style>
 </head>
 <body>
 
- <!-- ===== NAV BAR (fixed for desktop + mobile) ===== -->
-<header>
-  <div class="nav">
-    <img src="flying64thlogo.png" alt="The Flying 64th Logo"
-         style="height:48px;width:auto;border-radius:8px;margin-right:10px;">
-    <div class="brand"><a href="home.html">The Flying 64th</a></div>
-    <nav>
-      <a href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
-    </nav>
-  </div>
-</header>
-
-<style>
-  /* Header container */
-  header{
-    position:sticky; top:0; z-index:1000;
-    background:#0b0e15; border-bottom:1px solid rgba(255,255,255,.1);
-  }
-  .nav{
-    max-width:1200px; margin:0 auto; padding:12px 18px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .brand a{
-    font-weight:700; font-size:20px; color:#fff; text-decoration:none;
-    margin-right:auto; white-space:nowrap;
-  }
-
-  /* DESKTOP NAV (default) */
-  nav{
-    display:flex; align-items:center; gap:22px;   /* roomy spacing on desktop */
-    flex-wrap:nowrap; overflow:visible;           /* no scrollbars on desktop */
-  }
-  nav a{
-    color:#b6c0cf; text-decoration:none;
-    padding:10px 14px; border-radius:10px; transition:.2s;
-  }
-  nav a:hover{ color:#fff; background:rgba(255,255,255,.08) }
-  nav a.active{ background:#4da3ff; color:#fff; font-weight:600 }
-
-  /* MOBILE tweaks only */
-  @media (max-width:900px){
-    .nav{ padding:10px 12px; gap:10px; }
-    nav{
-      gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
-    }
-    nav::-webkit-scrollbar{ display:none; }
-    nav a{ padding:8px 12px; }
-  }
-</style>
-
-<script>
-  // Auto-highlight current page
-  (function(){
-    const current = location.pathname.split('/').pop().toLowerCase();
-    document.querySelectorAll('header nav a').forEach(a=>{
-      const href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      if(href && href === current) a.classList.add('active');
-    });
-  })();
-</script>
+  <!-- ===== NAV BAR ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a href="home.html" class="brand">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <span>The Flying 64th</span>
+      </a>
+      <nav>
+        <a href="home.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
+      </nav>
+    </div>
+  </header>
 
   <!-- ===== HERO ===== -->
   <section class="hero" role="img" aria-label="Cessna aircraft on ramp">
@@ -318,9 +177,9 @@
 
   <!-- ===== MAIN ===== -->
   <main class="container">
-    <!-- Mobile: simple picker -->
+    <!-- Mobile: dropdown picker -->
     <div class="mobile-picker" aria-label="Choose document">
-      <label for="mobileSelect">Document</label>
+      <label for="mobileSelect">Documents</label>
       <select id="mobileSelect" class="mobile-select"></select>
     </div>
 
@@ -333,7 +192,7 @@
       <ul id="filelist" class="filelist"></ul>
     </aside>
 
-    <!-- Viewer -->
+    <!-- PDF Viewer -->
     <section class="viewer" aria-label="PDF viewer">
       <div class="viewer-actions">
         <div class="crumb" id="crumb">No file selected</div>
@@ -353,16 +212,17 @@
   </main>
 
   <script>
-    // Highlight current nav automatically
+    // Highlight active nav (handles &amp; vs & safely)
     (function(){
       const current = location.pathname.split('/').pop().toLowerCase();
       document.querySelectorAll('header nav a').forEach(a=>{
-        const href = (a.getAttribute('href')||'').toLowerCase();
-        if (href && current === href) a.classList.add('active');
+        let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href = href.replace(/&amp;/g,'&');
+        if(href && href === current) a.classList.add('active');
       });
     })();
 
-    // Your real documents
+    // Your documents (bylaws intentionally omitted)
     const docs = [
       { title: "Cessna 172K – Pilot’s Operating Handbook (1969)", file: "documents/1969-172K-POH.pdf", desc: "Official 1969 POH for the Cessna 172K." },
       { title: "Cessna 150L – Pilot’s Operating Handbook (N10921)", file: "documents/N10921-POH.pdf", desc: "POH for C150L, tail number N10921." },
@@ -413,7 +273,7 @@
       });
     }
 
-    // Build mobile dropdown
+    // Mobile dropdown
     function renderMobilePicker(){
       if(!mobileSelect) return;
       mobileSelect.innerHTML = docs.map(d => `<option value="${d.file}">${d.title}</option>`).join("");
@@ -445,20 +305,17 @@
       downloadBtn.setAttribute('download', doc.file.split('/').pop());
       openNewTab.href = doc.file;
 
-      // Update URL (helps sharing)
       const url = new URL(window.location);
       url.searchParams.set('file', doc.file);
       history.replaceState({}, "", url);
     }
 
-    // Search (desktop)
+    // Wire up
     if(searchInput) searchInput.addEventListener('input', (e)=> renderList(e.target.value));
-
-    // Initial render
     renderList();
     renderMobilePicker();
 
-    // If URL preselect exists, open it; otherwise open first
+    // Preselect from URL or open first doc
     const pre = new URLSearchParams(location.search).get('file');
     const initial = docs.find(d => d.file === pre) || docs[0];
     if(initial){
@@ -466,19 +323,6 @@
       syncMobilePicker(initial.file);
       setActiveByFile(initial.file);
     }
-
-    // Resize iframe for mobile address bar changes (smooth UX)
-    function sizeIframe(){
-      if (window.matchMedia('(max-width:900px)').matches){
-        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        const offset = 270; // approx header + hero + controls
-        const h = Math.max(300, vh - offset);
-        document.getElementById('pdfViewer').style.height = h + 'px';
-      }
-    }
-    sizeIframe();
-    window.addEventListener('resize', sizeIframe);
-    if(window.visualViewport){ window.visualViewport.addEventListener('resize', sizeIframe); }
   </script>
 </body>
 </html>
