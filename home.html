@@ -143,13 +143,13 @@
       <span>The Flying 64th</span>
     </a>
     <nav>
+      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
       <a class="active" href="home.html">Home</a>
       <a href="calendar.html">Calendar</a>
       <a href="becomeamember.html">Become a Member</a>
       <a href="photos.html">Photos</a>
       <a href="poh&manuals.html">POH &amp; Manuals</a>
-      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
-    </nav>
+     </nav>
   </div>
 </header>
 
@@ -358,19 +358,28 @@
   postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
   // ===== Auth state =====
-  onAuthStateChanged(auth, (user)=>{
-    currentUser = user || null;
-    const verified = !!user?.emailVerified;
-    if (user){
-      openBtn.textContent = "Account";
-      newPostBtn.style.display = verified ? "inline-block" : "none";
-      hintEl.textContent = verified ? "Share updates with the club." : "Please verify your email to post.";
-    } else {
-      openBtn.textContent = "Sign In";
-      newPostBtn.style.display = "none";
-      hintEl.textContent = "Board notices and member updates appear here.";
-    }
-  });
+ onAuthStateChanged(auth, (user)=>{
+  currentUser = user || null;
+  const verified = !!user?.emailVerified;
+
+  if (user) {
+    // Display email directly in nav
+    const shortEmail = user.email.length > 25 ? user.email.slice(0, 25) + "…" : user.email;
+    openBtn.textContent = verified
+      ? `Account – ${shortEmail}`
+      : `Unverified – ${shortEmail}`;
+
+    newPostBtn.style.display = verified ? "inline-block" : "none";
+    hintEl.textContent = verified
+      ? "Share updates with the club."
+      : "Please verify your email to post.";
+
+  } else {
+    openBtn.textContent = "Sign In";
+    newPostBtn.style.display = "none";
+    hintEl.textContent = "Board notices and member updates appear here.";
+  }
+});
 
   // ===== Sign in / up / reset / out =====
   doSignIn.addEventListener('click', async ()=>{
