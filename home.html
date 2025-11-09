@@ -20,7 +20,7 @@
     html,body{margin:0;height:100%}
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 
-    /* ===== NAV (matches home.html) ===== */
+    /* ===== NAV ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -52,7 +52,7 @@
       header nav a{ padding:8px 10px; font-size:15px }
     }
 
-    /* ====== HERO ====== */
+    /* ===== HERO ===== */
     .hero{
       position:relative;min-height:56vh;display:grid;place-items:end;
       isolation:isolate;
@@ -69,11 +69,11 @@
     .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
     .hero p{margin:0;color:#d0d9e3;max-width:900px}
     .cta-row{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
-    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--rule);text-decoration:none;color:var(--ink);cursor:pointer}
     .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
     .btn:hover{transform:translateY(-1px)}
 
-    /* ====== CONTENT CARDS ====== */
+    /* ===== CONTENT CARDS ===== */
     .container{max-width:1100px;margin:0 auto;padding:28px 18px}
     .grid{display:grid;gap:16px}
     .grid.two{grid-template-columns:1.4fr 1fr}
@@ -91,9 +91,24 @@
     .list{padding-left:18px;margin:8px 0}
     .list li{margin:6px 0}
 
-    /* ====== FOOTER ====== */
+    /* ===== FOOTER ===== */
     .site-footer{border-top:1px solid var(--rule);margin-top:28px}
     .foot{max-width:1100px;margin:0 auto;padding:18px;color:var(--muted);text-align:center}
+
+    /* ===== AUTH MODAL ===== */
+    .auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
+    .auth-modal.open{display:grid}
+    .auth-card{width:min(420px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
+    .auth-title{margin:0 0 10px 0;font-size:20px;font-weight:800}
+    .auth-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
+    .auth-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
+    .auth-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#0b1117;color:#e6edf3}
+    .auth-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+    .auth-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#141b26;color:#e6edf3;cursor:pointer}
+    .auth-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
+    .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
+    .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
+    .invite-wrap{margin-top:6px}
   </style>
 </head>
 <body>
@@ -102,7 +117,7 @@
 <header class="site-header">
   <div class="nav">
     <a class="brand" href="home.html">
-    <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px; height:auto;">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px; height:auto;">
       <span>The Flying 64th</span>
     </a>
     <nav>
@@ -111,6 +126,7 @@
       <a href="becomeamember.html">Become a Member</a>
       <a href="photos.html">Photos</a>
       <a href="poh&manuals.html">POH &amp; Manuals</a>
+      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
     </nav>
   </div>
 </header>
@@ -120,6 +136,7 @@
   <div class="hero-inner">
     <h1>Affordable General Aviation in East Tennessee</h1>
     <p>The Flying 64th is a member-owned flying club based at Oliver Springs Airport (Braden Field). We operate a Cessna 172K and a Cessna 150L, both ADS-B equipped and maintained to FAA standards.</p>
+  </div>
 </section>
 
 <!-- ===== CONTENT ===== -->
@@ -151,8 +168,163 @@
   </div>
 </footer>
 
+<!-- ===== AUTH MODAL (login / create account with invite) ===== -->
+<div id="authModal" class="auth-modal" aria-hidden="true">
+  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
+    <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+
+    <label class="auth-label" for="email">Email</label>
+    <input id="email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+
+    <label class="auth-label" for="password">Password</label>
+    <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
+
+    <div class="invite-wrap">
+      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
+      <input id="invite" class="auth-input" type="text" placeholder="F64-CHRIS-2025-9QK7ATJ3">
+    </div>
+
+    <div class="auth-row">
+      <button id="doSignIn" class="auth-btn primary">Sign In</button>
+      <button id="doSignUp" class="auth-btn">Create Account</button>
+    </div>
+
+    <div class="auth-row">
+      <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+      <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+    </div>
+
+    <p id="authMsg" class="auth-msg"></p>
+  </div>
+</div>
+
 <script>
   document.getElementById("y").textContent = new Date().getFullYear();
+</script>
+
+<!-- ===== Firebase + Auth Logic ===== -->
+<script type="module">
+  // Firebase SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendPasswordResetEmail, sendEmailVerification, signOut
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+  // Your Firebase config (from Firebase console)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAI5lbnXxAiBQThX6Y4tEuqqQ1cY6bn74",
+    authDomain: "flying64th-b7813.firebaseapp.com",
+    projectId: "flying64th-b7813",
+    storageBucket: "flying64th-b7813.appspot.com",
+    messagingSenderId: "244940935157",
+    appId: "1:244940935157:web:58e7305541377ba743dabc"
+  };
+
+  // Init
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // UI refs
+  const openBtn   = document.getElementById('signinBtn');
+  const modal     = document.getElementById('authModal');
+  const closeBtn  = document.getElementById('closeModal');
+  const emailEl   = document.getElementById('email');
+  const passEl    = document.getElementById('password');
+  const inviteEl  = document.getElementById('invite');
+  const doSignIn  = document.getElementById('doSignIn');
+  const doSignUp  = document.getElementById('doSignUp');
+  const doReset   = document.getElementById('doReset');
+  const signOutBtn= document.getElementById('signOutBtn');
+  const msgEl     = document.getElementById('authMsg');
+
+  // Modal open/close
+  function openModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); msgEl.textContent=""; }
+  function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+  openBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // Helper to show messages
+  const say = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+
+  // Auth state → update button label
+  onAuthStateChanged(auth, (user)=>{
+    if (user?.emailVerified){
+      if (openBtn) openBtn.textContent = "Account";
+      say("Signed in as " + (user.email || "member"));
+    } else if (user) {
+      if (openBtn) openBtn.textContent = "Account";
+      say("Please verify your email to access member features.");
+    } else {
+      if (openBtn) openBtn.textContent = "Sign In";
+      say("");
+    }
+  });
+
+  // Sign in
+  doSignIn.addEventListener('click', async ()=>{
+    const email = emailEl.value.trim();
+    const pass  = passEl.value;
+    if (!email || !pass) return say("Enter email and password.", true);
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      say("Signed in."); closeModal();
+    } catch(err){ say(err.message, true); }
+  });
+
+  // Create account (requires a valid, unused invite code)
+  doSignUp.addEventListener('click', async ()=>{
+    const email = emailEl.value.trim();
+    const pass  = passEl.value;
+    const code  = (inviteEl.value || "").trim();
+    if (!email || !pass || !code) return say("Email, password, and invite code are required.", true);
+
+    try {
+      // 1) Check invite exists & unused
+      const inviteRef  = doc(db, "invites", code);
+      const inviteSnap = await getDoc(inviteRef);
+      if (!inviteSnap.exists()) return say("Invalid invite code.", true);
+      if (inviteSnap.data().used === true) return say("This invite code has already been used.", true);
+
+      // 2) Create user
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      // 3) Send verify email
+      await sendEmailVerification(cred.user);
+
+      // 4) Mark invite as used
+      await updateDoc(inviteRef, {
+        used: true,
+        usedBy: cred.user.uid,
+        usedAt: serverTimestamp()
+      });
+
+      say("Account created! Check your inbox to verify your email.");
+    } catch(err){ say(err.message, true); }
+  });
+
+  // Reset password
+  doReset.addEventListener('click', async ()=>{
+    const email = emailEl.value.trim();
+    if (!email) return say("Enter your email first.", true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      say("Password reset email sent.");
+    } catch(err){ say(err.message, true); }
+  });
+
+  // Sign out
+  signOutBtn.addEventListener('click', async ()=>{
+    await signOut(auth);
+    say("Signed out.");
+  });
 </script>
 </body>
 </html>
