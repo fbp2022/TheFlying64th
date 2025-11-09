@@ -1,1 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar – The Flying 64th</title>
+  <link rel="stylesheet" href="style.css" />
 
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+    }
+    body.light {
+      background-color: #fff;
+      color: #000;
+    }
+
+    header {
+      background-color: #1a1a1a;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    header a:hover {
+      color: #58a6ff;
+    }
+    body.light header {
+      background-color: #f7f7f7;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    body.light header a {
+      color: #000;
+    }
+    body.light header a:hover {
+      color: #007bff;
+    }
+
+    main {
+      padding: 5rem 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.25rem;
+      color: #aaa;
+    }
+
+    body.light p {
+      color: #555;
+    }
+
+    .construction-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <a href="home.html">Home</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="photos.html">Photos</a>
+    <a href="poh&manuals.html">POH & Manuals</a>
+    <a href="becomeamember.html">Join</a>
+  </header>
+
+  <main>
+    <div class="construction-icon">🛠️</div>
+    <h1>Calendar Under Development</h1>
+    <p>Our interactive event calendar is being built and will be available soon.<br>
+    Please check back later for updates.</p>
+  </main>
+</body>
+</html>
