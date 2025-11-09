@@ -226,16 +226,17 @@
 <!-- ===== Firebase + Auth + Board Logic ===== -->
 <script type="module">
   // --- Firebase SDKs
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged,
-    signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendPasswordResetEmail, sendEmailVerification, signOut
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-  import {
-    getFirestore, collection, addDoc, onSnapshot, query, orderBy,
-    doc, getDoc, updateDoc, deleteDoc, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail, sendEmailVerification, signOut
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, serverTimestamp,
+  collection, query, orderBy, onSnapshot, addDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
 
   // --- Your Firebase config (use EXACTLY what Console shows; replace if different)
   const firebaseConfig = {
