@@ -159,20 +159,71 @@
 </head>
 <body>
 
-  <!-- ===== NAV BAR ===== -->
-  <header>
-    <div class="nav">
-      <img src="images/logo.png" alt="The Flying 64th Logo" style="height:44px;width:auto;border-radius:8px;margin-right:8px;">
-      <div class="brand"><a href="home.html">The Flying 64th</a></div>
-      <nav>
-        <a href="home.html">Home</a>
-        <a href="calendar.html">Calendar</a>
-        <a href="becomeamember.html">Become a Member</a>
-        <a href="photos.html">Photos</a>
-        <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
-      </nav>
-    </div>
-  </header>
+ <!-- ===== NAV BAR (fixed for desktop + mobile) ===== -->
+<header>
+  <div class="nav">
+    <img src="images/logo.png" alt="The Flying 64th Logo"
+         style="height:48px;width:auto;border-radius:8px;margin-right:10px;">
+    <div class="brand"><a href="home.html">The Flying 64th</a></div>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="be.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* Header container */
+  header{
+    position:sticky; top:0; z-index:1000;
+    background:#0b0e15; border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  .nav{
+    max-width:1200px; margin:0 auto; padding:12px 18px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .brand a{
+    font-weight:700; font-size:20px; color:#fff; text-decoration:none;
+    margin-right:auto; white-space:nowrap;
+  }
+
+  /* DESKTOP NAV (default) */
+  nav{
+    display:flex; align-items:center; gap:22px;   /* roomy spacing on desktop */
+    flex-wrap:nowrap; overflow:visible;           /* no scrollbars on desktop */
+  }
+  nav a{
+    color:#b6c0cf; text-decoration:none;
+    padding:10px 14px; border-radius:10px; transition:.2s;
+  }
+  nav a:hover{ color:#fff; background:rgba(255,255,255,.08) }
+  nav a.active{ background:#4da3ff; color:#fff; font-weight:600 }
+
+  /* MOBILE tweaks only */
+  @media (max-width:900px){
+    .nav{ padding:10px 12px; gap:10px; }
+    nav{
+      gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    nav::-webkit-scrollbar{ display:none; }
+    nav a{ padding:8px 12px; }
+  }
+</style>
+
+<script>
+  // Auto-highlight current page
+  (function(){
+    const current = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('header nav a').forEach(a=>{
+      const href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+      if(href && href === current) a.classList.add('active');
+    });
+  })();
+</script>
 
   <!-- ===== HERO ===== -->
   <section class="hero" role="img" aria-label="Cessna aircraft on ramp">
