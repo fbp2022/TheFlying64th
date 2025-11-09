@@ -1,83 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calendar – The Flying 64th</title>
-  <link rel="stylesheet" href="style.css" />
-
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #fff;
-      text-align: center;
+    :root{
+      /* base palette + fallbacks for vars referenced by Home nav */
+      --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
+      --panel:#151924; --panel2:#0d1018;
+      --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
+      --radius:14px;
     }
-    body.light {
-      background-color: #fff;
-      color: #000;
-    }
-
-    header {
-      background-color: #1a1a1a;
-      padding: 1rem;
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    header a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
-    header a:hover {
-      color: #58a6ff;
-    }
-    body.light header {
-      background-color: #f7f7f7;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    body.light header a {
-      color: #000;
-    }
-    body.light header a:hover {
-      color: #007bff;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      background:var(--bg); color:var(--ink);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    main {
-      padding: 5rem 1rem;
+    /* ===== NAV (matches home.html) ===== */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
     }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+    .nav{
+      max-width:1200px; margin:0 auto; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
-
-    p {
-      font-size: 1.25rem;
-      color: #aaa;
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
+      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
     }
-
-    body.light p {
-      color: #555;
+    .brand img{ height:34px; width:auto }
+    header nav{
+      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
     }
-
-    .construction-icon {
-      font-size: 5rem;
-      margin-bottom: 1rem;
-      animation: pulse 1.5s infinite;
+    header nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
+      transition:all .18s ease;
     }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
+    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
+    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    @media (max-width:900px){
+      .nav{ padding:10px 14px; flex-wrap:wrap }
+      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+      header nav::-webkit-scrollbar{ display:none }
+      header nav a{ padding:8px 10px; font-size:15px }
     }
-  </style>
-</head>
-
+    
 <body>
   <header>
     <a href="home.html">Home</a>
