@@ -1,6 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar – The Flying 64th</title>
+
   <style>
     :root{
-      /* base palette + fallbacks for vars referenced by Home nav */
+      /* base palette to match POH page */
       --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
       --panel:#151924; --panel2:#0d1018;
       --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
@@ -14,7 +21,7 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ===== NAV (matches home.html) ===== */
+    /* ===== NAV (same as POH) ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -45,21 +52,80 @@
       header nav::-webkit-scrollbar{ display:none }
       header nav a{ padding:8px 10px; font-size:15px }
     }
-    
-<body>
-  <header>
-    <a href="home.html">Home</a>
-    <a href="calendar.html">Calendar</a>
-    <a href="photos.html">Photos</a>
-    <a href="becomeamember.html">Join</a>
-    <a href="poh&manuals.html">POH & Manuals</a>
-    </header>
 
-  <main>
-    <div class="construction-icon">🛠️</div>
-    <h1>Calendar Under Development</h1>
-    <p>Our interactive event calendar is being built and will be available soon.<br>
-    Please check back later for updates.</p>
+    /* ===== HERO ===== */
+    .hero{ position:relative; isolation:isolate; background:#0c0f17 }
+    .hero::before{
+      content:""; position:absolute; inset:0; z-index:-1;
+      background:url("images/planesc172.1.jpg") center/cover no-repeat; opacity:.22;
+    }
+    @media (min-width:900px){ .hero::before{ background-attachment:fixed } }
+    .hero-inner{ max-width:1200px; margin:0 auto; padding:28px 18px 20px }
+    .hero h1{ margin:0 0 6px; font-size:clamp(24px,4vw,38px) }
+    .hero p{ margin:0; color:var(--muted) }
+
+    /* ===== UNDER CONSTRUCTION PANEL ===== */
+    .wrap{
+      max-width:900px; margin:22px auto 60px; padding:0 18px;
+    }
+    .panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:var(--radius);
+      padding:28px; text-align:center;
+    }
+    .hammer{ font-size:56px; line-height:1; margin-bottom:8px; animation:pulse 1.6s infinite }
+    h2{ margin:8px 0 6px; font-size:26px }
+    p{ margin:0; color:var(--muted); font-size:15.5px }
+    @keyframes pulse{ 0%,100%{opacity:.7} 50%{opacity:1} }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV BAR (matches POH) ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a href="home.html" class="brand">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <span>The Flying 64th</span>
+      </a>
+      <nav>
+        <a href="home.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="poh&manuals.html">POH & Manuals</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" role="img" aria-label="Aircraft background">
+    <div class="hero-inner">
+      <h1>Calendar</h1>
+      <p>Google-style Day / Week / Month views are coming soon.</p>
+    </div>
+  </section>
+
+  <!-- ===== MAIN ===== -->
+  <main class="wrap">
+    <div class="panel" role="status" aria-live="polite">
+      <div class="hammer">🛠️</div>
+      <h2>Under Development</h2>
+      <p>We’re building an interactive calendar with smooth month/year navigation and multiple views.<br>
+      Check back for the first release.</p>
+    </div>
   </main>
+
+  <script>
+    // Highlight active nav (handles &amp; vs & safely)
+    (function(){
+      const current = location.pathname.split('/').pop().toLowerCase();
+      document.querySelectorAll('header nav a').forEach(a=>{
+        let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href = href.replace(/&amp;/g,'&');
+        if(href && href === current) a.classList.add('active');
+      });
+    })();
+  </script>
 </body>
 </html>
