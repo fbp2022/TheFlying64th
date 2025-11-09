@@ -96,12 +96,12 @@
     /* ===== MESSAGE BOARD SCROLL AREA ===== */
     #messages{
       display:grid; gap:12px;
-      max-height:48vh;            /* desktop */
+      max-height:48vh;
       overflow:auto;
       padding-right:4px;
     }
     @media (max-width:760px){
-      #messages{ max-height:40vh; } /* phone */
+      #messages{ max-height:40vh; }
     }
     .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;background:#0e1520}
     .msg-top{display:flex;justify-content:space-between;gap:10px}
@@ -185,7 +185,10 @@
     <section class="card" id="board">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <h2 style="margin:0;">Member Message Board</h2>
-        <button id="newPostBtn" class="btn primary" style="display:none;">New Post</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="newPostBtn" class="btn primary" style="display:none;">New Post</button>
+          <button id="notifyBtn" class="btn" style="display:none;">Submit &amp; Notify</button>
+        </div>
       </div>
       <p id="msgHint" class="muted" style="margin-top:8px;">Board notices and member updates appear here.</p>
 
@@ -240,17 +243,21 @@
     <h3 id="postTitle" class="post-title">New Message</h3>
 
     <label class="post-label" for="postName">Display Name</label>
-    <input id="postName" class="post-input" type="text" placeholder="e.g., Chris M.">
+    <input id="postName" class="post-input" type="text" placeholder="e.g., Chris B.">
 
     <label class="post-label" for="postEmail">Email (from your account)</label>
     <input id="postEmail" class="post-input" type="email" readonly>
+
+    <label class="post-label" for="postWhen">Post Date &amp; Time</label>
+    <input id="postWhen" class="post-input" type="datetime-local">
 
     <label class="post-label" for="postText">Message</label>
     <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
 
     <div class="post-row">
       <button id="postCancel" class="post-btn">Cancel</button>
-      <button id="postSubmit" class="post-btn primary">Post Message</button>
+      <button id="postSubmitOnly" class="post-btn">Submit Only</button>
+      <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
     </div>
     <p id="postMsg" class="auth-msg"></p>
   </div>
@@ -271,7 +278,7 @@
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, updateDoc, serverTimestamp,
-    collection, query, orderBy, onSnapshot, addDoc, deleteDoc
+    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
   // EXACT config from your console
@@ -289,8 +296,9 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // Board officers (can delete any post)
-  const BOARD_EMAILS = ["theflying64@gmail.com"];
+  // Role / profile state
+  let currentUser = null;
+  let isAdmin = false;
 
   // UI refs (auth)
   const openBtn    = document.getElementById('signinBtn');
@@ -309,40 +317,50 @@
   const hintEl     = document.getElementById('msgHint');
   const feedEl     = document.getElementById('messages');
   const newPostBtn = document.getElementById('newPostBtn');
+  const notifyBtn  = document.getElementById('notifyBtn');
 
   // New Post modal refs
-  const postModal  = document.getElementById('postModal');
-  const closePost  = document.getElementById('closePost');
-  const postCancel = document.getElementById('postCancel');
-  const postSubmit = document.getElementById('postSubmit');
-  const postNameEl = document.getElementById('postName');
-  const postEmailEl= document.getElementById('postEmail');
-  const postTextEl = document.getElementById('postText');
-  const postMsgEl  = document.getElementById('postMsg');
+  const postModal      = document.getElementById('postModal');
+  const closePost      = document.getElementById('closePost');
+  const postCancel     = document.getElementById('postCancel');
+  const postSubmitOnly = document.getElementById('postSubmitOnly');
+  const postSubmitNotify = document.getElementById('postSubmitNotify');
+  const postNameEl     = document.getElementById('postName');
+  const postEmailEl    = document.getElementById('postEmail');
+  const postWhenEl     = document.getElementById('postWhen');
+  const postTextEl     = document.getElementById('postText');
+  const postMsgEl      = document.getElementById('postMsg');
 
-  let currentUser = null;
-
-  // ===== Helpers =====
-  const say = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+  // Helpers
+  const say  = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color  = isErr ? '#ffb4b4' : '#9fb1c3'; };
   const psay = (t, isErr=false)=>{ postMsgEl.textContent = t; postMsgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
-  function escapeHtml(s){
-    return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+  function toLocalDatetimeValue(d=new Date()){
+    const pad = (n)=> String(n).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const mm   = pad(d.getMonth()+1);
+    const dd   = pad(d.getDate());
+    const hh   = pad(d.getHours());
+    const mi   = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
   }
 
-  // ===== Auth modal open/close =====
+  // Modal open/close (Auth)
   function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); say(""); }
   function closeAuth(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
   openBtn?.addEventListener('click', openAuth);
   closeBtn?.addEventListener('click', closeAuth);
   modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
 
-  // ===== New Post modal open/close =====
+  // New Post modal open/close
   function openPost(){
     if (!currentUser){ openAuth(); return; }
     if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
     postEmailEl.value = currentUser.email || "";
     postNameEl.value = (currentUser.email || "").split("@")[0];
     postTextEl.value = "";
+    postWhenEl.value = toLocalDatetimeValue(new Date());
     psay("");
     postModal.classList.add('open');
     postModal.setAttribute('aria-hidden','false');
@@ -357,31 +375,46 @@
   postCancel.addEventListener('click', closePostModal);
   postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
-  // ===== Auth state =====
- onAuthStateChanged(auth, (user)=>{
-  currentUser = user || null;
-  const verified = !!user?.emailVerified;
-
-  if (user) {
-    // Display email directly in nav
-    const shortEmail = user.email.length > 25 ? user.email.slice(0, 25) + "…" : user.email;
-    openBtn.textContent = verified
-      ? `Account – ${shortEmail}`
-      : `Unverified – ${shortEmail}`;
-
-    newPostBtn.style.display = verified ? "inline-block" : "none";
-    hintEl.textContent = verified
-      ? "Share updates with the club."
-      : "Please verify your email to post.";
-
-  } else {
-    openBtn.textContent = "Sign In";
-    newPostBtn.style.display = "none";
-    hintEl.textContent = "Board notices and member updates appear here.";
+  // Role loader (checks profiles/{uid}.role == "admin")
+  async function reloadRole(){
+    isAdmin = false;
+    if (!currentUser) return;
+    try{
+      const pref = doc(db, "profiles", currentUser.uid);
+      const snap = await getDoc(pref);
+      const role = snap.exists() ? (snap.data().role || "").toLowerCase() : "";
+      isAdmin = (role === "admin");
+    }catch{}
   }
-});
 
-  // ===== Sign in / up / reset / out =====
+  // Auth state
+  onAuthStateChanged(auth, async (user)=>{
+    currentUser = user || null;
+    await reloadRole();
+    const verified = !!user?.emailVerified;
+
+    if (user) {
+      const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
+      openBtn.textContent = verified
+        ? `Account – ${shortEmail}`
+        : `Unverified – ${shortEmail}`;
+
+      newPostBtn.style.display = verified ? "inline-block" : "none";
+      // Only admins get the big "Submit & Notify" control next to New Post button
+      notifyBtn.style.display = (verified && isAdmin) ? "inline-block" : "none";
+
+      hintEl.textContent = verified
+        ? "Share updates with the club."
+        : "Please verify your email to post.";
+    } else {
+      openBtn.textContent = "Sign In";
+      newPostBtn.style.display = "none";
+      notifyBtn.style.display  = "none";
+      hintEl.textContent = "Board notices and member updates appear here.";
+    }
+  });
+
+  // Sign in / up / reset / out
   doSignIn.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
@@ -425,39 +458,110 @@
 
   signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); say("Signed out."); });
 
-  // ===== Post a message (from modal) =====
-  postSubmit.addEventListener('click', async ()=>{
+  // Post helpers (create & optionally notify)
+  async function createPost(){
+    if (!currentUser){ psay("Please sign in.", true); return null; }
+    if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
+
+    const displayName = (postNameEl.value || "").trim();
+    const text        = (postTextEl.value || "").trim();
+    if (!displayName){ psay("Display name is required.", true); return null; }
+    if (!text)       { psay("Message cannot be empty.", true); return null; }
+
+    // Choose timestamp (user-adjustable) or now
+    let when = new Date();
+    const raw = (postWhenEl.value || "").trim();
+    if (raw){
+      const dt = new Date(raw);
+      if (!isNaN(dt.getTime())) when = dt;
+    }
+
+    // Add to Firestore
+    const ref = await addDoc(collection(db,"board"), {
+      text,
+      authorEmail: currentUser.email || "",
+      authorName: displayName,
+      authorUid: currentUser.uid,
+      createdAt: when  // Firestore rules: "is timestamp" is satisfied by Date
+    });
+    return { id: ref.id, text, displayName, when };
+  }
+
+  // Fetch active member emails (admin only; rules require admin to list profiles)
+  async function getActiveEmails(){
+    if (!isAdmin) return [];
+    const emails = [];
     try{
-      if (!currentUser) return psay("Please sign in.", true);
-      if (!currentUser.emailVerified) return psay("Verify your email first.", true);
-
-      const displayName = (postNameEl.value || "").trim();
-      const text        = (postTextEl.value || "").trim();
-      if (!displayName) return psay("Display name is required.", true);
-      if (!text)        return psay("Message cannot be empty.", true);
-
-      await addDoc(collection(db,"board"), {
-        text,
-        authorEmail: currentUser.email || "",
-        authorName: displayName,
-        authorUid: currentUser.uid,
-        createdAt: serverTimestamp()
+      const qProfiles = query(collection(db,"profiles"), where("active","==", true));
+      const snap = await getDocs(qProfiles);
+      snap.forEach(docu=>{
+        const d = docu.data();
+        const e = (d.email || "").trim();
+        if (e) emails.push(e);
       });
+    }catch{}
+    return emails;
+  }
+
+  // Build & open mailto
+  function openMailto(allBcc, subject, body){
+    // Be mindful of URL length; small club should be fine.
+    const mailto = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  }
+
+  // Click handlers for submit buttons inside modal
+  postSubmitOnly.addEventListener('click', async ()=>{
+    try{
+      const created = await createPost();
+      if (created){ closePostModal(); }
+    }catch(err){ psay(err.message, true); }
+  });
+
+  postSubmitNotify.addEventListener('click', async ()=>{
+    try{
+      if (!isAdmin){ psay("Only admins can notify all members.", true); return; }
+      const created = await createPost();
+      if (!created) return;
+
+      const all = await getActiveEmails();
+      if (!all.length){ closePostModal(); alert("Post created, but no active member emails found to notify."); return; }
+
+      const whenStr = created.when.toLocaleString();
+      const subject = "New Message on The Flying 64th Website";
+      const body =
+`From: ${created.displayName}
+When: ${whenStr}
+
+${created.text}
+
+— This message was posted on the Member Message Board (The Flying 64th).`;
+
+      openMailto(all, subject, body);
       closePostModal();
     }catch(err){ psay(err.message, true); }
   });
 
-  // ===== Live feed (scrollable) =====
-  const q = query(collection(db,"board"), orderBy("createdAt","desc"));
-  onSnapshot(q, (snap)=>{
-    const isBoard = currentUser?.email && BOARD_EMAILS.includes(currentUser.email);
+  // Big top-right "Submit & Notify" convenience (admins only) -> opens modal, then uses the same notify flow
+  notifyBtn.addEventListener('click', ()=>{
+    if (!currentUser){ openAuth(); return; }
+    if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
+    if (!isAdmin){ alert("Only admins can notify all members."); return; }
+    // Make sure the modal shows the admin-only button
+    openPost();
+  });
+
+  // Live feed
+  const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
+  onSnapshot(qBoard, (snap)=>{
     const verified = !!currentUser?.emailVerified;
     feedEl.innerHTML = "";
     snap.forEach(d=>{
       const m = d.data();
-      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : (m.createdAt instanceof Date ? m.createdAt : null);
       const when = ts ? ts.toLocaleString() : "…";
-      const canDelete = verified && (isBoard || currentUser?.uid === m.authorUid);
+      const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
+
       const div = document.createElement("div");
       div.className = "msg";
       div.innerHTML = `
