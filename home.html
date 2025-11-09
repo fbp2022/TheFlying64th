@@ -93,25 +93,44 @@
     .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
     .iconbtn:hover{background:rgba(255,255,255,.06)}
 
-    /* ===== AUTH MODAL ===== */
-    .auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
-    .auth-modal.open{display:grid}
-    .auth-card{width:min(420px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
-    .auth-title{margin:0 0 10px 0;font-size:20px;font-weight:800}
-    .auth-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
-    .auth-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
-    .auth-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#0b1117;color:#e6edf3}
-    .auth-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
-    .auth-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#141b26;color:#e6edf3;cursor:pointer}
-    .auth-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
-    .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
-    .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
-    .invite-wrap{margin-top:6px}
-
-    /* Messages */
-    .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;margin:10px 0;background:#0e1520}
+    /* ===== MESSAGE BOARD SCROLL AREA ===== */
+    #messages{
+      display:grid; gap:12px;
+      max-height:48vh;            /* desktop */
+      overflow:auto;
+      padding-right:4px;
+    }
+    @media (max-width:760px){
+      #messages{ max-height:40vh; } /* phone */
+    }
+    .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;background:#0e1520}
     .msg-top{display:flex;justify-content:space-between;gap:10px}
     .msg-meta{font-size:12px;color:#9fb1c3}
+
+    /* ===== MODALS (Auth + New Post) ===== */
+    .auth-modal,
+    .post-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
+    .auth-modal.open,
+    .post-modal.open{display:grid}
+    .auth-card,
+    .post-card{width:min(460px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
+    .auth-title,
+    .post-title{margin:0 0 10px 0;font-size:20px;font-weight:800}
+    .auth-x,
+    .post-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
+    .auth-label,
+    .post-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
+    .auth-input,
+    .post-input,
+    .post-text{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#0b1117;color:#e6edf3}
+    .auth-row,
+    .post-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+    .auth-btn,
+    .post-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#141b26;color:#e6edf3;cursor:pointer}
+    .auth-btn.primary,
+    .post-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
+    .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
+    .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
   </style>
 </head>
 <body>
@@ -164,19 +183,14 @@
 
     <!-- ===== MEMBER MESSAGE BOARD ===== -->
     <section class="card" id="board">
-      <h2>Member Message Board</h2>
-      <p id="msgHint" class="muted">Board notices and member updates appear here.</p>
-
-      <!-- Composer (visible when signed-in & verified) -->
-      <div id="composer" style="display:none; margin:12px 0 16px;">
-        <textarea id="newMsg" class="auth-input" rows="3" placeholder="Post an update to members…"></textarea>
-        <div style="display:flex; gap:10px; margin-top:8px;">
-          <button id="postBtn" class="auth-btn primary" style="max-width:160px;">Post Message</button>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <h2 style="margin:0;">Member Message Board</h2>
+        <button id="newPostBtn" class="btn primary" style="display:none;">New Post</button>
       </div>
+      <p id="msgHint" class="muted" style="margin-top:8px;">Board notices and member updates appear here.</p>
 
-      <!-- Feed -->
-      <div id="messages" style="display:grid; gap:12px;"></div>
+      <!-- Scrollable feed -->
+      <div id="messages"></div>
     </section>
   </div>
 </main>
@@ -219,44 +233,66 @@
   </div>
 </div>
 
+<!-- ===== NEW POST MODAL ===== -->
+<div id="postModal" class="post-modal" aria-hidden="true">
+  <div class="post-card" role="dialog" aria-modal="true" aria-labelledby="postTitle">
+    <button id="closePost" class="post-x" aria-label="Close">✕</button>
+    <h3 id="postTitle" class="post-title">New Message</h3>
+
+    <label class="post-label" for="postName">Display Name</label>
+    <input id="postName" class="post-input" type="text" placeholder="e.g., Chris M.">
+
+    <label class="post-label" for="postEmail">Email (from your account)</label>
+    <input id="postEmail" class="post-input" type="email" readonly>
+
+    <label class="post-label" for="postText">Message</label>
+    <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
+
+    <div class="post-row">
+      <button id="postCancel" class="post-btn">Cancel</button>
+      <button id="postSubmit" class="post-btn primary">Post Message</button>
+    </div>
+    <p id="postMsg" class="auth-msg"></p>
+  </div>
+</div>
+
 <script>
   document.getElementById("y").textContent = new Date().getFullYear();
 </script>
 
 <!-- ===== Firebase + Auth + Board Logic ===== -->
 <script type="module">
-  // --- Firebase SDKs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged,
-  signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail, sendEmailVerification, signOut
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-import {
-  getFirestore, doc, getDoc, updateDoc, serverTimestamp,
-  collection, query, orderBy, onSnapshot, addDoc, deleteDoc
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+  // Firebase SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendPasswordResetEmail, sendEmailVerification, signOut
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, updateDoc, serverTimestamp,
+    collection, query, orderBy, onSnapshot, addDoc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-
-  // --- Your Firebase config (use EXACTLY what Console shows; replace if different)
+  // EXACT config from your console
   const firebaseConfig = {
-  apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
-  authDomain: "flying64th-b7813.firebaseapp.com",
-  projectId: "flying64th-b7813",
-  storageBucket: "flying64th-b7813.firebasestorage.app",
-  messagingSenderId: "244940935157",
-  appId: "1:244940935157:web:58e7305541377ba743dabc"
-};
+    apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
+    authDomain: "flying64th-b7813.firebaseapp.com",
+    projectId: "flying64th-b7813",
+    storageBucket: "flying64th-b7813.firebasestorage.app",
+    messagingSenderId: "244940935157",
+    appId: "1:244940935157:web:58e7305541377ba743dabc"
+  };
 
-  // --- Init
+  // Init
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // --- Board officers (can delete any post)
+  // Board officers (can delete any post)
   const BOARD_EMAILS = ["theflying64@gmail.com"];
 
-  // --- UI refs
+  // UI refs (auth)
   const openBtn    = document.getElementById('signinBtn');
   const modal      = document.getElementById('authModal');
   const closeBtn   = document.getElementById('closeModal');
@@ -269,70 +305,98 @@ import {
   const signOutBtn = document.getElementById('signOutBtn');
   const msgEl      = document.getElementById('authMsg');
 
-  const composer   = document.getElementById('composer');
-  const newMsgEl   = document.getElementById('newMsg');
-  const postBtn    = document.getElementById('postBtn');
-  const feedEl     = document.getElementById('messages');
+  // Board UI refs
   const hintEl     = document.getElementById('msgHint');
+  const feedEl     = document.getElementById('messages');
+  const newPostBtn = document.getElementById('newPostBtn');
+
+  // New Post modal refs
+  const postModal  = document.getElementById('postModal');
+  const closePost  = document.getElementById('closePost');
+  const postCancel = document.getElementById('postCancel');
+  const postSubmit = document.getElementById('postSubmit');
+  const postNameEl = document.getElementById('postName');
+  const postEmailEl= document.getElementById('postEmail');
+  const postTextEl = document.getElementById('postText');
+  const postMsgEl  = document.getElementById('postMsg');
 
   let currentUser = null;
 
-  // --- Modal open/close
-  function openModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); msgEl.textContent=""; }
-  function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
-  openBtn?.addEventListener('click', openModal);
-  closeBtn?.addEventListener('click', closeModal);
-  modal?.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-  // --- Helper to show messages
+  // ===== Helpers =====
   const say = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+  const psay = (t, isErr=false)=>{ postMsgEl.textContent = t; postMsgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+  function escapeHtml(s){
+    return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  }
 
-  // --- Auth state
+  // ===== Auth modal open/close =====
+  function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); say(""); }
+  function closeAuth(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+  openBtn?.addEventListener('click', openAuth);
+  closeBtn?.addEventListener('click', closeAuth);
+  modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
+
+  // ===== New Post modal open/close =====
+  function openPost(){
+    if (!currentUser){ openAuth(); return; }
+    if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
+    postEmailEl.value = currentUser.email || "";
+    postNameEl.value = (currentUser.email || "").split("@")[0];
+    postTextEl.value = "";
+    psay("");
+    postModal.classList.add('open');
+    postModal.setAttribute('aria-hidden','false');
+    postNameEl.focus();
+  }
+  function closePostModal(){
+    postModal.classList.remove('open');
+    postModal.setAttribute('aria-hidden','true');
+  }
+  newPostBtn.addEventListener('click', openPost);
+  closePost.addEventListener('click', closePostModal);
+  postCancel.addEventListener('click', closePostModal);
+  postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
+
+  // ===== Auth state =====
   onAuthStateChanged(auth, (user)=>{
     currentUser = user || null;
     const verified = !!user?.emailVerified;
     if (user){
       openBtn.textContent = "Account";
-      composer.style.display = verified ? "block" : "none";
+      newPostBtn.style.display = verified ? "inline-block" : "none";
       hintEl.textContent = verified ? "Share updates with the club." : "Please verify your email to post.";
     } else {
       openBtn.textContent = "Sign In";
-      composer.style.display = "none";
+      newPostBtn.style.display = "none";
       hintEl.textContent = "Board notices and member updates appear here.";
     }
   });
 
-  // --- Sign in
+  // ===== Sign in / up / reset / out =====
   doSignIn.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
     if (!email || !pass) return say("Enter email and password.", true);
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      say("Signed in."); closeModal();
-    } catch(err){ say(err.message, true); }
+    try { await signInWithEmailAndPassword(auth, email, pass); say("Signed in."); closeAuth(); }
+    catch(err){ say(err.message, true); }
   });
 
-  // --- Create account (requires valid invite code)
   doSignUp.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
     const code  = (inviteEl.value || "").trim();
     if (!email || !pass || !code) return say("Email, password, and invite code are required.", true);
-
     try {
       const inviteRef  = doc(db, "invites", code);
       const inviteSnap = await getDoc(inviteRef);
       if (!inviteSnap.exists()) return say("Invalid invite code.", true);
       const d = inviteSnap.data();
       if (d.disabled === true) return say("This invite code is disabled.", true);
-      // If single-use semantics are still desired for some codes:
       if (d.used === true && d.multi !== true) return say("This invite code has already been used.", true);
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await sendEmailVerification(cred.user);
 
-      // Mark as used (or track count)
       await updateDoc(inviteRef, {
         used: true,
         usedByLast: cred.user.uid,
@@ -343,58 +407,56 @@ import {
     } catch(err){ say(err.message, true); }
   });
 
-  // --- Reset password
   doReset.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     if (!email) return say("Enter your email first.", true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      say("Password reset email sent.");
-    } catch(err){ say(err.message, true); }
+    try { await sendPasswordResetEmail(auth, email); say("Password reset email sent."); }
+    catch(err){ say(err.message, true); }
   });
 
-  // --- Sign out
-  signOutBtn.addEventListener('click', async ()=>{
-    await signOut(auth);
-    say("Signed out.");
-  });
+  signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); say("Signed out."); });
 
-  // --- Post a message
-  postBtn.addEventListener('click', async ()=>{
+  // ===== Post a message (from modal) =====
+  postSubmit.addEventListener('click', async ()=>{
     try{
-      if (!currentUser) return alert("Please sign in.");
-      if (!currentUser.emailVerified) return alert("Verify your email first.");
-      const text = (newMsgEl.value || "").trim();
-      if (!text) return;
+      if (!currentUser) return psay("Please sign in.", true);
+      if (!currentUser.emailVerified) return psay("Verify your email first.", true);
+
+      const displayName = (postNameEl.value || "").trim();
+      const text        = (postTextEl.value || "").trim();
+      if (!displayName) return psay("Display name is required.", true);
+      if (!text)        return psay("Message cannot be empty.", true);
+
       await addDoc(collection(db,"board"), {
         text,
         authorEmail: currentUser.email || "",
-        authorName: (currentUser.email || "").split("@")[0] || "Member",
+        authorName: displayName,
         authorUid: currentUser.uid,
         createdAt: serverTimestamp()
       });
-      newMsgEl.value = "";
-    }catch(err){ alert(err.message); }
+      closePostModal();
+    }catch(err){ psay(err.message, true); }
   });
 
-  // --- Live feed
+  // ===== Live feed (scrollable) =====
   const q = query(collection(db,"board"), orderBy("createdAt","desc"));
   onSnapshot(q, (snap)=>{
     const isBoard = currentUser?.email && BOARD_EMAILS.includes(currentUser.email);
+    const verified = !!currentUser?.emailVerified;
     feedEl.innerHTML = "";
     snap.forEach(d=>{
       const m = d.data();
       const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
       const when = ts ? ts.toLocaleString() : "…";
-      const canDelete = currentUser && currentUser.emailVerified && (isBoard || currentUser.uid === m.authorUid);
+      const canDelete = verified && (isBoard || currentUser?.uid === m.authorUid);
       const div = document.createElement("div");
       div.className = "msg";
       div.innerHTML = `
         <div class="msg-top">
           <div class="msg-meta">
-            <strong>${m.authorName || "Member"}</strong>
+            <strong>${escapeHtml(m.authorName || "Member")}</strong>
             <span> • ${when}</span>
-            <div style="color:#9fb1c3;font-size:12px">${m.authorEmail || ""}</div>
+            <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
           </div>
           ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
         </div>
@@ -403,7 +465,7 @@ import {
       feedEl.appendChild(div);
     });
 
-    // wire delete buttons
+    // Wire delete buttons
     [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         const id = btn.getAttribute("data-del");
@@ -413,16 +475,6 @@ import {
       });
     });
   });
-
-  // --- util: escape HTML
-  function escapeHtml(s){
-    return (s||"")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
 </script>
 </body>
 </html>
