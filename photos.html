@@ -1,1 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Flying 64th – Photos</title>
+  <meta name="color-scheme" content="dark light">
 
+  <style>
+    /* Reset */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: #fff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow: hidden; /* prevent page scroll */
+    }
+
+    /* Fullscreen slideshow stage */
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(1200px 800px at 50% 40%, rgba(255,255,255,.06), transparent 60%),
+        #0b0b0b;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+
+    /* Slides */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity .6s ease;
+      will-change: opacity;
+    }
+    .slide.active { opacity: 1; }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;       /* fills entire screen */
+      object-position: center; /* center crop */
+      image-rendering: auto;
+      -webkit-user-drag: none;
+      pointer-events: none; /* clicks pass to stage/buttons */
+    }
+
+    /* Gradient edge masks for polish */
+    .vignette::after {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.45), transparent 18%, transparent 82%, rgba(0,0,0,.45)),
+        linear-gradient(0deg, rgba(0,0,0,.35), transparent 25%, transparent 85%, rgba(0,0,0,.5));
+      pointer-events: none;
+    }
+
+    /* Nav buttons */
+    .nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background .2s ease, transform .06s ease;
+      backdrop-filter: blur(6px);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav:hover { background: rgba(0,0,0,.65); }
+    .nav:active { transform: translateY(-50%) scale(.98); }
+    .nav svg { width: 28px; height: 28px; fill: #fff; opacity: .95; }
+
+    .prev { left: 20px; }
+    .next { right: 20px; }
+
+    /* Minimal top-left label (can be removed if undesired) */
+    .badge {
+      position: absolute; left: 20px; top: 18px;
+      font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 8px 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Index counter (optional overlay, no thumbnail strip) */
+    .counter {
+      position: absolute; right: 20px; bottom: 18px;
+      font-variant-numeric: tabular-nums;
+      font-size: 13px; opacity: .85;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 6px 10px;
+      backdrop-filter: blur(6px);
+    }
+
+    @media (max-width: 600px) {
+      .nav { width: 48px; height: 48px; }
+      .nav svg { width: 24px; height: 24px; }
+      .badge, .counter { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage vignette" aria-label="Full-screen photo slideshow">
+    <!-- Slides (images live in /images/) -->
+    <div class="slide active">
+      <img src="images/bothplanes_homepage.jpg" alt="Two aircraft on the ramp">
+    </div>
+    <div class="slide">
+      <img src="images/planesboth.jpg" alt="Both aircraft side by side">
+    </div>
+    <div class="slide">
+      <img src="images/planesc150.jpg" alt="Cessna 150 on ramp">
+    </div>
+    <div class="slide">
+      <img src="images/planesc150.2.jpg" alt="Cessna 150 close-up">
+    </div>
+    <div class="slide">
+      <img src="images/planesc172.1.jpg" alt="Cessna 172 on ramp">
+    </div>
+    <div class="slide">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th logo">
+    </div>
+
+    <!-- Minimal label & counter (no bottom menu) -->
+    <div class="badge" aria-hidden="true">Photos</div>
+    <div class="counter" id="counter" aria-live="polite">1 / 6</div>
+
+    <!-- Nav buttons -->
+    <button class="nav prev" id="prev" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </button>
+    <button class="nav next" id="next" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+    </button>
+  </main>
+
+  <script>
+    // Grab slides
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const counter = document.getElementById('counter');
+
+    // Preload images for snappy nav
+    slides.forEach(s => {
+      const img = s.querySelector('img');
+      if (img && img.src) { const i = new Image(); i.src = img.src; }
+    });
+
+    let i = 0;
+    function show(idx) {
+      i = (idx + slides.length) % slides.length;
+      slides.forEach((s, n) => s.classList.toggle('active', n === i));
+      if (counter) counter.textContent = (i + 1) + ' / ' + slides.length;
+    }
+
+    prevBtn.addEventListener('click', () => show(i - 1));
+    nextBtn.addEventListener('click', () => show(i + 1));
+
+    // Keyboard arrows
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(i - 1);
+      else if (e.key === 'ArrowRight') show(i + 1);
+    });
+
+    // Basic swipe support
+    let startX = null;
+    const stage = document.querySelector('.stage');
+    stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive:true});
+    stage.addEventListener('touchend', (e) => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) (dx > 0 ? show(i - 1) : show(i + 1));
+      startX = null;
+    });
+
+    // Prevent space/arrow causing page scroll on some browsers
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    }, { passive: false });
+  </script>
+</body>
+</html>
