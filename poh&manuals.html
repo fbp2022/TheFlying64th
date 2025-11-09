@@ -3,80 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>POH &amp; Manuals – The Flying 64th</title>
-  <meta name="description" content="POH & Manuals for The Flying 64th aircraft. View PDFs in-browser and download copies." />
+  <title>POH & Manuals – The Flying 64th</title>
 
   <style>
     :root{
       --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
       --panel:#151924; --panel2:#0d1018;
-      --accent:#4da3ff; --hover:#2b6bb1;
-      --border:rgba(255,255,255,.08);
+      --accent:#4da3ff; --border:rgba(255,255,255,.1);
+      --radius:14px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
       background:var(--bg); color:var(--ink);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ===== Header / Nav ===== */
-    header{
-      position:sticky; top:0; z-index:1000;
-      background:#121520; border-bottom:1px solid var(--border);
-      backdrop-filter: saturate(120%) blur(4px);
+    /* ===== NAV BAR ===== */
+    header {
+      position: sticky; top: 0; z-index: 1000;
+      background: #0b0e15;
+      border-bottom: 1px solid var(--border);
     }
-    .nav{
-      max-width:1200px; margin:0 auto; padding:14px 18px;
-      display:flex; align-items:center; gap:16px;
+    .nav {
+      max-width: 1200px; margin: 0 auto; padding: 10px 12px;
+      display: flex; align-items: center; gap: 12px;
     }
-    .brand{
-      font-weight:700; letter-spacing:.2px; margin-right:auto;
+    .brand a {
+      font-weight: 700; font-size: 20px;
+      color: #fff; text-decoration: none;
+      margin-right: auto;
+      white-space:nowrap;
     }
-    .brand a{ color:#fff; text-decoration:none }
-    nav a{
-      color:var(--muted); text-decoration:none; padding:8px 10px; border-radius:8px;
+    nav {
+      display:flex; gap:6px; overflow-x:auto; white-space:nowrap;
+      -webkit-overflow-scrolling: touch; scrollbar-width:none;
     }
-    nav a:hover{ color:#fff; background:rgba(255,255,255,.06) }
-    nav a.active{ color:#fff; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.25) }
+    nav::-webkit-scrollbar{display:none}
+    nav a {
+      color: #b6c0cf; text-decoration: none;
+      padding: 8px 12px; border-radius: 10px;
+      transition:.2s;
+      display:inline-block;
+    }
+    nav a:hover { color:#fff; background:rgba(255,255,255,.08) }
+    nav a.active { background:#4da3ff; color:#fff; font-weight:600 }
 
-    /* ===== Hero ===== */
+    /* ===== HERO ===== */
     .hero{
-      position:relative; isolation:isolate;
-      background:#0c0f17;
+      position:relative; isolation:isolate; background:#0c0f17;
     }
     .hero::before{
-      content:"";
-      position:absolute; inset:0; z-index:-1;
-      background:url("images/planesc172.1.jpg") center/cover no-repeat fixed;
+      content:""; position:absolute; inset:0; z-index:-1;
+      background:url("images/planesc172.1.jpg") center/cover no-repeat;
       opacity:.22;
     }
+    @media (min-width: 900px){ .hero::before{ background-attachment: fixed; } }
     .hero-inner{
-      max-width:1200px; margin:0 auto; padding:42px 18px 30px;
+      max-width:1200px; margin:0 auto; padding:28px 14px 20px;
     }
-    .hero h1{ margin:0 0 6px; font-size:clamp(28px, 3vw, 38px) }
-    .hero p{ margin:0; color:var(--muted) }
+    .hero h1{ margin:0 0 6px; font-size:clamp(24px, 4vw, 38px) }
+    .hero p{ margin:0; color:var(--muted); font-size:14px }
 
-    /* ===== Layout ===== */
+    /* ===== LAYOUT ===== */
     .container{
-      max-width:1200px; margin:22px auto 60px; padding:0 18px;
-      display:grid; grid-template-columns: 320px 1fr; gap:18px;
-    }
-    @media (max-width: 900px){
-      .container{ grid-template-columns: 1fr }
-      .viewer-actions{ position:sticky; top:70px }
+      max-width:1200px; margin:16px auto 60px; padding:0 14px;
+      display:grid; grid-template-columns: 320px 1fr; gap:16px;
     }
 
-    /* ===== File list ===== */
+    /* Desktop sidebar (hidden on mobile) */
     .panel{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
     }
     .panel h2{
-      margin:0; padding:14px 14px 10px; font-size:16px; color:#cfe1ff; letter-spacing:.2px;
+      margin:0; padding:12px 12px 10px; font-size:16px; color:#cfe1ff;
       border-bottom:1px solid var(--border);
     }
-    .search-wrap{ padding:10px 12px; border-bottom:1px solid var(--border); }
+    .search-wrap{ padding:10px 10px; border-bottom:1px solid var(--border); }
     .search{
       width:100%; padding:10px 12px; border-radius:10px; background:#0b0e15; color:var(--ink);
       border:1px solid var(--border); outline:none;
@@ -87,50 +92,69 @@
       text-decoration:none;
     }
     .filelist li a:hover{ background:rgba(255,255,255,.06) }
-    .filelist li a.active{ background:rgba(77,163,255,.12); outline:1px solid rgba(77,163,255,.3) }
+    .filelist li a.active{ background:rgba(77,163,255,.12); outline:1px solid rgba(77,163,255,.28) }
     .file-name{ font-weight:600; font-size:14.5px }
     .file-sub{ color:var(--muted); font-size:12px }
-
-    .pdf-icon{
-      width:26px; height:26px; flex:0 0 26px; display:inline-block;
-      border-radius:6px; background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.35);
-      place-content:center; display:grid;
-    }
+    .pdf-icon{ width:26px; height:26px; flex:0 0 26px; display:grid; place-content:center;
+      border-radius:6px; background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.35); }
     .pdf-icon svg{ width:16px; height:16px; opacity:.9 }
 
-    /* ===== Viewer ===== */
-    .viewer{
-      display:grid; grid-template-rows: auto 1fr; gap:12px; min-height:70vh;
-    }
+    /* Viewer */
+    .viewer{ display:grid; grid-template-rows:auto 1fr; gap:10px; min-height:70vh; }
     .viewer-actions{
-      display:flex; align-items:center; gap:10px; justify-content:space-between;
+      display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border); border-radius:14px; padding:8px 10px;
+      border:1px solid var(--border); border-radius:var(--radius); padding:8px 10px;
     }
     .crumb{ font-size:14px; color:var(--muted) }
     .crumb b{ color:#e5f0ff }
     .btn{
-      appearance:none; border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
-      padding:9px 12px; border-radius:10px; cursor:pointer; text-decoration:none; font-weight:600;
+      border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
+      padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600;
+      display:inline-flex; align-items:center; gap:8px;
     }
     .btn:hover{ border-color:rgba(77,163,255,.45); background:#0e1630 }
-    .btn.primary{
-      background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1;
-    }
-    .btn.primary:hover{ filter:brightness(1.05) }
+    .btn.primary{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1; }
 
     .iframe-wrap{
-      background:#0b0f1a; border:1px solid var(--border); border-radius:14px; overflow:hidden;
+      background:#0b0f1a; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
       min-height:60vh;
     }
-    iframe{
-      display:block; width:100%; height:72vh; border:0;
-      background:#0b0f1a;
-    }
-    .placeholder{
-      padding:24px; color:var(--muted);
-    }
+    iframe{ display:block; width:100%; height:70vh; border:0; background:#0b0f1a; }
+    .placeholder{ padding:22px; color:var(--muted) }
     .placeholder h3{ margin:0 0 6px }
+
+    /* ===== MOBILE FIRST CLEANUP ===== */
+    /* Stack layout, hide sidebar, use simple select */
+    .mobile-picker{
+      display:none; gap:8px; align-items:center; background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:var(--radius); padding:10px;
+    }
+    .mobile-picker label{ font-size:14px; color:#cfe1ff; white-space:nowrap; }
+    .mobile-select{
+      flex:1; padding:10px 12px; border-radius:10px; background:#0b0e15; color:var(--ink);
+      border:1px solid var(--border); outline:none;
+    }
+
+    @media (max-width: 900px){
+      .container{
+        display:block; /* single column */
+      }
+      .panel{ display:none; }          /* hide crowded sidebar on phones */
+      .mobile-picker{ display:flex; margin-bottom:10px; }
+      .viewer-actions{ gap:8px; }
+      .btn{ padding:10px 12px; }
+      .hero-inner{ padding:22px 14px 16px; }
+      nav a{ padding:8px 10px; }       /* better fit in top bar */
+      iframe{ height: calc(100vh - 270px); } /* fill most of the screen on phones */
+    }
+
+    /* iOS viewport fix when URL bar hides/shows */
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width:900px){
+        iframe{ height: calc(100svh - 270px); }
+      }
+    }
   </style>
 </head>
 <body>
@@ -138,13 +162,14 @@
   <!-- ===== NAV BAR ===== -->
   <header>
     <div class="nav">
+      <img src="images/logo.png" alt="The Flying 64th Logo" style="height:44px;width:auto;border-radius:8px;margin-right:8px;">
       <div class="brand"><a href="home.html">The Flying 64th</a></div>
       <nav>
-      <a href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a class="active" href="poh&manuals.html">POH &amp; Manuals</a>
+        <a href="home.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="be.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
       </nav>
     </div>
   </header>
@@ -153,13 +178,19 @@
   <section class="hero" role="img" aria-label="Cessna aircraft on ramp">
     <div class="hero-inner">
       <h1>POH &amp; Manuals</h1>
-      <p>View aircraft POHs, avionics manuals, and checklists right here. Click a file to open it in the viewer; use the button to download.</p>
+      <p>View aircraft POHs, avionics manuals, and checklists. On mobile, pick a file below; on desktop, use the sidebar.</p>
     </div>
   </section>
 
   <!-- ===== MAIN ===== -->
   <main class="container">
-    <!-- File list -->
+    <!-- Mobile: simple picker -->
+    <div class="mobile-picker" aria-label="Choose document">
+      <label for="mobileSelect">Document</label>
+      <select id="mobileSelect" class="mobile-select"></select>
+    </div>
+
+    <!-- Desktop: sidebar list -->
     <aside class="panel" aria-label="Document list">
       <h2>Documents</h2>
       <div class="search-wrap">
@@ -168,19 +199,19 @@
       <ul id="filelist" class="filelist"></ul>
     </aside>
 
-    <!-- PDF Viewer -->
+    <!-- Viewer -->
     <section class="viewer" aria-label="PDF viewer">
       <div class="viewer-actions">
         <div class="crumb" id="crumb">No file selected</div>
-        <div class="actions">
-          <a id="openNewTab" class="btn" href="#" target="_blank" rel="noopener" aria-label="Open in a new tab">Open in New Tab</a>
-          <a id="downloadBtn" class="btn primary" href="#" download aria-label="Download this PDF">Download</a>
+        <div class="actions" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a id="openNewTab" class="btn" href="#" target="_blank" rel="noopener">Open in New Tab</a>
+          <a id="downloadBtn" class="btn primary" href="#" download>Download</a>
         </div>
       </div>
       <div class="iframe-wrap" id="iframeWrap" aria-live="polite">
         <div class="placeholder" id="placeholder">
           <h3>Select a document</h3>
-          <p>Choose a file from the left to load it in the viewer. You can also open it in a new tab or download it.</p>
+          <p>Choose a file to load it in the viewer. You can also open it in a new tab or download it.</p>
         </div>
         <iframe id="pdfViewer" title="PDF Viewer" hidden></iframe>
       </div>
@@ -188,48 +219,48 @@
   </main>
 
   <script>
-    // ======= Configure your documents here (kept out of the DOM for simplicity) =======
-    // Put your actual filenames in /documents/. "desc" is optional.
-    // NOTE: Bylaws intentionally omitted per your instruction.
-    const docs = [
-  { title: "Cessna 172K – Pilot’s Operating Handbook (1969)", file: "documents/1969-172K-POH.pdf", desc: "Official 1969 POH for the Cessna 172K aircraft." },
-  { title: "Cessna 150L – Pilot’s Operating Handbook (N10921)", file: "documents/N10921-POH.pdf", desc: "Operating handbook for the Cessna 150L aircraft, tail number N10921." },
-  { title: "Garmin GTR 225 – Radio Manual", file: "documents/Garmin-GTR225-Radio.pdf", desc: "Pilot’s guide and operating instructions for the Garmin GTR 225 radio unit." },
-  { title: "Garmin GPS 175 / GNC 355 / GNX 375 – Pilot’s Guide", file: "documents/GPS-175-GNC-355-GNX-375-Pilots-Guide.pdf", desc: "Comprehensive GPS/Comm/Nav unit manual used in the 172." },
-  { title: "FlightBox Pro – User Manual", file: "documents/FlightBoxPro-Manual.pdf", desc: "Reference manual for FlightBox Pro ADS-B equipment." }
-  // { title: "Flying 64th By-Laws", file: "documents/Flying64th_By-Laws_11012024.pdf" }  <-- intentionally omitted
-];
+    // Highlight current nav automatically
+    (function(){
+      const current = location.pathname.split('/').pop().toLowerCase();
+      document.querySelectorAll('header nav a').forEach(a=>{
+        const href = (a.getAttribute('href')||'').toLowerCase();
+        if (href && current === href) a.classList.add('active');
+      });
+    })();
 
-    // ======= DOM Elements =======
+    // Your real documents
+    const docs = [
+      { title: "Cessna 172K – Pilot’s Operating Handbook (1969)", file: "documents/1969-172K-POH.pdf", desc: "Official 1969 POH for the Cessna 172K." },
+      { title: "Cessna 150L – Pilot’s Operating Handbook (N10921)", file: "documents/N10921-POH.pdf", desc: "POH for C150L, tail number N10921." },
+      { title: "Garmin GTR 225 – Radio Manual", file: "documents/Garmin-GTR225-Radio.pdf", desc: "Pilot’s guide for the Garmin GTR 225 radio." },
+      { title: "Garmin GPS 175 / GNC 355 / GNX 375 – Pilot’s Guide", file: "documents/GPS-175-GNC-355-GNX-375-Pilots-Guide.pdf", desc: "Comprehensive GPS/Comm/Nav unit manual." },
+      { title: "FlightBox Pro – User Manual", file: "documents/FlightBoxPro-Manual.pdf", desc: "Reference manual for FlightBox Pro ADS-B." }
+    ];
+
+    // Elements
     const listEl = document.getElementById('filelist');
+    const searchInput = document.getElementById('search');
+    const mobileSelect = document.getElementById('mobileSelect');
     const viewer = document.getElementById('pdfViewer');
     const placeholder = document.getElementById('placeholder');
     const crumb = document.getElementById('crumb');
     const downloadBtn = document.getElementById('downloadBtn');
     const openNewTab = document.getElementById('openNewTab');
-    const searchInput = document.getElementById('search');
 
-    // Build list items
+    // Build desktop list
     function renderList(filter=""){
+      if(!listEl) return;
       listEl.innerHTML = "";
-      const q = filter.trim().toLowerCase();
+      const q = (filter||"").trim().toLowerCase();
       const filtered = docs.filter(d => !q || d.title.toLowerCase().includes(q) || (d.desc||"").toLowerCase().includes(q));
-
       if(filtered.length === 0){
         listEl.innerHTML = `<li style="padding:10px 12px; color:#9aa6b6">No matching documents.</li>`;
         return;
       }
-
-      filtered.forEach((doc, idx) => {
+      filtered.forEach((doc) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
-        a.href = "#";
-        a.setAttribute('role','button');
-        a.dataset.file = doc.file;
-        a.dataset.title = doc.title;
-        a.title = doc.title;
-        a.addEventListener('click', (e) => { e.preventDefault(); openDoc(doc); setActive(a); });
-
+        a.href = "#"; a.dataset.file = doc.file; a.dataset.title = doc.title;
         a.innerHTML = `
           <span class="pdf-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -243,51 +274,77 @@
             ${doc.desc ? `<div class="file-sub">${doc.desc}</div>` : ``}
           </div>
         `;
-        li.appendChild(a);
-        listEl.appendChild(li);
+        a.addEventListener('click', (e) => { e.preventDefault(); openDoc(doc); setActive(a); syncMobilePicker(doc.file); });
+        li.appendChild(a); listEl.appendChild(li);
+      });
+    }
+
+    // Build mobile dropdown
+    function renderMobilePicker(){
+      if(!mobileSelect) return;
+      mobileSelect.innerHTML = docs.map(d => `<option value="${d.file}">${d.title}</option>`).join("");
+      mobileSelect.addEventListener('change', (e)=>{
+        const file = e.target.value;
+        const doc = docs.find(d=>d.file===file);
+        if(doc){ openDoc(doc); setActiveByFile(file); }
       });
     }
 
     function setActive(anchor){
-      // clear previous
+      if(!listEl) return;
       listEl.querySelectorAll('a').forEach(a => a.classList.remove('active'));
       if(anchor) anchor.classList.add('active');
     }
+    function setActiveByFile(file){
+      const match = listEl ? Array.from(listEl.querySelectorAll('a')).find(a => a.dataset.file === file) : null;
+      if(match) setActive(match);
+    }
+    function syncMobilePicker(file){
+      if(mobileSelect && file) mobileSelect.value = file;
+    }
 
     function openDoc(doc){
-      // set iframe to direct PDF file (GitHub Pages will serve it; browsers show built-in PDF viewer)
       viewer.src = doc.file + "#view=FitH";
-      viewer.hidden = false;
-      placeholder.hidden = true;
-
-      // update buttons/crumb
+      viewer.hidden = false; placeholder.hidden = true;
       crumb.innerHTML = `<span style="color:#9fbaf2">Viewing:</span> <b>${doc.title}</b>`;
       downloadBtn.href = doc.file;
       downloadBtn.setAttribute('download', doc.file.split('/').pop());
       openNewTab.href = doc.file;
 
-      // reflect in URL (?file=...) so you can deep-link
+      // Update URL (helps sharing)
       const url = new URL(window.location);
       url.searchParams.set('file', doc.file);
-      window.history.replaceState({}, "", url);
+      history.replaceState({}, "", url);
     }
 
-    // Handle search
-    searchInput.addEventListener('input', (e)=> renderList(e.target.value));
+    // Search (desktop)
+    if(searchInput) searchInput.addEventListener('input', (e)=> renderList(e.target.value));
 
     // Initial render
     renderList();
+    renderMobilePicker();
 
-    // If URL has ?file=... open it
-    const preselect = new URLSearchParams(window.location.search).get('file');
-    if(preselect){
-      const doc = docs.find(d => d.file === preselect);
-      if(doc){ openDoc(doc); 
-        // mark active
-        const match = Array.from(listEl.querySelectorAll('a')).find(a => a.dataset.file === doc.file);
-        if(match) setActive(match);
+    // If URL preselect exists, open it; otherwise open first
+    const pre = new URLSearchParams(location.search).get('file');
+    const initial = docs.find(d => d.file === pre) || docs[0];
+    if(initial){
+      openDoc(initial);
+      syncMobilePicker(initial.file);
+      setActiveByFile(initial.file);
+    }
+
+    // Resize iframe for mobile address bar changes (smooth UX)
+    function sizeIframe(){
+      if (window.matchMedia('(max-width:900px)').matches){
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const offset = 270; // approx header + hero + controls
+        const h = Math.max(300, vh - offset);
+        document.getElementById('pdfViewer').style.height = h + 'px';
       }
     }
+    sizeIframe();
+    window.addEventListener('resize', sizeIframe);
+    if(window.visualViewport){ window.visualViewport.addEventListener('resize', sizeIframe); }
   </script>
 </body>
 </html>
