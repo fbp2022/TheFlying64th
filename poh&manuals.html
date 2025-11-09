@@ -1,1 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POH &amp; Manuals – The Flying 64th</title>
+  <meta name="description" content="POH & Manuals for The Flying 64th aircraft. View PDFs in-browser and download copies." />
 
+  <style>
+    :root{
+      --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
+      --panel:#151924; --panel2:#0d1018;
+      --accent:#4da3ff; --hover:#2b6bb1;
+      --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      background:var(--bg); color:var(--ink);
+    }
+
+    /* ===== Header / Nav ===== */
+    header{
+      position:sticky; top:0; z-index:1000;
+      background:#121520; border-bottom:1px solid var(--border);
+      backdrop-filter: saturate(120%) blur(4px);
+    }
+    .nav{
+      max-width:1200px; margin:0 auto; padding:14px 18px;
+      display:flex; align-items:center; gap:16px;
+    }
+    .brand{
+      font-weight:700; letter-spacing:.2px; margin-right:auto;
+    }
+    .brand a{ color:#fff; text-decoration:none }
+    nav a{
+      color:var(--muted); text-decoration:none; padding:8px 10px; border-radius:8px;
+    }
+    nav a:hover{ color:#fff; background:rgba(255,255,255,.06) }
+    nav a.active{ color:#fff; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.25) }
+
+    /* ===== Hero ===== */
+    .hero{
+      position:relative; isolation:isolate;
+      background:#0c0f17;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:0; z-index:-1;
+      background:url("images/planesc172.1.jpg") center/cover no-repeat fixed;
+      opacity:.22;
+    }
+    .hero-inner{
+      max-width:1200px; margin:0 auto; padding:42px 18px 30px;
+    }
+    .hero h1{ margin:0 0 6px; font-size:clamp(28px, 3vw, 38px) }
+    .hero p{ margin:0; color:var(--muted) }
+
+    /* ===== Layout ===== */
+    .container{
+      max-width:1200px; margin:22px auto 60px; padding:0 18px;
+      display:grid; grid-template-columns: 320px 1fr; gap:18px;
+    }
+    @media (max-width: 900px){
+      .container{ grid-template-columns: 1fr }
+      .viewer-actions{ position:sticky; top:70px }
+    }
+
+    /* ===== File list ===== */
+    .panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    }
+    .panel h2{
+      margin:0; padding:14px 14px 10px; font-size:16px; color:#cfe1ff; letter-spacing:.2px;
+      border-bottom:1px solid var(--border);
+    }
+    .search-wrap{ padding:10px 12px; border-bottom:1px solid var(--border); }
+    .search{
+      width:100%; padding:10px 12px; border-radius:10px; background:#0b0e15; color:var(--ink);
+      border:1px solid var(--border); outline:none;
+    }
+    .filelist{ list-style:none; margin:0; padding:6px 6px 8px; max-height:65vh; overflow:auto }
+    .filelist li a{
+      display:flex; align-items:center; gap:10px; padding:10px; border-radius:10px; color:var(--ink);
+      text-decoration:none;
+    }
+    .filelist li a:hover{ background:rgba(255,255,255,.06) }
+    .filelist li a.active{ background:rgba(77,163,255,.12); outline:1px solid rgba(77,163,255,.3) }
+    .file-name{ font-weight:600; font-size:14.5px }
+    .file-sub{ color:var(--muted); font-size:12px }
+
+    .pdf-icon{
+      width:26px; height:26px; flex:0 0 26px; display:inline-block;
+      border-radius:6px; background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.35);
+      place-content:center; display:grid;
+    }
+    .pdf-icon svg{ width:16px; height:16px; opacity:.9 }
+
+    /* ===== Viewer ===== */
+    .viewer{
+      display:grid; grid-template-rows: auto 1fr; gap:12px; min-height:70vh;
+    }
+    .viewer-actions{
+      display:flex; align-items:center; gap:10px; justify-content:space-between;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:14px; padding:8px 10px;
+    }
+    .crumb{ font-size:14px; color:var(--muted) }
+    .crumb b{ color:#e5f0ff }
+    .btn{
+      appearance:none; border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
+      padding:9px 12px; border-radius:10px; cursor:pointer; text-decoration:none; font-weight:600;
+    }
+    .btn:hover{ border-color:rgba(77,163,255,.45); background:#0e1630 }
+    .btn.primary{
+      background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1;
+    }
+    .btn.primary:hover{ filter:brightness(1.05) }
+
+    .iframe-wrap{
+      background:#0b0f1a; border:1px solid var(--border); border-radius:14px; overflow:hidden;
+      min-height:60vh;
+    }
+    iframe{
+      display:block; width:100%; height:72vh; border:0;
+      background:#0b0f1a;
+    }
+    .placeholder{
+      padding:24px; color:var(--muted);
+    }
+    .placeholder h3{ margin:0 0 6px }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV BAR ===== -->
+  <header>
+    <div class="nav">
+      <div class="brand"><a href="home.html">The Flying 64th</a></div>
+      <nav>
+      <a href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="becomeamember.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a class="active" href="pohmanuals.html">POH &amp; Manuals</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" role="img" aria-label="Cessna aircraft on ramp">
+    <div class="hero-inner">
+      <h1>POH &amp; Manuals</h1>
+      <p>View aircraft POHs, avionics manuals, and checklists right here. Click a file to open it in the viewer; use the button to download.</p>
+    </div>
+  </section>
+
+  <!-- ===== MAIN ===== -->
+  <main class="container">
+    <!-- File list -->
+    <aside class="panel" aria-label="Document list">
+      <h2>Documents</h2>
+      <div class="search-wrap">
+        <input id="search" class="search" type="search" placeholder="Search by aircraft, system, or name…" aria-label="Search documents">
+      </div>
+      <ul id="filelist" class="filelist"></ul>
+    </aside>
+
+    <!-- PDF Viewer -->
+    <section class="viewer" aria-label="PDF viewer">
+      <div class="viewer-actions">
+        <div class="crumb" id="crumb">No file selected</div>
+        <div class="actions">
+          <a id="openNewTab" class="btn" href="#" target="_blank" rel="noopener" aria-label="Open in a new tab">Open in New Tab</a>
+          <a id="downloadBtn" class="btn primary" href="#" download aria-label="Download this PDF">Download</a>
+        </div>
+      </div>
+      <div class="iframe-wrap" id="iframeWrap" aria-live="polite">
+        <div class="placeholder" id="placeholder">
+          <h3>Select a document</h3>
+          <p>Choose a file from the left to load it in the viewer. You can also open it in a new tab or download it.</p>
+        </div>
+        <iframe id="pdfViewer" title="PDF Viewer" hidden></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ======= Configure your documents here (kept out of the DOM for simplicity) =======
+    // Put your actual filenames in /documents/. "desc" is optional.
+    // NOTE: Bylaws intentionally omitted per your instruction.
+    const docs = [
+  { title: "Cessna 172K – Pilot’s Operating Handbook (1969)", file: "documents/1969-172K-POH.pdf", desc: "Official 1969 POH for the Cessna 172K aircraft." },
+  { title: "Cessna 150L – Pilot’s Operating Handbook (N10921)", file: "documents/N10921-POH.pdf", desc: "Operating handbook for the Cessna 150L aircraft, tail number N10921." },
+  { title: "Garmin GTR 225 – Radio Manual", file: "documents/Garmin-GTR225-Radio.pdf", desc: "Pilot’s guide and operating instructions for the Garmin GTR 225 radio unit." },
+  { title: "Garmin GPS 175 / GNC 355 / GNX 375 – Pilot’s Guide", file: "documents/GPS-175-GNC-355-GNX-375-Pilots-Guide.pdf", desc: "Comprehensive GPS/Comm/Nav unit manual used in the 172." },
+  { title: "FlightBox Pro – User Manual", file: "documents/FlightBoxPro-Manual.pdf", desc: "Reference manual for FlightBox Pro ADS-B equipment." }
+  // { title: "Flying 64th By-Laws", file: "documents/Flying64th_By-Laws_11012024.pdf" }  <-- intentionally omitted
+];
+
+    // ======= DOM Elements =======
+    const listEl = document.getElementById('filelist');
+    const viewer = document.getElementById('pdfViewer');
+    const placeholder = document.getElementById('placeholder');
+    const crumb = document.getElementById('crumb');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const openNewTab = document.getElementById('openNewTab');
+    const searchInput = document.getElementById('search');
+
+    // Build list items
+    function renderList(filter=""){
+      listEl.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+      const filtered = docs.filter(d => !q || d.title.toLowerCase().includes(q) || (d.desc||"").toLowerCase().includes(q));
+
+      if(filtered.length === 0){
+        listEl.innerHTML = `<li style="padding:10px 12px; color:#9aa6b6">No matching documents.</li>`;
+        return;
+      }
+
+      filtered.forEach((doc, idx) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = "#";
+        a.setAttribute('role','button');
+        a.dataset.file = doc.file;
+        a.dataset.title = doc.title;
+        a.title = doc.title;
+        a.addEventListener('click', (e) => { e.preventDefault(); openDoc(doc); setActive(a); });
+
+        a.innerHTML = `
+          <span class="pdf-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M9 13h1.5a1.5 1.5 0 0 1 0 3H9v-3zM12.5 16v-3H14a1.5 1.5 0 0 1 0 3h-1.5zM16.5 16v-3H18"/>
+            </svg>
+          </span>
+          <div>
+            <div class="file-name">${doc.title}</div>
+            ${doc.desc ? `<div class="file-sub">${doc.desc}</div>` : ``}
+          </div>
+        `;
+        li.appendChild(a);
+        listEl.appendChild(li);
+      });
+    }
+
+    function setActive(anchor){
+      // clear previous
+      listEl.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      if(anchor) anchor.classList.add('active');
+    }
+
+    function openDoc(doc){
+      // set iframe to direct PDF file (GitHub Pages will serve it; browsers show built-in PDF viewer)
+      viewer.src = doc.file + "#view=FitH";
+      viewer.hidden = false;
+      placeholder.hidden = true;
+
+      // update buttons/crumb
+      crumb.innerHTML = `<span style="color:#9fbaf2">Viewing:</span> <b>${doc.title}</b>`;
+      downloadBtn.href = doc.file;
+      downloadBtn.setAttribute('download', doc.file.split('/').pop());
+      openNewTab.href = doc.file;
+
+      // reflect in URL (?file=...) so you can deep-link
+      const url = new URL(window.location);
+      url.searchParams.set('file', doc.file);
+      window.history.replaceState({}, "", url);
+    }
+
+    // Handle search
+    searchInput.addEventListener('input', (e)=> renderList(e.target.value));
+
+    // Initial render
+    renderList();
+
+    // If URL has ?file=... open it
+    const preselect = new URLSearchParams(window.location.search).get('file');
+    if(preselect){
+      const doc = docs.find(d => d.file === preselect);
+      if(doc){ openDoc(doc); 
+        // mark active
+        const match = Array.from(listEl.querySelectorAll('a')).find(a => a.dataset.file === doc.file);
+        if(match) setActive(match);
+      }
+    }
+  </script>
+</body>
+</html>
