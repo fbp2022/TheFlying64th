@@ -181,7 +181,7 @@
     <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
 
     <div class="invite-wrap">
-      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
+      <label class="auth-label" for="invite">Membership Access Code (Only for New Accounts)</label>
       <input id="invite" class="auth-input" type="text" placeholder="Admin will provide invite code.">
     </div>
 
@@ -291,8 +291,7 @@
       const inviteRef  = doc(db, "invites", code);
       const inviteSnap = await getDoc(inviteRef);
       if (!inviteSnap.exists()) return say("Invalid invite code.", true);
-      if (inviteSnap.data().used === true) return say("This invite code has already been used.", true);
-
+      
       // 2) Create user
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
