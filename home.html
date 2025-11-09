@@ -278,7 +278,7 @@
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, updateDoc, serverTimestamp,
-    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where
+    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
   // EXACT config from your console
@@ -295,6 +295,10 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
+
+  // ===== Admin allow-list (fallback while profiles populate) =====
+  const BOARD_EMAILS = ["theflying64@gmail.com"]; // add more if needed
+  const FALLBACK_EMAILS = []; // optional: add member emails here if profiles query is blocked
 
   // Role / profile state
   let currentUser = null;
@@ -338,12 +342,7 @@
 
   function toLocalDatetimeValue(d=new Date()){
     const pad = (n)=> String(n).padStart(2,'0');
-    const yyyy = d.getFullYear();
-    const mm   = pad(d.getMonth()+1);
-    const dd   = pad(d.getDate());
-    const hh   = pad(d.getHours());
-    const mi   = pad(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   // Modal open/close (Auth)
@@ -375,16 +374,24 @@
   postCancel.addEventListener('click', closePostModal);
   postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
-  // Role loader (checks profiles/{uid}.role == "admin")
+  // Role loader
   async function reloadRole(){
     isAdmin = false;
     if (!currentUser) return;
+    // email allow-list fallback
+    if (currentUser.email && BOARD_EMAILS.includes(currentUser.email)) {
+      isAdmin = true;
+      return;
+    }
+    // profiles/{uid}.role == "admin"
     try{
       const pref = doc(db, "profiles", currentUser.uid);
       const snap = await getDoc(pref);
       const role = snap.exists() ? (snap.data().role || "").toLowerCase() : "";
-      isAdmin = (role === "admin");
-    }catch{}
+      if (role === "admin") isAdmin = true;
+    }catch{
+      // ignore; rely on allow-list if needed
+    }
   }
 
   // Auth state
@@ -400,8 +407,7 @@
         : `Unverified – ${shortEmail}`;
 
       newPostBtn.style.display = verified ? "inline-block" : "none";
-      // Only admins get the big "Submit & Notify" control next to New Post button
-      notifyBtn.style.display = (verified && isAdmin) ? "inline-block" : "none";
+      notifyBtn.style.display  = (verified && isAdmin) ? "inline-block" : "none";
 
       hintEl.textContent = verified
         ? "Share updates with the club."
@@ -468,64 +474,66 @@
     if (!displayName){ psay("Display name is required.", true); return null; }
     if (!text)       { psay("Message cannot be empty.", true); return null; }
 
-    // Choose timestamp (user-adjustable) or now
-    let when = new Date();
+    // Timestamp from user input or now
+    let whenTs = Timestamp.fromDate(new Date());
     const raw = (postWhenEl.value || "").trim();
     if (raw){
       const dt = new Date(raw);
-      if (!isNaN(dt.getTime())) when = dt;
+      if (!isNaN(dt.getTime())) whenTs = Timestamp.fromDate(dt);
     }
 
-    // Add to Firestore
     const ref = await addDoc(collection(db,"board"), {
       text,
       authorEmail: currentUser.email || "",
       authorName: displayName,
       authorUid: currentUser.uid,
-      createdAt: when  // Firestore rules: "is timestamp" is satisfied by Date
+      createdAt: whenTs
     });
-    return { id: ref.id, text, displayName, when };
+    return { id: ref.id, text, displayName, when: whenTs.toDate() };
   }
 
-  // Fetch active member emails (admin only; rules require admin to list profiles)
+  // Fetch active member emails (admin only)
   async function getActiveEmails(){
-    if (!isAdmin) return [];
-    const emails = [];
-    try{
-      const qProfiles = query(collection(db,"profiles"), where("active","==", true));
-      const snap = await getDocs(qProfiles);
-      snap.forEach(docu=>{
-        const d = docu.data();
-        const e = (d.email || "").trim();
-        if (e) emails.push(e);
-      });
-    }catch{}
-    return emails;
+    // first try profiles where active==true
+    if (isAdmin){
+      try{
+        const emails = [];
+        const qProfiles = query(collection(db,"profiles"), where("active","==", true));
+        const snap = await getDocs(qProfiles);
+        snap.forEach(docu=>{
+          const d = docu.data();
+          const e = (d.email || "").trim();
+          if (e) emails.push(e);
+        });
+        if (emails.length) return emails;
+      }catch{
+        /* fall through to FALLBACK_EMAILS */
+      }
+    }
+    return FALLBACK_EMAILS;
   }
 
-  // Build & open mailto
   function openMailto(allBcc, subject, body){
-    // Be mindful of URL length; small club should be fine.
     const mailto = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   }
 
-  // Click handlers for submit buttons inside modal
-  postSubmitOnly.addEventListener('click', async ()=>{
+  // Submit buttons
+  document.getElementById('postSubmitOnly').addEventListener('click', async ()=>{
     try{
       const created = await createPost();
       if (created){ closePostModal(); }
     }catch(err){ psay(err.message, true); }
   });
 
-  postSubmitNotify.addEventListener('click', async ()=>{
+  document.getElementById('postSubmitNotify').addEventListener('click', async ()=>{
     try{
       if (!isAdmin){ psay("Only admins can notify all members.", true); return; }
       const created = await createPost();
       if (!created) return;
 
       const all = await getActiveEmails();
-      if (!all.length){ closePostModal(); alert("Post created, but no active member emails found to notify."); return; }
+      if (!all.length){ closePostModal(); alert("Post created, but no member emails found to notify."); return; }
 
       const whenStr = created.when.toLocaleString();
       const subject = "New Message on The Flying 64th Website";
@@ -542,12 +550,11 @@ ${created.text}
     }catch(err){ psay(err.message, true); }
   });
 
-  // Big top-right "Submit & Notify" convenience (admins only) -> opens modal, then uses the same notify flow
+  // Big convenience button (admins only)
   notifyBtn.addEventListener('click', ()=>{
     if (!currentUser){ openAuth(); return; }
     if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
     if (!isAdmin){ alert("Only admins can notify all members."); return; }
-    // Make sure the modal shows the admin-only button
     openPost();
   });
 
@@ -558,7 +565,7 @@ ${created.text}
     feedEl.innerHTML = "";
     snap.forEach(d=>{
       const m = d.data();
-      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : (m.createdAt instanceof Date ? m.createdAt : null);
+      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
       const when = ts ? ts.toLocaleString() : "…";
       const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
 
