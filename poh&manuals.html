@@ -20,35 +20,118 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ===== NAV BAR ===== */
-    header {
-      position: sticky; top: 0; z-index: 1000;
-      background: #0b0e15;
-      border-bottom: 1px solid var(--border);
+   <!-- ===== NAV BAR (matches home.html style) ===== -->
+<header class="site-header">
+  <div class="nav">
+    <a href="home.html" class="brand">
+      <img src="images/logo.png" alt="The Flying 64th Logo">
+      <span>The Flying 64th</span>
+    </a>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="be.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="poh&amp;manuals.html">POH &amp; Manuals</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* ===== NAV STYLES (copied from home.html, with responsive tweaks) ===== */
+  .site-header{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(160%) blur(8px);
+    background:rgba(11,17,23,.75);
+    border-bottom:1px solid var(--rule,rgba(255,255,255,.1));
+  }
+
+  .nav{
+    max-width:1200px;
+    margin:0 auto;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    letter-spacing:.2px;
+    color:var(--ink,#fff);
+    text-decoration:none;
+    font-size:22px;
+    white-space:nowrap;
+  }
+
+  .brand img{
+    height:34px;
+    width:auto;
+  }
+
+  nav{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:nowrap;
+  }
+
+  nav a{
+    color:var(--muted,#c3c9d4);
+    text-decoration:none;
+    padding:8px 12px;
+    border-radius:10px;
+    transition:all .18s ease;
+  }
+
+  nav a:hover{
+    color:var(--ink,#fff);
+    background:rgba(255,255,255,.06);
+  }
+
+  nav a.active{
+    color:#001a33;
+    background:var(--accent,#4da3ff);
+    font-weight:700;
+  }
+
+  /* ===== MOBILE TWEAKS ===== */
+  @media (max-width:900px){
+    .nav{
+      padding:10px 14px;
+      flex-wrap:wrap;
     }
-    .nav {
-      max-width: 1200px; margin: 0 auto; padding: 10px 12px;
-      display: flex; align-items: center; gap: 12px;
+    nav{
+      width:100%;
+      justify-content:flex-start;
+      gap:10px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
     }
-    .brand a {
-      font-weight: 700; font-size: 20px;
-      color: #fff; text-decoration: none;
-      margin-right: auto;
-      white-space:nowrap;
+    nav::-webkit-scrollbar{display:none;}
+    nav a{
+      padding:8px 10px;
+      font-size:15px;
     }
-    nav {
-      display:flex; gap:6px; overflow-x:auto; white-space:nowrap;
-      -webkit-overflow-scrolling: touch; scrollbar-width:none;
-    }
-    nav::-webkit-scrollbar{display:none}
-    nav a {
-      color: #b6c0cf; text-decoration: none;
-      padding: 8px 12px; border-radius: 10px;
-      transition:.2s;
-      display:inline-block;
-    }
-    nav a:hover { color:#fff; background:rgba(255,255,255,.08) }
-    nav a.active { background:#4da3ff; color:#fff; font-weight:600 }
+  }
+</style>
+
+<script>
+  // Auto-highlight active page (works across all pages)
+  (function(){
+    const current = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('header nav a').forEach(a=>{
+      const href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+      if(href && href === current) a.classList.add('active');
+    });
+  })();
+</script>
+
 
     /* ===== HERO ===== */
     .hero{
