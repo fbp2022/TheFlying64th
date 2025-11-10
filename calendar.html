@@ -121,7 +121,7 @@
     /* ===== Modal (booking form + details) ===== */
     .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); z-index:2000 }
     .modal.open{ display:grid }
-    .card{ width:min(880px,96vw); max-height:90vh; overflow:auto; background:#0f1722; border:1px solid var(--rule); border-radius:14px; padding:18px; }
+    .card{ width:min(1100px,98vw); max-height:90vh; overflow:auto; background:#0f1722; border:1px solid var(--rule); border-radius:14px; padding:18px; }
     .card h4{ margin:0 0 10px 0 }
     .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .row-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px }
@@ -136,6 +136,96 @@
     @media (max-width:1080px){
       .wrap{ grid-template-columns:1fr }
     }
+
+  /* ===== Shared Calendar Layout + Aircraft Notes (single calendar) ===== */
+.notes-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin:12px auto 14px;
+  max-width:1600px;
+  width:96vw;
+}
+
+.note-card{
+  background:#0e1520;
+  border:1px solid var(--rule);
+  border-radius:12px;
+  padding:10px;
+}
+
+.note-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.note-card textarea{
+  width:100%;
+  min-height:54px;
+  background:#0b1117;
+  color:var(--ink);
+  border:1px solid var(--rule);
+  border-radius:10px;
+  padding:8px;
+  resize:vertical;
+}
+
+/* Single calendar wrapper */
+.cal-card{
+  background:#0e1520;
+  border:1px solid var(--rule);
+  border-radius:12px;
+  padding:10px;
+  margin:10px auto 40px;
+  max-width:1600px;
+  width:96vw;
+}
+
+.cal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+
+.calendar{
+  min-height:64vh;
+  border:1px dashed rgba(255,255,255,.12);
+  border-radius:10px;
+  padding:8px;
+  overflow:auto;
+}
+
+/* Small button + chip styles used in toolbar */
+.btn-sm{
+  border:1px solid var(--rule);
+  background:#121b29;
+  color:#e6edf3;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#132031;
+  border:1px solid #203148;
+  color:#cfe1ff;
+  padding:6px 10px;
+  border-radius:100px;
+  font-size:13px;
+  cursor:pointer;
+}
+.chip.active{ background:#152238; color:#e6f0ff; font-weight:700 }
+  
   </style>
 </head>
 <body>
@@ -193,36 +283,46 @@
     </div>
   </div>
 
-  <!-- ===== Two-airframe calendars ===== -->
-  <div class="wrap">
-    <section class="airframe" id="cal172">
-      <div class="air-h">
-        <h3>N78710 — Cessna 172</h3>
-        <div class="oil">
-          <textarea id="note172" placeholder="e.g., N78710 oil change at 1234.5 or N78710: do not fly after 55555.5 until maintenance."></textarea>
-        </div>
-        <button class="btn saveNote" data-note="N78710">Save note</button>
-      </div>
-      <div class="grid">
-        <div class="cal-controls"><strong id="title172">Loading…</strong></div>
-        <div class="cal" id="grid172"></div>
-      </div>
-    </section>
+ <!-- ===== AIRCRAFT NOTES (keep both) ===== -->
+<div class="notes-row">
+  <section class="note-card">
+    <header class="note-head">
+      <strong>N78710 — Cessna 172</strong>
+      <button id="saveNote172" class="btn-sm">Save note</button>
+    </header>
+    <textarea id="note172" placeholder="e.g., N78710 oil change at 1234.5 or 'do not fly after 55555.5 until maintenance.'"></textarea>
+  </section>
 
-    <section class="airframe" id="cal150">
-      <div class="air-h">
-        <h3>N10921 — Cessna 150</h3>
-        <div class="oil">
-          <textarea id="note150" placeholder="e.g., N10921: flap motor squawk, avoid touch-and-go’s until cleared."></textarea>
-        </div>
-        <button class="btn saveNote" data-note="N10921">Save note</button>
-      </div>
-      <div class="grid">
-        <div class="cal-controls"><strong id="title150">Loading…</strong></div>
-        <div class="cal" id="grid150"></div>
-      </div>
-    </section>
-  </div>
+  <section class="note-card">
+    <header class="note-head">
+      <strong>N10921 — Cessna 150</strong>
+      <button id="saveNote150" class="btn-sm">Save note</button>
+    </header>
+    <textarea id="note150" placeholder="e.g., N10921: flap motor squawk, avoid touch-and-go’s until cleared."></textarea>
+  </section>
+</div>
+
+<!-- ===== SINGLE CALENDAR FOR BOTH AIRCRAFT ===== -->
+<section class="cal-card">
+  <header class="cal-head">
+    <div class="filters">
+      <button id="fltAll"   class="chip active">All</button>
+      <button id="flt172"   class="chip">N78710 — C172</button>
+      <button id="flt150"   class="chip">N10921 — C150</button>
+    </div>
+    <div class="tools">
+      <button id="btnToday" class="btn-sm">Today</button>
+      <button id="btnPrev"  class="btn-sm">‹</button>
+      <button id="btnNext"  class="btn-sm">›</button>
+      <button id="viewMonth" class="chip active">Month</button>
+      <button id="viewWeek"  class="chip">Week</button>
+      <button id="viewDay"   class="chip">Day</button>
+      <button id="newBooking" class="btn primary">+ New booking</button>
+    </div>
+  </header>
+
+  <div id="calendar" class="calendar"></div>
+</section>
 
   <!-- ===== Booking Modal ===== -->
   <div id="bookingModal" class="modal" aria-hidden="true">
@@ -400,6 +500,17 @@
     const notesKey = "f64_notes_v1";
     let notes = JSON.parse(localStorage.getItem(notesKey)||"{}"); // { N78710:"...", N10921:"..." }
 
+// Save aircraft notes
+document.getElementById('saveNote172').addEventListener('click', ()=>{
+  notes['N78710'] = document.getElementById('note172').value || '';
+  saveAll();
+});
+document.getElementById('saveNote150').addEventListener('click', ()=>{
+  notes['N10921'] = document.getElementById('note150').value || '';
+  saveAll();
+});
+
+    
     function saveAll(){
       localStorage.setItem(LS_KEY, JSON.stringify(bookings));
       localStorage.setItem(notesKey, JSON.stringify(notes));
@@ -464,206 +575,339 @@
       render();
     });
 
-    /* ================= Calendar logic (vanilla) ============================ */
-    const state = {
-      filter: 'all',  // all | tail
-      view: 'month',  // month | week | day
-      cursor: new Date() // current anchor date
-    };
+    /* ================= Calendar logic (single calendar version) ============================ */
 
-    // set to today on load
-    state.cursor = new Date();
+// Calendar state
+const state = {
+  filter: 'all',  // all | N78710 | N10921
+  view: 'month',  // month | week | day
+  cursor: new Date()
+};
 
-    // Controls
-    document.getElementById('fltFilter').addEventListener('click', (e)=>{
-      if(e.target.tagName!=='BUTTON') return;
-      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
-      e.target.classList.add('active');
-      state.filter = e.target.dataset.f;
-      render();
-    });
-    document.getElementById('viewSeg').addEventListener('click', (e)=>{
-      if(e.target.tagName!=='BUTTON') return;
-      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
-      e.target.classList.add('active');
-      state.view = e.target.dataset.v;
-      render();
-    });
-    document.getElementById('prevBtn').addEventListener('click', ()=>{
-      const d = new Date(state.cursor);
-      if(state.view==='month'){ d.setMonth(d.getMonth()-1); }
-      else if(state.view==='week'){ d.setDate(d.getDate()-7); }
-      else { d.setDate(d.getDate()-1); }
-      state.cursor = d; render();
-    });
-    document.getElementById('nextBtn').addEventListener('click', ()=>{
-      const d = new Date(state.cursor);
-      if(state.view==='month'){ d.setMonth(d.getMonth()+1); }
-      else if(state.view==='week'){ d.setDate(d.getDate()+7); }
-      else { d.setDate(d.getDate()+1); }
-      state.cursor = d; render();
-    });
-    document.getElementById('todayBtn').addEventListener('click', ()=>{ state.cursor = new Date(); render(); });
+// === Toolbar handlers ===
+const filterBtns = {
+  all: document.getElementById('fltAll'),
+  c172: document.getElementById('flt172'),
+  c150: document.getElementById('flt150'),
+};
 
-    document.querySelectorAll('.saveNote').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const tail = btn.dataset.note;
-        const txt = (tail==='N78710') ? document.getElementById('note172').value : document.getElementById('note150').value;
-        notes[tail] = txt;
-        saveAll();
+function setFilter(which){
+  state.filter = which;
+  Object.values(filterBtns).forEach(b=>b.classList.remove('active'));
+  if(which==='all') filterBtns.all.classList.add('active');
+  if(which==='N78710') filterBtns.c172.classList.add('active');
+  if(which==='N10921') filterBtns.c150.classList.add('active');
+  render();
+}
+
+filterBtns.all.addEventListener('click', ()=>setFilter('all'));
+filterBtns.c172.addEventListener('click', ()=>setFilter('N78710'));
+filterBtns.c150.addEventListener('click', ()=>setFilter('N10921'));
+
+const viewBtns = {
+  month: document.getElementById('viewMonth'),
+  week:  document.getElementById('viewWeek'),
+  day:   document.getElementById('viewDay'),
+};
+
+function setView(v){
+  state.view = v;
+  Object.values(viewBtns).forEach(b=>b.classList.remove('active'));
+  viewBtns[v].classList.add('active');
+  render();
+}
+
+viewBtns.month.addEventListener('click', ()=>setView('month'));
+viewBtns.week.addEventListener('click',  ()=>setView('week'));
+viewBtns.day.addEventListener('click',   ()=>setView('day'));
+
+document.getElementById('btnPrev').addEventListener('click', ()=>{
+  const d = new Date(state.cursor);
+  if(state.view==='month') d.setMonth(d.getMonth()-1);
+  else if(state.view==='week') d.setDate(d.getDate()-7);
+  else d.setDate(d.getDate()-1);
+  state.cursor = d; render();
+});
+
+document.getElementById('btnNext').addEventListener('click', ()=>{
+  const d = new Date(state.cursor);
+  if(state.view==='month') d.setMonth(d.getMonth()+1);
+  else if(state.view==='week') d.setDate(d.getDate()+7);
+  else d.setDate(d.getDate()+1);
+  state.cursor = d; render();
+});
+
+document.getElementById('btnToday').addEventListener('click', ()=>{
+  state.cursor = new Date(); render();
+});
+
+document.getElementById('newBooking').addEventListener('click', ()=> openBookingModal());
+
+// ===== Helper functions =====
+function fmtMonthTitle(d){ return d.toLocaleString(undefined,{month:'long', year:'numeric'}); }
+function startOfMonth(d){ const x=new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
+function endOfMonth(d){ const x=new Date(d); x.setMonth(x.getMonth()+1); x.setDate(0); x.setHours(23,59,59,999); return x; }
+function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function endOfWeek(d){ const s=startOfWeek(d); const x=new Date(s); x.setDate(x.getDate()+6); x.setHours(23,59,59,999); return x; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+
+// ---------- Unified single-calendar renderers ----------
+function eventsForRange(rangeStart, rangeEnd){
+  return bookings.filter(b=>{
+    if (state.filter !== 'all' && b.aircraft !== state.filter) return false;
+    const s = new Date(b.start), e = new Date(b.end);
+    return e >= rangeStart && s <= rangeEnd;
+  });
+}
+
+function eventClass(bk){
+  const cls = [];
+  cls.push(bk.aircraft==='N78710' ? 'c172' : 'c150');
+  if (bk.withInstr && bk.withInstr !== 'no') cls.push('instr');
+  if (currentUser && (bk.ownerEmail||"").toLowerCase() === (currentUser.email||"").toLowerCase()) cls.push('mine');
+  return cls.join(' ');
+}
+
+function render(){
+  const host = document.getElementById('calendar');
+  host.innerHTML = "";
+
+  if (state.view === 'month') renderMonthOne(host);
+  else if (state.view === 'week') renderWeekOne(host);
+  else renderDayOne(host);
+}
+
+function renderMonthOne(host){
+  const start = startOfWeek(startOfMonth(state.cursor));
+  const end   = endOfWeek(endOfMonth(state.cursor));
+
+  const head = document.createElement('div');
+  head.className = 'cal-header';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
+    const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
+  });
+  host.appendChild(head);
+
+  let d = new Date(start);
+  while (d <= end){
+    const row = document.createElement('div');
+    row.className = 'cal-row';
+    for (let i=0;i<7;i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const day = document.createElement('div');
+      day.className = 'd';
+      day.textContent = d.getDate();
+      if (sameDate(d,new Date())){ day.style.color='#fff'; day.style.fontWeight='800'; }
+      cell.appendChild(day);
+
+      const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0);
+      const d1 = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999);
+
+      eventsForRange(d0,d1).forEach(bk=>{
+        const e = document.createElement('div');
+        e.className = 'evt ' + eventClass(bk);
+        const s = new Date(bk.start), eD = new Date(bk.end);
+        e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+        e.title = `${bk.aircraft} • ${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
+        e.addEventListener('click', ()=>openBookingModal(bk));
+        cell.appendChild(e);
       });
-    });
 
-    document.getElementById('newBtn').addEventListener('click', ()=> openBookingModal());
-
-    // Rendering helpers
-    function fmtMonthTitle(d){ return d.toLocaleString(undefined,{month:'long', year:'numeric'}); }
-    function startOfMonth(d){ const x=new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
-    function endOfMonth(d){ const x=new Date(d); x.setMonth(x.getMonth()+1); x.setDate(0); x.setHours(23,59,59,999); return x; }
-    function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
-    function endOfWeek(d){ const s=startOfWeek(d); const x=new Date(s); x.setDate(x.getDate()+6); x.setHours(23,59,59,999); return x; }
-    function pad(n){ return String(n).padStart(2,'0'); }
-    function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-
-    function render(){
-      // titles
-      document.getElementById('title172').textContent = fmtMonthTitle(state.cursor);
-      document.getElementById('title150').textContent = fmtMonthTitle(state.cursor);
-      // notes
-      document.getElementById('note172').value = notes['N78710'] || '';
-      document.getElementById('note150').value = notes['N10921'] || '';
-
-      // which tails visible (filter only affects event display)
-      const g172 = document.getElementById('grid172');
-      const g150 = document.getElementById('grid150');
-      g172.innerHTML = ""; g150.innerHTML = "";
-
-      if(state.view==='month'){
-        renderMonth(g172,'N78710'); renderMonth(g150,'N10921');
-      }else if(state.view==='week'){
-        renderWeek(g172,'N78710'); renderWeek(g150,'N10921');
-      }else{
-        renderDay(g172,'N78710'); renderDay(g150,'N10921');
-      }
-    }
-
-    function relevant(bk, tail, rangeStart, rangeEnd){
-      if(state.filter!=='all' && bk.aircraft!==state.filter) return false;
-      if(bk.aircraft!==tail) return false;
-      const s=new Date(bk.start), e=new Date(bk.end);
-      return e>=rangeStart && s<=rangeEnd;
-    }
-
-    function eventClass(bk){
-      const cls = [];
-      cls.push(bk.aircraft==='N78710'?'c172':'c150');
-      if(bk.withInstr && bk.withInstr!=='no') cls.push('instr');
-      if(currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase()) cls.push('mine');
-      return cls.join(' ');
-    }
-
-    function renderMonth(container, tail){
-      const start = startOfWeek(startOfMonth(state.cursor));
-      const end   = endOfWeek(endOfMonth(state.cursor));
-
-      // weekdays header
-      const head = document.createElement('div');
-      head.className = 'cal-header';
-      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
-        const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
-      });
-      container.appendChild(head);
-
-      // build days
-      const rows = [];
-      let d = new Date(start);
-      while(d<=end){
-        const row=document.createElement('div'); row.className='cal-row';
-        for(let i=0;i<7;i++){
-          const cell=document.createElement('div'); cell.className='cell';
-          const day=document.createElement('div'); day.className='d'; day.textContent=d.getDate();
-          if(sameDate(d,new Date())){ day.style.color='#fff'; day.style.fontWeight='800'; }
-          cell.appendChild(day);
-
-          // events
-          bookings.filter(b=>relevant(b,tail,new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0), new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59,999)))
-            .forEach(bk=>{
-              const e=document.createElement('div');
-              e.className = 'evt '+eventClass(bk);
-              const s=new Date(bk.start), eD=new Date(bk.end);
-              e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-              e.title = `${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
-              e.addEventListener('click', ()=>openBookingModal(bk));
-              cell.appendChild(e);
-            });
-
-          row.appendChild(cell);
-          d.setDate(d.getDate()+1);
-        }
-        container.appendChild(row);
-        rows.push(row);
-      }
-    }
-
-    function renderWeek(container, tail){
-      const start = startOfWeek(state.cursor);
-      const end   = endOfWeek(state.cursor);
-
-      // header
-      const head = document.createElement('div'); head.className='cal-header';
-      for(let i=0;i<7;i++){
-        const dt=new Date(start); dt.setDate(start.getDate()+i);
-        const el=document.createElement('div'); el.textContent=`${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
-        head.appendChild(el);
-      }
-      container.appendChild(head);
-
-      const row=document.createElement('div'); row.className='cal-row';
-      for(let i=0;i<7;i++){
-        const cell=document.createElement('div'); cell.className='cell';
-        const dt=new Date(start); dt.setDate(start.getDate()+i);
-        const d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
-        const d1=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
-
-        bookings.filter(b=>relevant(b,tail,d0,d1)).forEach(bk=>{
-          const s=new Date(bk.start), eD=new Date(bk.end);
-          const totalMinutes = (eD - s)/60000;
-          const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
-          const height = Math.max(28, (totalMinutes / (24*60))*100);
-          const slot=document.createElement('div');
-          slot.className='slot '+eventClass(bk);
-          slot.style.top = `calc(${top}% - 6px)`;
-          slot.style.height = `calc(${height}% - 6px)`;
-          slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-          slot.addEventListener('click', ()=>openBookingModal(bk));
-          cell.appendChild(slot);
-        });
-
-        row.appendChild(cell);
-      }
-      container.appendChild(row);
-    }
-
-    function renderDay(container, tail){
-      const start=new Date(state.cursor); start.setHours(0,0,0,0);
-      const end=new Date(state.cursor); end.setHours(23,59,59,999);
-
-      const row=document.createElement('div'); row.className='cal-row';
-      const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='560px';
-      bookings.filter(b=>relevant(b,tail,start,end)).forEach(bk=>{
-        const s=new Date(bk.start), eD=new Date(bk.end);
-        const totalMinutes = (eD - s)/60000;
-        const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
-        const height = Math.max(28, (totalMinutes / (24*60))*100);
-        const slot=document.createElement('div'); slot.className='slot '+eventClass(bk);
-        slot.style.top=`calc(${top}% - 6px)`; slot.style.height=`calc(${height}% - 6px)`;
-        slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-        slot.addEventListener('click', ()=>openBookingModal(bk));
-        cell.appendChild(slot);
-      });
       row.appendChild(cell);
-      container.appendChild(row);
+      d.setDate(d.getDate()+1);
     }
+    host.appendChild(row);
+  }
+}
+
+function renderWeekOne(host){
+  const start = startOfWeek(state.cursor);
+  const end   = endOfWeek(state.cursor);
+
+  const head = document.createElement('div'); head.className = 'cal-header';
+  for (let i=0;i<7;i++){
+    const dt = new Date(start); dt.setDate(start.getDate()+i);
+    const el = document.createElement('div');
+    el.textContent = `${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
+    head.appendChild(el);
+  }
+  host.appendChild(head);
+
+  const row = document.createElement('div'); row.className = 'cal-row';
+  for (let i=0;i<7;i++){
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const dt = new Date(start); dt.setDate(start.getDate()+i);
+    const d0 = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
+    const d1 = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
+
+    eventsForRange(d0,d1).forEach(bk=>{
+      const s = new Date(bk.start), eD = new Date(bk.end);
+      const minutes = (eD - s)/60000;
+      const topPct = ((s.getHours()*60 + s.getMinutes())/(24*60))*100;
+      const hPct = Math.max(28, (minutes/(24*60))*100);
+      const slot = document.createElement('div');
+      slot.className = 'slot ' + eventClass(bk);
+      slot.style.top = `calc(${topPct}% - 6px)`;
+      slot.style.height = `calc(${hPct}% - 6px)`;
+      slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+      slot.addEventListener('click', ()=>openBookingModal(bk));
+      cell.appendChild(slot);
+    });
+    row.appendChild(cell);
+  }
+  host.appendChild(row);
+}
+
+function renderDayOne(host){
+  const start = new Date(state.cursor); start.setHours(0,0,0,0);
+  const end   = new Date(state.cursor); end.setHours(23,59,59,999);
+
+  const row = document.createElement('div'); row.className = 'cal-row';
+  const cell = document.createElement('div'); cell.className = 'cell'; cell.style.minHeight='560px';
+
+  eventsForRange(start,end).forEach(bk=>{
+    const s = new Date(bk.start), eD = new Date(bk.end);
+    const minutes = (eD - s)/60000;
+    const topPct = ((s.getHours()*60 + s.getMinutes())/(24*60))*100;
+    const hPct = Math.max(28, (minutes/(24*60))*100);
+    const slot = document.createElement('div'); slot.className='slot ' + eventClass(bk);
+    slot.style.top = `calc(${topPct}% - 6px)`;
+    slot.style.height = `calc(${hPct}% - 6px)`;
+    slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+    slot.addEventListener('click', ()=>openBookingModal(bk));
+    cell.appendChild(slot);
+  });
+
+  row.appendChild(cell);
+  host.appendChild(row);
+}
+
+  /* ================= Booking modal logic ================================ */
+```)
+**with this block:**
+```js
+function render(){
+  // keep aircraft notes visible
+  document.getElementById('note172').value = notes['N78710'] || '';
+  document.getElementById('note150').value = notes['N10921'] || '';
+
+  const calEl = document.getElementById('calendar');
+  calEl.innerHTML = '';
+
+  if(state.view==='month'){ renderMonthOne(calEl); }
+  else if(state.view==='week'){ renderWeekOne(calEl); }
+  else { renderDayOne(calEl); }
+}
+
+// helper: filter by selected aircraft and by date range
+function inRangeAndFilter(bk, rangeStart, rangeEnd){
+  if(state.filter!=='all' && bk.aircraft!==state.filter) return false;
+  const s=new Date(bk.start), e=new Date(bk.end);
+  return e>=rangeStart && s<=rangeEnd;
+}
+
+function renderMonthOne(container){
+  const start = startOfWeek(startOfMonth(state.cursor));
+  const end   = endOfWeek(endOfMonth(state.cursor));
+
+  const head = document.createElement('div');
+  head.className = 'cal-header';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
+    const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
+  });
+  container.appendChild(head);
+
+  let d = new Date(start);
+  while(d<=end){
+    const row=document.createElement('div'); row.className='cal-row';
+    for(let i=0;i<7;i++){
+      const cell=document.createElement('div'); cell.className='cell';
+      const day=document.createElement('div'); day.className='d'; day.textContent=d.getDate();
+      if(sameDate(d,new Date())){ day.style.color='#fff'; day.style.fontWeight='800'; }
+      cell.appendChild(day);
+
+      const d0=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
+      const d1=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59,999);
+
+      bookings.filter(b=>inRangeAndFilter(b,d0,d1)).forEach(bk=>{
+        const e=document.createElement('div');
+        e.className = 'evt ' + eventClass(bk);
+        const s=new Date(bk.start), eD=new Date(bk.end);
+        e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+        e.title = `${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
+        e.addEventListener('click', ()=>openBookingModal(bk));
+        cell.appendChild(e);
+      });
+
+      row.appendChild(cell);
+      d.setDate(d.getDate()+1);
+    }
+    container.appendChild(row);
+  }
+}
+
+function renderWeekOne(container){
+  const start = startOfWeek(state.cursor);
+
+  const head = document.createElement('div'); head.className='cal-header';
+  for(let i=0;i<7;i++){
+    const dt=new Date(start); dt.setDate(start.getDate()+i);
+    const el=document.createElement('div'); el.textContent=
+      `${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
+    head.appendChild(el);
+  }
+  container.appendChild(head);
+
+  const row=document.createElement('div'); row.className='cal-row';
+  for(let i=0;i<7;i++){
+    const cell=document.createElement('div'); cell.className='cell';
+    const dt=new Date(start); dt.setDate(start.getDate()+i);
+    const d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
+    const d1=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
+
+    bookings.filter(b=>inRangeAndFilter(b,d0,d1)).forEach(bk=>{
+      const s=new Date(bk.start), eD=new Date(bk.end);
+      const totalMinutes = (eD - s)/60000;
+      const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+      const height = Math.max(28, (totalMinutes / (24*60))*100);
+      const slot=document.createElement('div');
+      slot.className='slot ' + eventClass(bk);
+      slot.style.top = `calc(${top}% - 6px)`;
+      slot.style.height = `calc(${height}% - 6px)`;
+      slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+      slot.addEventListener('click', ()=>openBookingModal(bk));
+      cell.appendChild(slot);
+    });
+
+    row.appendChild(cell);
+  }
+  container.appendChild(row);
+}
+
+function renderDayOne(container){
+  const start=new Date(state.cursor); start.setHours(0,0,0,0);
+  const end=new Date(state.cursor);   end.setHours(23,59,59,999);
+
+  const row=document.createElement('div'); row.className='cal-row';
+  const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='560px';
+
+  bookings.filter(b=>inRangeAndFilter(b,start,end)).forEach(bk=>{
+    const s=new Date(bk.start), eD=new Date(bk.end);
+    const totalMinutes = (eD - s)/60000;
+    const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+    const height = Math.max(28, (totalMinutes / (24*60))*100);
+    const slot=document.createElement('div'); slot.className='slot ' + eventClass(bk);
+    slot.style.top=`calc(${top}% - 6px)`; slot.style.height=`calc(${height}% - 6px)`;
+    slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+    slot.addEventListener('click', ()=>openBookingModal(bk));
+    cell.appendChild(slot);
+  });
+
+  row.appendChild(cell);
+  container.appendChild(row);
+}
 
     /* ================= Booking modal logic ================================ */
     const modal = document.getElementById('bookingModal');
