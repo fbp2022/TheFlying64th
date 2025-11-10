@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Flying 64th – Home</title>
-  <meta name="description" content="The Flying 64th Flying Club – affordable general aviation in East Tennessee based at Oliver Springs Airport (Braden Field). Operates Cessna 172 & 150." />
+  <title>The Flying 64th – Members</title>
+  <meta name="description" content="The Flying 64th Flying Club – Members area currently under development." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
- <style>
+  <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
       --card:#0f1722cc;
@@ -18,9 +18,13 @@
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);color:var(--ink);line-height:1.6;
+      display:flex;flex-direction:column;min-height:100vh;
+    }
 
-   /* ===== NAV (matches home.html) ===== */
+    /* ===== NAV (matches home.html) ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -52,41 +56,67 @@
       header nav a{ padding:8px 10px; font-size:15px }
     }
 
-    /* ===== CONTENT ===== */
-    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
-    .grid{display:grid;gap:16px}
-    .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
-    @media (max-width:760px){ .grid.cols-3{grid-template-columns:1fr} }
-
-    .card{
+    /* ===== UNDER DEVELOPMENT ===== */
+    main{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:40px 20px;
+    }
+    .dev-box{
       background:var(--card);
       border:1px solid var(--rule);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
-      padding:18px 18px;
+      padding:50px 40px;
+      max-width:600px;
+      animation:fadeIn 1.2s ease both;
     }
-    .card h2{margin:0 0 8px;font-size:1.25rem}
-    .muted{color:var(--muted)}
-    .list{padding-left:18px;margin:8px 0}
-    .list li{margin:6px 0}
-    .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
-    .iconbtn:hover{background:rgba(255,255,255,.06)}
-<!-- ===== NAV ===== -->
-<header class="site-header">
-  <div class="nav">
-    <a class="brand" href="home.html">
-      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
-      <span>The Flying 64th</span>
-    </a>
-    <nav>
-      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
-      <a href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a class="active" href="members.html">Members</a>
-      <a href="poh&manuals.html">POH &amp; Manuals</a>
-    </nav>
-  </div>
-</header>
+    .dev-box h1{
+      font-size:2rem;
+      margin:0 0 10px;
+      color:var(--accent);
+    }
+    .dev-box p{
+      color:var(--muted);
+      margin:0;
+    }
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== NAV ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="home.html">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
+        <span>The Flying 64th</span>
+      </a>
+      <nav>
+        <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
+        <a href="home.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a class="active" href="members.html">Members</a>
+        <a href="poh&manuals.html">POH &amp; Manuals</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+    <div class="dev-box">
+      <h1>🚧 Under Development 🚧</h1>
+      <p>The Members area is currently being built.<br>
+      Please check back soon for updates.</p>
+    </div>
+  </main>
+</body>
+</html>
