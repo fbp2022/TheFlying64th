@@ -337,7 +337,6 @@ select.input{
         <button id="btnNext"  class="btn-sm">›</button>
         <button id="viewMonth" class="chip active">Month</button>
         <button id="viewWeek"  class="chip">Week</button>
-        <button id="viewDay"   class="chip">Day</button>
         <button id="newBooking" class="btn primary">+ New booking</button>
       </div>
     </header>
@@ -625,8 +624,7 @@ filterBtns.c150.addEventListener('click', ()=>setFilter('N10921'));
 const viewBtns = {
   month: document.getElementById('viewMonth'),
   week:  document.getElementById('viewWeek'),
-  day:   document.getElementById('viewDay'),
-};
+ };
 function setView(v){
   state.view = v;
   Object.values(viewBtns).forEach(b=>b.classList.remove('active'));
@@ -635,7 +633,6 @@ function setView(v){
 }
 viewBtns.month.addEventListener('click', ()=>setView('month'));
 viewBtns.week.addEventListener('click',  ()=>setView('week'));
-viewBtns.day.addEventListener('click',   ()=>setView('day'));
 
 document.getElementById('btnPrev').addEventListener('click', ()=>{
   const d = new Date(state.cursor);
@@ -698,7 +695,6 @@ function render(){
 
   if(state.view==='month') renderMonth(calEl);
   else if(state.view==='week') renderWeek(calEl);
-  else renderDay(calEl);
 }
 
 function renderMonth(container){
