@@ -11,21 +11,16 @@
 
  <style>
     :root{
-      /* base palette + fallbacks for vars referenced by Home nav */
-      --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
-      --panel:#151924; --panel2:#0d1018;
-      --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
-      --radius:14px;
+      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
+      --card:#0f1722cc;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-      background:var(--bg); color:var(--ink);
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 
-    /* ===== NAV (matches home.html) ===== */
+   /* ===== NAV (matches home.html) ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -56,7 +51,7 @@
       header nav::-webkit-scrollbar{ display:none }
       header nav a{ padding:8px 10px; font-size:15px }
     }
-
+   
     /* ===== HERO ===== */
     .hero{
       position:relative;min-height:56vh;display:grid;place-items:end;
@@ -141,17 +136,16 @@
 <header class="site-header">
   <div class="nav">
     <a class="brand" href="home.html">
-      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px; height:auto;">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
       <span>The Flying 64th</span>
     </a>
     <nav>
-      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
-      <a class="active" href="home.html">Home</a>
+      <a href="home.html">Home</a>
       <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
+      <a class="active" href="becomeamember.html">Become a Member</a>
       <a href="photos.html">Photos</a>
       <a href="poh&manuals.html">POH &amp; Manuals</a>
-     </nav>
+    </nav>
   </div>
 </header>
 
