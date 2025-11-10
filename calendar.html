@@ -93,6 +93,11 @@
     .slot.instr{ box-shadow:inset 0 0 0 2px var(--instr) }
     .slot.mine{ outline:2px dashed var(--mine) }
 
+    /* Modal css */
+    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); z-index:2000; }
+    .modal.open{ display:grid; }
+    .card{ width:min(880px,96vw); max-height:90vh; overflow:auto; }
+
     /* ===== Notes + Single calendar wrapper ===== */
     .notes-row{
       display:grid;
@@ -522,414 +527,433 @@
       render();
     });
 
-    /* ================= Calendar logic (single calendar) ==================== */
+/* ================= Calendar logic (single calendar) ==================== */
+const state = {
+  filter: 'all',     // 'all' | 'N78710' | 'N10921'
+  view: 'month',     // 'month' | 'week' | 'day'
+  cursor: new Date() // anchor date
+};
 
-    const state = {
-      filter: 'all',   // 'all' | 'N78710' | 'N10921'
-      view:   'month', // 'month' | 'week' | 'day'
-      cursor: new Date()
-    };
+const calEl = document.getElementById('calendar');
 
-    // Wire BOTH toolbars -> single state
-    // Topbar filters
-    document.getElementById('fltFilter').addEventListener('click', (e)=>{
-      if(e.target.tagName!=='BUTTON') return;
-      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
-      e.target.classList.add('active');
-      state.filter = e.target.dataset.f; // 'all' | tail
-      render();
-    });
-    // Topbar view
-    document.getElementById('viewSeg').addEventListener('click', (e)=>{
-      if(e.target.tagName!=='BUTTON') return;
-      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
-      e.target.classList.add('active');
-      state.view = e.target.dataset.v;
-      render();
-    });
-    document.getElementById('prevBtn').addEventListener('click', ()=>{
-      const d = new Date(state.cursor);
-      if(state.view==='month') d.setMonth(d.getMonth()-1);
-      else if(state.view==='week') d.setDate(d.getDate()-7);
-      else d.setDate(d.getDate()-1);
-      state.cursor = d; render();
-    });
-    document.getElementById('nextBtn').addEventListener('click', ()=>{
-      const d = new Date(state.cursor);
-      if(state.view==='month') d.setMonth(d.getMonth()+1);
-      else if(state.view==='week') d.setDate(d.getDate()+7);
-      else d.setDate(d.getDate()+1);
-      state.cursor = d; render();
-    });
-    document.getElementById('todayBtn').addEventListener('click', ()=>{ state.cursor=new Date(); render(); });
-    document.getElementById('newBtn').addEventListener('click', ()=> openBookingModal());
+/* ============ Toolbar wiring (inside the single calendar card) ========= */
+const filterBtns = {
+  all: document.getElementById('fltAll'),
+  c172: document.getElementById('flt172'),
+  c150: document.getElementById('flt150'),
+};
+function setFilter(which){
+  state.filter = which; // 'all' or tail #
+  Object.values(filterBtns).forEach(b=>b.classList.remove('active'));
+  if(which==='all') filterBtns.all.classList.add('active');
+  if(which==='N78710') filterBtns.c172.classList.add('active');
+  if(which==='N10921') filterBtns.c150.classList.add('active');
+  render();
+}
+filterBtns.all.addEventListener('click', ()=>setFilter('all'));
+filterBtns.c172.addEventListener('click', ()=>setFilter('N78710'));
+filterBtns.c150.addEventListener('click', ()=>setFilter('N10921'));
 
-    // Calendar card controls
-    const filterBtns = { all:document.getElementById('fltAll'), c172:document.getElementById('flt172'), c150:document.getElementById('flt150') };
-    function setFilter(which){
-      state.filter = which;
-      Object.values(filterBtns).forEach(b=>b.classList.remove('active'));
-      if(which==='all') filterBtns.all.classList.add('active');
-      if(which==='N78710') filterBtns.c172.classList.add('active');
-      if(which==='N10921') filterBtns.c150.classList.add('active');
-      render();
-    }
-    document.getElementById('fltAll').addEventListener('click', ()=>setFilter('all'));
-    document.getElementById('flt172').addEventListener('click', ()=>setFilter('N78710'));
-    document.getElementById('flt150').addEventListener('click', ()=>setFilter('N10921'));
+const viewBtns = {
+  month: document.getElementById('viewMonth'),
+  week:  document.getElementById('viewWeek'),
+  day:   document.getElementById('viewDay'),
+};
+function setView(v){
+  state.view = v;
+  Object.values(viewBtns).forEach(b=>b.classList.remove('active'));
+  viewBtns[v].classList.add('active');
+  render();
+}
+viewBtns.month.addEventListener('click', ()=>setView('month'));
+viewBtns.week.addEventListener('click',  ()=>setView('week'));
+viewBtns.day.addEventListener('click',   ()=>setView('day'));
 
-    const viewBtns = { month:document.getElementById('viewMonth'), week:document.getElementById('viewWeek'), day:document.getElementById('viewDay') };
-    function setView(v){
-      state.view = v;
-      Object.values(viewBtns).forEach(b=>b.classList.remove('active'));
-      viewBtns[v].classList.add('active');
-      render();
-    }
-    document.getElementById('viewMonth').addEventListener('click', ()=>setView('month'));
-    document.getElementById('viewWeek').addEventListener('click',  ()=>setView('week'));
-    document.getElementById('viewDay').addEventListener('click',   ()=>setView('day'));
-    document.getElementById('btnPrev').addEventListener('click',   ()=>document.getElementById('prevBtn').click());
-    document.getElementById('btnNext').addEventListener('click',   ()=>document.getElementById('nextBtn').click());
-    document.getElementById('btnToday').addEventListener('click',  ()=>document.getElementById('todayBtn').click());
-    document.getElementById('newBooking').addEventListener('click',()=> openBookingModal());
+document.getElementById('btnPrev').addEventListener('click', ()=>{
+  const d = new Date(state.cursor);
+  if(state.view==='month') d.setMonth(d.getMonth()-1);
+  else if(state.view==='week') d.setDate(d.getDate()-7);
+  else d.setDate(d.getDate()-1);
+  state.cursor = d; render();
+});
+document.getElementById('btnNext').addEventListener('click', ()=>{
+  const d = new Date(state.cursor);
+  if(state.view==='month') d.setMonth(d.getMonth()+1);
+  else if(state.view==='week') d.setDate(d.getDate()+7);
+  else d.setDate(d.getDate()+1);
+  state.cursor = d; render();
+});
+document.getElementById('btnToday').addEventListener('click', ()=>{ state.cursor = new Date(); render(); });
+document.getElementById('newBooking').addEventListener('click', ()=> openBookingModal(null, new Date(state.cursor)));
 
-    // Helpers
-    function startOfMonth(d){ const x=new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
-    function endOfMonth(d){ const x=new Date(d); x.setMonth(x.getMonth()+1); x.setDate(0); x.setHours(23,59,59,999); return x; }
-    function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
-    function endOfWeek(d){ const s=startOfWeek(d); const x=new Date(s); x.setDate(x.getDate()+6); x.setHours(23,59,59,999); return x; }
-    function pad(n){ return String(n).padStart(2,'0'); }
-    function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+/* ===== Notes: only signed-in users can save ===== */
+document.getElementById('saveNote172').addEventListener('click', ()=>{
+  if(!currentUser){ alert('Please sign in to save aircraft notes.'); return; }
+  notes['N78710'] = document.getElementById('note172').value || '';
+  saveAll();
+});
+document.getElementById('saveNote150').addEventListener('click', ()=>{
+  if(!currentUser){ alert('Please sign in to save aircraft notes.'); return; }
+  notes['N10921'] = document.getElementById('note150').value || '';
+  saveAll();
+});
 
-    function eventClass(bk){
-      const cls=[];
-      cls.push(bk.aircraft==='N78710'?'c172':'c150');
-      if(bk.withInstr && bk.withInstr!=='no') cls.push('instr');
-      if(currentUser && (bk.ownerEmail||'').toLowerCase()===(currentUser.email||'').toLowerCase()) cls.push('mine');
-      return cls.join(' ');
-    }
-    function withinRange(bk, rangeStart, rangeEnd){
-      if(state.filter!=='all' && bk.aircraft!==state.filter) return false;
-      const s=new Date(bk.start), e=new Date(bk.end);
-      return e>=rangeStart && s<=rangeEnd;
-    }
+/* ================= Helpers ====================== */
+function fmtMonthTitle(d){ return d.toLocaleString(undefined,{month:'long', year:'numeric'}); }
+function startOfMonth(d){ const x=new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
+function endOfMonth(d){ const x=new Date(d); x.setMonth(x.getMonth()+1); x.setDate(0); x.setHours(23,59,59,999); return x; }
+function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function endOfWeek(d){ const s=startOfWeek(d); const x=new Date(s); x.setDate(x.getDate()+6); x.setHours(23,59,59,999); return x; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
 
-    function render(){
-      const container = document.getElementById('calendar');
-      if(!container) return;
-      container.innerHTML = '';
+function relevant(bk, rangeStart, rangeEnd){
+  if(state.filter!=='all' && bk.aircraft!==state.filter) return false;
+  const s=new Date(bk.start), e=new Date(bk.end);
+  return e>=rangeStart && s<=rangeEnd;
+}
+function eventClass(bk){
+  const cls = [];
+  cls.push(bk.aircraft==='N78710'?'c172':'c150');
+  if(bk.withInstr && bk.withInstr!=='no') cls.push('instr');
+  if(currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase()) cls.push('mine');
+  return cls.join(' ');
+}
 
-      if(state.view==='month') renderMonth(container);
-      else if(state.view==='week') renderWeek(container);
-      else renderDay(container);
+/* ================= Renderer (single calendar) =========================== */
+function render(){
+  // keep notes text synced
+  document.getElementById('note172').value = notes['N78710'] || '';
+  document.getElementById('note150').value = notes['N10921'] || '';
 
-      // keep the notes textareas in sync with saved notes
-      document.getElementById('note172').value = notes['N78710'] || '';
-      document.getElementById('note150').value = notes['N10921'] || '';
-    }
+  calEl.innerHTML = '';  // wipe
 
-    function renderMonth(container){
-      const start = startOfWeek(startOfMonth(state.cursor));
-      const end   = endOfWeek(endOfMonth(state.cursor));
+  if(state.view==='month') renderMonth(calEl);
+  else if(state.view==='week') renderWeek(calEl);
+  else renderDay(calEl);
+}
 
-      const head = document.createElement('div');
-      head.className = 'cal-header';
-      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
-        const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
-      });
-      container.appendChild(head);
+function renderMonth(container){
+  const start = startOfWeek(startOfMonth(state.cursor));
+  const end   = endOfWeek(endOfMonth(state.cursor));
 
-      let d = new Date(start);
-      while(d<=end){
-        const row=document.createElement('div'); row.className='cal-row';
-        for(let i=0;i<7;i++){
-          const cell=document.createElement('div'); cell.className='cell';
-          const day=document.createElement('div'); day.className='d'; day.textContent=d.getDate();
-          if(sameDate(d,new Date())){ day.style.color='#fff'; day.style.fontWeight='800'; }
-          cell.appendChild(day);
+  const head = document.createElement('div');
+  head.className = 'cal-header';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
+    const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
+  });
+  container.appendChild(head);
 
-          const d0=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
-          const d1=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59,999);
+  let d = new Date(start);
+  while(d<=end){
+    const row=document.createElement('div'); row.className='cal-row';
+    for(let i=0;i<7;i++){
+      // make a safe copy for listeners
+      const dayDate = new Date(d);
+      const cell=document.createElement('div'); cell.className='cell';
+      const dayNum=document.createElement('div'); dayNum.className='d'; dayNum.textContent=d.getDate();
+      if(sameDate(d,new Date())){ dayNum.style.color='#fff'; dayNum.style.fontWeight='800'; }
+      cell.appendChild(dayNum);
 
-          bookings.filter(b=>withinRange(b,d0,d1)).forEach(bk=>{
-            const e=document.createElement('div');
-            e.className = 'evt '+eventClass(bk);
-            const s=new Date(bk.start), eD=new Date(bk.end);
-            e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-            e.title = `${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
-            e.addEventListener('click', ()=>openBookingModal(bk));
-            cell.appendChild(e);
-          });
-
-          row.appendChild(cell);
-          d.setDate(d.getDate()+1);
+      // clicking a day opens modal with date prefilled
+      cell.addEventListener('click', (ev)=>{
+        // avoid hijacking clicks on existing events; only blank area / day number
+        if(ev.target === cell || ev.target === dayNum){
+          openBookingModal(null, dayDate);
         }
-        container.appendChild(row);
-      }
-    }
+      });
 
-    function renderWeek(container){
-      const start = startOfWeek(state.cursor);
+      // events for that day
+      const dayStart=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
+      const dayEnd  =new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59,999);
 
-      const head = document.createElement('div'); head.className='cal-header';
-      for(let i=0;i<7;i++){
-        const dt=new Date(start); dt.setDate(start.getDate()+i);
-        const el=document.createElement('div'); el.textContent=`${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
-        head.appendChild(el);
-      }
-      container.appendChild(head);
-
-      const row=document.createElement('div'); row.className='cal-row';
-      for(let i=0;i<7;i++){
-        const cell=document.createElement('div'); cell.className='cell';
-        const dt=new Date(start); dt.setDate(start.getDate()+i);
-        const d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
-        const d1=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
-
-        bookings.filter(b=>withinRange(b,d0,d1)).forEach(bk=>{
-          const s=new Date(bk.start), eD=new Date(bk.end);
-          const totalMinutes = (eD - s)/60000;
-          const top = ((s.getHours()*60 + s.getMinutes())/(24*60))*100;
-          const height = Math.max(28, (totalMinutes/(24*60))*100);
-          const slot=document.createElement('div');
-          slot.className='slot '+eventClass(bk);
-          slot.style.top = `calc(${top}% - 6px)`;
-          slot.style.height = `calc(${height}% - 6px)`;
-          slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-          slot.addEventListener('click', ()=>openBookingModal(bk));
-          cell.appendChild(slot);
-        });
-
-        row.appendChild(cell);
-      }
-      container.appendChild(row);
-    }
-
-    function renderDay(container){
-      const start=new Date(state.cursor); start.setHours(0,0,0,0);
-      const end=new Date(state.cursor);   end.setHours(23,59,59,999);
-
-      const row=document.createElement('div'); row.className='cal-row';
-      const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='560px';
-      bookings.filter(b=>withinRange(b,start,end)).forEach(bk=>{
+      bookings.filter(b=>relevant(b,dayStart,dayEnd)).forEach(bk=>{
+        const e=document.createElement('div');
+        e.className = 'evt '+eventClass(bk);
         const s=new Date(bk.start), eD=new Date(bk.end);
-        const totalMinutes = (eD - s)/60000;
-        const top = ((s.getHours()*60 + s.getMinutes())/(24*60))*100;
-        const height = Math.max(28, (totalMinutes/(24*60))*100);
-        const slot=document.createElement('div'); slot.className='slot '+eventClass(bk);
-        slot.style.top=`calc(${top}% - 6px)`; slot.style.height=`calc(${height}% - 6px)`;
-        slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
-        slot.addEventListener('click', ()=>openBookingModal(bk));
-        cell.appendChild(slot);
+        e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+        e.title = `${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
+        e.addEventListener('click', (evt)=>{ evt.stopPropagation(); openBookingModal(bk); });
+        cell.appendChild(e);
       });
+
       row.appendChild(cell);
-      container.appendChild(row);
+      d.setDate(d.getDate()+1);
     }
+    container.appendChild(row);
+  }
+}
 
-    /* ================= Booking modal logic ================================ */
-    const modal = document.getElementById('bookingModal');
-    const closeBtn = document.getElementById('bkClose');
-    const saveBtn = document.getElementById('saveBtn');
-    const delBtn  = document.getElementById('delBtn');
-    const ownBadge = document.getElementById('ownBadge');
+function renderWeek(container){
+  const start = startOfWeek(state.cursor);
 
-    const firstName = document.getElementById('firstName');
-    const lastName  = document.getElementById('lastName');
-    const emailField= document.getElementById('emailField');
-    const aircraftSel=document.getElementById('aircraftSel');
-    const titleField= document.getElementById('titleField');
-    const startDate = document.getElementById('startDate');
-    const endDate   = document.getElementById('endDate');
-    const startTime = document.getElementById('startTime');
-    const endTime   = document.getElementById('endTime');
-    const withInstr = document.getElementById('withInstr');
-    const instrName = document.getElementById('instrName');
-    const tachStart = document.getElementById('tachStart');
-    const tachEnd   = document.getElementById('tachEnd');
-    const hobbsStart= document.getElementById('hobbsStart');
-    const hobbsEnd  = document.getElementById('hobbsEnd');
-    const comments  = document.getElementById('comments');
-    const mismatchWrap = document.getElementById('mismatchWrap');
-    const overwritePrev = document.getElementById('overwritePrev');
+  const head = document.createElement('div'); head.className='cal-header';
+  for(let i=0;i<7;i++){
+    const dt=new Date(start); dt.setDate(start.getDate()+i);
+    const el=document.createElement('div'); el.textContent=`${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
+    head.appendChild(el);
+  }
+  container.appendChild(head);
 
-    withInstr.addEventListener('change', ()=>{
-      if(withInstr.value==='no'){ instrName.value=''; }
-      else{ instrName.value = withInstr.value; }
+  const row=document.createElement('div'); row.className='cal-row';
+  for(let i=0;i<7;i++){
+    const dt=new Date(start); dt.setDate(start.getDate()+i);
+    const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='320px';
+
+    // click empty space to preset that date
+    cell.addEventListener('click', ()=> openBookingModal(null, dt));
+
+    const d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
+    const d1=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
+
+    bookings.filter(b=>relevant(b,d0,d1)).forEach(bk=>{
+      const s=new Date(bk.start), eD=new Date(bk.end);
+      const totalMinutes = (eD - s)/60000;
+      const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+      const height = Math.max(28, (totalMinutes / (24*60))*100);
+      const slot=document.createElement('div');
+      slot.className='slot '+eventClass(bk);
+      slot.style.top = `calc(${top}% - 6px)`;
+      slot.style.height = `calc(${height}% - 6px)`;
+      slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+      slot.addEventListener('click', (evt)=>{ evt.stopPropagation(); openBookingModal(bk); });
+      cell.appendChild(slot);
     });
 
-    let editingId = null; // null = new
+    row.appendChild(cell);
+  }
+  container.appendChild(row);
+}
 
-    function openBookingModal(bk=null){
-      editingId = bk ? bk.id : null;
-      ownBadge.style.display='none';
-      delBtn.style.display='none';
-      overwritePrev.checked=false;
-      mismatchWrap.style.display='none';
+function renderDay(container){
+  const dt=new Date(state.cursor);
+  const start=new Date(dt); start.setHours(0,0,0,0);
+  const end  =new Date(dt); end.setHours(23,59,59,999);
 
-      emailField.value = currentUser?.email || "";
-      firstName.value = currentUser?.displayName ? currentUser.displayName.split(' ')[0] || '' : (firstName.value||'');
-      lastName.value  = currentUser?.displayName ? (currentUser.displayName.split(' ').slice(1).join(' ')||'') : (lastName.value||'');
+  const row=document.createElement('div'); row.className='cal-row';
+  const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='560px';
+  cell.addEventListener('click', ()=> openBookingModal(null, dt));
 
-      if(bk){
-        document.getElementById('bkTitle').textContent = "Booking details";
-        const mine = currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase();
-        ownBadge.style.display = mine ? 'inline-flex' : 'none';
-        delBtn.style.display   = mine ? 'inline-block' : 'none';
-        setReadOnly(!mine);
-        fill(bk);
-      }else{
-        document.getElementById('bkTitle').textContent = "Add title and time";
-        setReadOnly(false);
-        const s=new Date(state.cursor);
-        const pad2 = n=>String(n).padStart(2,'0');
-        startDate.value = `${s.getFullYear()}-${pad2(s.getMonth()+1)}-${pad2(s.getDate())}`;
-        endDate.value   = startDate.value;
-        startTime.value = "10:00";
-        endTime.value   = "11:00";
-        aircraftSel.value = (state.filter==='N78710'||state.filter==='N10921')?state.filter:'N78710';
-        titleField.value = "";
-        withInstr.value="no"; instrName.value="";
-        tachStart.value=tachEnd.value=hobbsStart.value=hobbsEnd.value="";
-        comments.value="";
-      }
+  bookings.filter(b=>relevant(b,start,end)).forEach(bk=>{
+    const s=new Date(bk.start), eD=new Date(bk.end);
+    const totalMinutes = (eD - s)/60000;
+    const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+    const height = Math.max(28, (totalMinutes / (24*60))*100);
+    const slot=document.createElement('div'); slot.className='slot '+eventClass(bk);
+    slot.style.top=`calc(${top}% - 6px)`; slot.style.height=`calc(${height}% - 6px)`;
+    slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+    slot.addEventListener('click', (evt)=>{ evt.stopPropagation(); openBookingModal(bk); });
+    cell.appendChild(slot);
+  });
 
-      modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
-      titleField.focus();
-      checkMismatch();
+  row.appendChild(cell);
+  container.appendChild(row);
+}
+
+/* ================= Booking modal logic (updated) ======================= */
+const modal = document.getElementById('bookingModal');
+const closeBtn = document.getElementById('bkClose');
+const saveBtn = document.getElementById('saveBtn');
+const delBtn  = document.getElementById('delBtn');
+const ownBadge = document.getElementById('ownBadge');
+
+const firstName = document.getElementById('firstName');
+const lastName  = document.getElementById('lastName');
+const emailField= document.getElementById('emailField');
+const aircraftSel=document.getElementById('aircraftSel');
+const titleField= document.getElementById('titleField');
+const startDate = document.getElementById('startDate');
+const endDate   = document.getElementById('endDate');
+const startTime = document.getElementById('startTime');
+const endTime   = document.getElementById('endTime');
+const withInstr = document.getElementById('withInstr');
+const instrName = document.getElementById('instrName');
+const tachStart = document.getElementById('tachStart');
+const tachEnd   = document.getElementById('tachEnd');
+const hobbsStart= document.getElementById('hobbsStart');
+const hobbsEnd  = document.getElementById('hobbsEnd');
+const comments  = document.getElementById('comments');
+const mismatchWrap = document.getElementById('mismatchWrap');
+const overwritePrev = document.getElementById('overwritePrev');
+
+withInstr.addEventListener('change', ()=>{
+  if(withInstr.value==='no'){ instrName.value=''; }
+  else{ instrName.value = withInstr.value; }
+});
+
+let editingId = null; // null = new
+
+function openBookingModal(bk=null, presetDate=null){
+  editingId = bk ? bk.id : null;
+  ownBadge.style.display='none';
+  delBtn.style.display='none';
+  overwritePrev.checked=false;
+  mismatchWrap.style.display='none';
+
+  // defaults from auth
+  emailField.value = currentUser?.email || "";
+  firstName.value = currentUser?.displayName ? currentUser.displayName.split(' ')[0] || '' : (firstName.value||'');
+  lastName.value  = currentUser?.displayName ? (currentUser.displayName.split(' ').slice(1).join(' ')||'') : (lastName.value||'');
+
+  if(bk){
+    document.getElementById('bkTitle').textContent = "Booking details";
+    const mine = currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase();
+    ownBadge.style.display = mine ? 'inline-flex' : 'none';
+    delBtn.style.display   = mine ? 'inline-block' : 'none';
+    setReadOnly(!mine);
+    fill(bk);
+  }else{
+    document.getElementById('bkTitle').textContent = "Add title and time";
+    setReadOnly(false);
+    const s = presetDate ? new Date(presetDate) : new Date(state.cursor);
+    startDate.value = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;
+    endDate.value   = startDate.value;
+    startTime.value = "10:00";
+    endTime.value   = "11:00";
+    aircraftSel.value = (state.filter==='N78710'||state.filter==='N10921')?state.filter:'N78710';
+    titleField.value = "";
+    withInstr.value="no"; instrName.value="";
+    tachStart.value=tachEnd.value=hobbsStart.value=hobbsEnd.value="";
+    comments.value="";
+  }
+
+  modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+  titleField.focus();
+  checkMismatch();
+}
+
+function setReadOnly(ro){
+  [firstName,lastName,startDate,endDate,startTime,endTime,titleField,withInstr,instrName,tachStart,tachEnd,hobbsStart,hobbsEnd,comments,aircraftSel]
+    .forEach(el=> el.readOnly = ro);
+  withInstr.disabled = ro;
+  aircraftSel.disabled = ro;
+  saveBtn.style.display = ro ? 'none' : 'inline-block';
+}
+
+function fill(bk){
+  firstName.value = bk.first||"";
+  lastName.value  = bk.last||"";
+  emailField.value= bk.ownerEmail||"";
+  aircraftSel.value = bk.aircraft;
+  titleField.value = bk.title||"";
+  const s=new Date(bk.start), e=new Date(bk.end);
+  startDate.value = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;
+  endDate.value   = `${e.getFullYear()}-${pad(e.getMonth()+1)}-${pad(e.getDate())}`;
+  startTime.value = `${pad(s.getHours())}:${pad(s.getMinutes())}`;
+  endTime.value   = `${pad(e.getHours())}:${pad(e.getMinutes())}`;
+  withInstr.value = bk.withInstr||'no';
+  instrName.value = bk.instrName||'';
+  tachStart.value = bk.tachStart||'';
+  tachEnd.value   = bk.tachEnd||'';
+  hobbsStart.value= bk.hobbsStart||'';
+  hobbsEnd.value  = bk.hobbsEnd||'';
+  comments.value  = bk.comments||'';
+}
+
+closeBtn.addEventListener('click', ()=>{ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
+
+/* ================= Conflict detection, mismatch checks ================== */
+function overlaps(candidate, ignoreId=null){
+  const cs = new Date(candidate.start), ce=new Date(candidate.end);
+  return bookings.some(b=>{
+    if(b.aircraft!==candidate.aircraft) return false;
+    if(ignoreId && b.id===ignoreId) return false;
+    const bs=new Date(b.start), be=new Date(b.end);
+    return (cs < be) && (ce > bs);
+  });
+}
+function findPrevForTailBefore(tail, when){
+  const list = bookings.filter(b=>b.aircraft===tail && new Date(b.end) <= when)
+                       .sort((a,b)=> new Date(b.end)-new Date(a.end));
+  return list[0] || null;
+}
+function checkMismatch(){
+  const tail = aircraftSel.value;
+  const startIso = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
+  if(isNaN(startIso.getTime())){ mismatchWrap.style.display='none'; return; }
+  const prev = findPrevForTailBefore(tail,startIso);
+  if(!prev){ mismatchWrap.style.display='none'; return; }
+
+  let mismatch=false;
+  if(tachStart.value && prev.tachEnd && Number(tachStart.value) != Number(prev.tachEnd)) mismatch=true;
+  if(hobbsStart.value && prev.hobbsEnd && Number(hobbsStart.value) != Number(prev.hobbsEnd)) mismatch=true;
+
+  mismatchWrap.style.display = mismatch ? 'block' : 'none';
+}
+[aircraftSel,startDate,startTime,tachStart,hobbsStart].forEach(el=> el.addEventListener('input', checkMismatch));
+
+/* ================= Save / Delete booking =============================== */
+saveBtn.addEventListener('click', ()=>{
+  if(!currentUser){ alert("Please sign in first."); return; }
+  const s = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
+  const e = new Date(`${endDate.value}T${endTime.value||"00:00"}`);
+  if(isNaN(s)||isNaN(e)|| e<=s){ alert("Please enter a valid start/end."); return; }
+
+  const data = {
+    id: editingId || crypto.randomUUID(),
+    aircraft: aircraftSel.value,
+    title: (titleField.value||"").trim(),
+    start: s.toISOString(),
+    end:   e.toISOString(),
+    withInstr: withInstr.value,
+    instrName: (withInstr.value==='no'?'':withInstr.value),
+    tachStart: tachStart.value || "",
+    tachEnd:   tachEnd.value   || "",
+    hobbsStart: hobbsStart.value || "",
+    hobbsEnd:   hobbsEnd.value   || "",
+    comments: (comments.value||"").trim(),
+    ownerEmail: (currentUser.email||"").toLowerCase(),
+    first: (firstName.value||"").trim(),
+    last:  (lastName.value||"").trim()
+  };
+
+  if(overlaps(data, editingId)){ alert("This overlaps an existing booking for this aircraft."); return; }
+
+  const prev = findPrevForTailBefore(data.aircraft, s);
+  if(prev){
+    const needFix = (data.tachStart && prev.tachEnd && Number(data.tachStart)!=Number(prev.tachEnd))
+                 || (data.hobbsStart && prev.hobbsEnd && Number(data.hobbsStart)!=Number(prev.hobbsEnd));
+    if(needFix && overwritePrev.checked){
+      prev.tachEnd   = data.tachStart || prev.tachEnd;
+      prev.hobbsEnd  = data.hobbsStart|| prev.hobbsEnd;
+    }else if(needFix){
+      alert("Start Tach/Hobbs do not match the previous end. Check the overwrite box to proceed.");
+      return;
     }
+  }
 
-    function setReadOnly(ro){
-      [firstName,lastName,startDate,endDate,startTime,endTime,titleField,withInstr,instrName,tachStart,tachEnd,hobbsStart,hobbsEnd,comments,aircraftSel]
-        .forEach(el=> el.readOnly = ro);
-      withInstr.disabled = ro;
-      aircraftSel.disabled = ro;
-      saveBtn.style.display = ro ? 'none' : 'inline-block';
-    }
-
-    function fill(bk){
-      const pad2 = n=>String(n).padStart(2,'0');
-      firstName.value = bk.first||"";
-      lastName.value  = bk.last||"";
-      emailField.value= bk.ownerEmail||"";
-      aircraftSel.value = bk.aircraft;
-      titleField.value = bk.title||"";
-      const s=new Date(bk.start), e=new Date(bk.end);
-      startDate.value = `${s.getFullYear()}-${pad2(s.getMonth()+1)}-${pad2(s.getDate())}`;
-      endDate.value   = `${e.getFullYear()}-${pad2(e.getMonth()+1)}-${pad2(e.getDate())}`;
-      startTime.value = `${pad2(s.getHours())}:${pad2(s.getMinutes())}`;
-      endTime.value   = `${pad2(e.getHours())}:${pad2(e.getMinutes())}`;
-      withInstr.value = bk.withInstr||'no';
-      instrName.value = bk.instrName||'';
-      tachStart.value = bk.tachStart||'';
-      tachEnd.value   = bk.tachEnd||'';
-      hobbsStart.value= bk.hobbsStart||'';
-      hobbsEnd.value  = bk.hobbsEnd||'';
-      comments.value  = bk.comments||'';
-    }
-
-    function overlaps(candidate, ignoreId=null){
-      const cs = new Date(candidate.start), ce=new Date(candidate.end);
-      return bookings.some(b=>{
-        if(b.aircraft!==candidate.aircraft) return false;
-        if(ignoreId && b.id===ignoreId) return false;
-        const bs=new Date(b.start), be=new Date(b.end);
-        return (cs < be) && (ce > bs);
-      });
-    }
-
-    function findPrevForTailBefore(tail, when){
-      const list = bookings
-        .filter(b=>b.aircraft===tail && new Date(b.end) <= when)
-        .sort((a,b)=> new Date(b.end)-new Date(a.end));
-      return list[0] || null;
-    }
-
-    function checkMismatch(){
-      const tail = aircraftSel.value;
-      const startIso = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
-      if(isNaN(startIso.getTime())){ mismatchWrap.style.display='none'; return; }
-      const prev = findPrevForTailBefore(tail,startIso);
-      if(!prev){ mismatchWrap.style.display='none'; return; }
-
-      let mismatch=false;
-      if(tachStart.value && prev.tachEnd && Number(tachStart.value) != Number(prev.tachEnd)) mismatch=true;
-      if(hobbsStart.value && prev.hobbsEnd && Number(hobbsStart.value) != Number(prev.hobbsEnd)) mismatch=true;
-
-      mismatchWrap.style.display = mismatch ? 'block' : 'none';
-    }
-    [aircraftSel,startDate,startTime,tachStart,hobbsStart].forEach(el=> el.addEventListener('input', checkMismatch));
-
-    closeBtn.addEventListener('click', ()=>{ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
-
-    const pad2 = n=>String(n).padStart(2,'0');
-
-    document.getElementById('saveBtn').addEventListener('click', ()=>{
-      if(!currentUser){ alert("Please sign in first."); return; }
-      const s = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
-      const e = new Date(`${endDate.value}T${endTime.value||"00:00"}`);
-      if(isNaN(s)||isNaN(e)|| e<=s){ alert("Please enter a valid start/end."); return; }
-
-      const data = {
-        id: editingId || crypto.randomUUID(),
-        aircraft: aircraftSel.value,
-        title: (titleField.value||"").trim(),
-        start: s.toISOString(),
-        end:   e.toISOString(),
-        withInstr: withInstr.value,
-        instrName: (withInstr.value==='no'?'':withInstr.value),
-        tachStart: tachStart.value || "",
-        tachEnd:   tachEnd.value   || "",
-        hobbsStart: hobbsStart.value || "",
-        hobbsEnd:   hobbsEnd.value   || "",
-        comments: (comments.value||"").trim(),
-        ownerEmail: (currentUser.email||"").toLowerCase(),
-        first: (firstName.value||"").trim(),
-        last:  (lastName.value||"").trim()
-      };
-
-      if(overlaps(data, editingId)){ alert("This overlaps an existing booking for this aircraft."); return; }
-
-      const prev = findPrevForTailBefore(data.aircraft, s);
-      if(prev){
-        const needFix = (data.tachStart && prev.tachEnd && Number(data.tachStart)!=Number(prev.tachEnd))
-                     || (data.hobbsStart && prev.hobbsEnd && Number(data.hobbsStart)!=Number(prev.hobbsEnd));
-        if(needFix && overwritePrev.checked){
-          prev.tachEnd   = data.tachStart || prev.tachEnd;
-          prev.hobbsEnd  = data.hobbsStart|| prev.hobbsEnd;
-        }else if(needFix){
-          alert("Start Tach/Hobbs do not match the previous end. Check the overwrite box to proceed.");
-          return;
-        }
-      }
-
-      if(editingId){
-        const i = bookings.findIndex(b=>b.id===editingId);
-        if(i>=0){
-          const mine = (bookings[i].ownerEmail||"") === (currentUser.email||"").toLowerCase();
-          if(!mine){ alert("You can only edit your own booking."); return; }
-          bookings[i] = data;
-        }
-      }else{
-        bookings.push(data);
-      }
-
-      saveAll();
-      modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
-    });
-
-    delBtn.addEventListener('click', ()=>{
-      if(!currentUser){ alert("Please sign in first."); return; }
-      if(!editingId) return;
-      const i = bookings.findIndex(b=>b.id===editingId);
-      if(i<0) return;
+  if(editingId){
+    const i = bookings.findIndex(b=>b.id===editingId);
+    if(i>=0){
       const mine = (bookings[i].ownerEmail||"") === (currentUser.email||"").toLowerCase();
-      if(!mine){ alert("You can only delete your own booking."); return; }
-      if(confirm("Delete this booking?")){
-        bookings.splice(i,1);
-        saveAll();
-        modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
-      }
-    });
+      if(!mine){ alert("You can only edit your own booking."); return; }
+      bookings[i] = data;
+    }
+  }else{
+    bookings.push(data);
+  }
+
+  saveAll();
+  modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+});
+
+delBtn.addEventListener('click', ()=>{
+  if(!currentUser){ alert("Please sign in first."); return; }
+  if(!editingId) return;
+  const i = bookings.findIndex(b=>b.id===editingId);
+  if(i<0) return;
+  const mine = (bookings[i].ownerEmail||"") === (currentUser.email||"").toLowerCase();
+  if(!mine){ alert("You can only delete your own booking."); return; }
+  if(confirm("Delete this booking?")){
+    bookings.splice(i,1);
+    saveAll();
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+  }
+});
+
+/* initial render */
+render();
+
 
     // Kick off
     render();
