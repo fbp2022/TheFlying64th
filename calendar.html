@@ -323,13 +323,6 @@ select.input{
       <button id="prevBtn">◀</button>
       <button id="nextBtn">▶</button>
     </div>
-   
-    <div class="legend">
-      <span class="dot d172"></span> C172
-      <span class="dot d150"></span> C150
-      <span class="dot dInstr"></span> With Instructor
-    </div>
-  </div>
 
   <!-- ===== AIRCRAFT NOTES (both aircraft, single calendar below) ===== -->
   <div class="notes-row">
@@ -433,16 +426,19 @@ select.input{
         </div>
       </div>
 
-      <div class="row">
-        <div>
-          <div class="label">Book with instructor?</div>
-          <select id="withInstr" class="input">
-            <option value="no">No</option>
-            <option value="Brian Westfall (BW)">Brian Westfall (BW)</option>
-            <option value="Justin Cox (JC)">Justin Cox (JC)</option>
-            <option value="Jeff Moersch (JM)">Jeff Moersch (JM)</option>
-          </select>
-        </div>
+     <!-- Instructor (single control) -->
+<div class="row">
+  <div style="grid-column:1/-1">
+    <div class="label">Instructor</div>
+    <select id="withInstr" class="input">
+      <option value="none">None</option>
+      <option value="Brian Westfall (BW)">Brian Westfall (BW)</option>
+      <option value="Justin Cox (JC)">Justin Cox (JC)</option>
+      <option value="Jeff Moersch (JM)">Jeff Moersch (JM)</option>
+    </select>
+  </div>
+</div>
+
         <div>
           <div class="label">Instructor</div>
           <input id="instrName" class="input" placeholder="Auto-filled if chosen above" readonly>
