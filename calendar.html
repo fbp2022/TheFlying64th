@@ -1,640 +1,879 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Calendar – The Flying 64th</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar – The Flying 64th</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-<style>
-  :root{
-    --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
-    --panel:#151924; --panel2:#0d1018;
-    --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
-    --radius:14px;
-    --c172:#69b7ff;      /* N78710 */
-    --c150:#9dd17d;      /* N10921 */
-    --c172-inst:#2a76c5; /* with instructor inner ring */
-    --c150-inst:#4a8f42;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-    background:var(--bg); color:var(--ink);
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
+  <style>
+    :root{
+      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3;
+      --panel:#0f1722; --panel2:#0c141f; --rule:#1f2a38; --accent:#58a6ff;
+      --radius:16px;
+      --c172:#4da3ff;         /* N78710 (C172) */
+      --c150:#8bd26a;         /* N10921 (C150) */
+      --instr:#b384ff;        /* with instructor overlay */
+      --mine:#ffd166;         /* my bookings outline */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 
-  /* ===== NAV ===== */
-  .site-header{
-    position:sticky; top:0; z-index:50;
-    backdrop-filter:saturate(160%) blur(8px);
-    background:rgba(11,17,23,.75);
-    border-bottom:1px solid var(--rule);
-  }
-  .nav{
-    max-width:min(1600px,96vw); margin:0 auto; padding:12px 18px;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-  }
-  .brand{
-    display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
-    color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
-  }
-  .brand img{ height:34px; width:auto }
-  header nav{ display:flex; align-items:center; gap:18px; flex-wrap:nowrap; }
-  header nav a{
-    color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
-    transition:all .18s ease;
-  }
-  header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
-  header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
-  #signinBtn{border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer}
-  #signinBtn:hover{background:rgba(255,255,255,.06)}
+    /* ===== NAV ===== */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
+    }
+    .nav{
+      max-width:1200px; margin:0 auto; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
+      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
+    }
+    .brand img{ height:34px; width:auto }
+    header nav{ display:flex; align-items:center; gap:18px }
+    header nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px; transition:all .18s ease;
+    }
+    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
+    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
 
-  /* ===== Persistent Tach/Hobbs Banner ===== */
-  .banner{
-    max-width:min(1600px,96vw); margin:12px auto 8px; padding:10px 12px;
-    border:1px solid var(--border); border-radius:12px;
-    background:linear-gradient(180deg,var(--panel),var(--panel2));
-    display:flex; align-items:center; gap:10px;
-  }
-  .banner b{color:#d9e7ff}
+    /* ===== Banner ===== */
+    .banner{
+      max-width:1600px; width:96vw; margin:12px auto 0; padding:10px 14px;
+      border:1px solid var(--rule); border-radius:14px;
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      display:flex; gap:10px; align-items:center;
+    }
+    .banner b{color:#e9f1ff}
 
-  /* ===== Top controls ===== */
-  .controls{
-    max-width:min(1600px,96vw); margin:0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  }
-  .pill{
-    border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
-    padding:8px 12px; border-radius:999px; text-decoration:none; cursor:pointer;
-  }
-  .pill.active{ background:var(--accent); color:#001a33; font-weight:700; }
-  .btn{ border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
-        padding:10px 14px; border-radius:10px; text-decoration:none; cursor:pointer; }
-  .btn.primary{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1 }
+    /* ===== Top controls ===== */
+    .topbar{
+      max-width:1600px; width:96vw; margin:10px auto; padding:0 2px;
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .seg{ display:flex; gap:8px; background:#0d1724; border:1px solid var(--rule); border-radius:10px; padding:6px }
+    .seg button{
+      background:transparent; border:0; color:#c7d1de; padding:8px 12px; border-radius:8px; cursor:pointer;
+    }
+    .seg button.active{ background:#152238; color:#e6f0ff; font-weight:700 }
+    .btn{ border:1px solid var(--rule); background:#121b29; color:#e6edf3; padding:10px 12px; border-radius:10px; cursor:pointer }
+    .btn.primary{ background:var(--accent); color:#001a33; border-color:transparent; font-weight:700 }
+    .spacer{ flex:1 }
 
-  .controls .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+    .legend{ display:flex; gap:10px; align-items:center; color:#9fb1c3; font-size:14px }
+    .dot{ width:12px; height:12px; border-radius:3px; display:inline-block }
+    .d172{ background:var(--c172) }
+    .d150{ background:var(--c150) }
+    .dInstr{ background:var(--instr) }
 
-  /* ===== Notes cards for each aircraft ===== */
-  .notes-wrap{
-    max-width:min(1600px,96vw); margin:10px auto; display:grid; grid-template-columns:1fr 1fr; gap:12px;
-  }
-  .note-card{
-    background:linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid var(--border); border-radius:12px; padding:12px;
-  }
-  .note-card h3{margin:0 0 8px}
-  .note-card small{color:var(--muted)}
-  .note-card textarea{width:100%; min-height:56px; resize:vertical; border-radius:10px; border:1px solid var(--border); background:#0b0f1a; color:#e9eef7; padding:8px;}
-  .note-card .save{ margin-top:8px; }
+    /* ===== Calendar frame ===== */
+    .wrap{
+      max-width:1600px; width:96vw; margin:10px auto 40px;
+      display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    }
+    .airframe{
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--rule); border-radius:16px; overflow:hidden;
+      min-height:65vh; display:grid; grid-template-rows:auto 1fr;
+    }
+    .air-h{ padding:10px 12px; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:10px }
+    .air-h h3{ margin:0; font-size:16px }
+    .oil{ flex:1; color:#9fb1c3; font-size:12px }
+    .oil textarea{ width:100%; min-height:34px; resize:vertical; border-radius:8px; border:1px solid var(--rule);
+      background:#0b1117; color:#e6edf3; padding:6px 8px; }
+    .saveNote{ margin-left:auto }
 
-  /* ===== Calendar ===== */
-  .calendar-wrap{
-    max-width:min(1600px,96vw); margin:12px auto 40px;
-    background:linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid var(--border); border-radius:12px; padding:16px;
-  }
-  .cal-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
-  .cal-title{ font-weight:800; letter-spacing:.2px; color:#cfe1ff; margin-left:auto; margin-right:auto; }
-  .grid-month{
-    display:grid; grid-template-columns:repeat(7,1fr); gap:8px;
-  }
-  .cell{
-    min-height:120px; border:1px dashed var(--border); border-radius:10px; padding:6px; position:relative;
-    background:rgba(255,255,255,.02);
-  }
-  .cell .d{ position:absolute; right:8px; top:6px; color:#8da0b8; font-size:12px }
-  .event{
-    margin-top:22px; border-radius:8px; padding:6px 8px; font-size:13px;
-    border:2px solid transparent; cursor:pointer;
-  }
-  .event.mine{ outline:2px solid #fff4; }
-  .event.inst::after{ content:"•"; margin-left:6px; font-weight:900; }
-  .event.c172{ background:rgba(105,183,255,.18); border-color:rgba(105,183,255,.45); }
-  .event.c150{ background:rgba(157,209,125,.18); border-color:rgba(157,209,125,.45); }
-  .event.c172.inst{ box-shadow: inset 0 0 0 2px var(--c172-inst); }
-  .event.c150.inst{ box-shadow: inset 0 0 0 2px var(--c150-inst); }
+    .grid{ display:grid; grid-template-rows:auto 1fr; }
+    .cal-controls{ padding:10px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--rule) }
+    .cal{ padding:4px 8px 12px; overflow:auto }
 
-  /* ===== Modal (create/edit, details) ===== */
-  .modal{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; place-items:center; z-index:1000; }
-  .modal.open{ display:grid }
-  .modal-card{
-    width:min(1180px,98vw); /* wider horizontally per request */
-    max-height:92vh;        /* scroll if zoomed */
-    overflow:auto;
-    background:#0f1722; color:#e6edf3; border:1px solid #1f2a38; border-radius:14px; padding:16px; position:relative;
-  }
-  .modal-title{ font-size:18px; font-weight:800; margin:0 0 10px }
-  .modal-x{ position:absolute; right:12px; top:10px; border:0; background:transparent; color:#9fb1c3; font-size:18px; cursor:pointer }
-  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  @media (max-width:780px){ .row{ grid-template-columns:1fr } }
-  .label{ font-size:12px; color:#9fb1c3; margin-bottom:4px }
-  .in, select, textarea{
-    width:100%; padding:10px 12px; border-radius:10px;
-    border:1px solid #1f2a38; background:#0b1117; color:#e6edf3;
-  }
-  .switch{ display:flex; align-items:center; gap:10px; }
-  .foot{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px }
-  .warn{ color:#ffb86b; font-size:12px; margin-top:6px }
-  .err{ color:#ff9b9b; font-size:12px; margin-top:6px }
+    /* ===== Simple month/week/day calendar (vanilla) ===== */
+    .cal-header{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; padding:0 6px; color:#9fb1c3; font-size:12px }
+    .cal-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; padding:6px }
+    .cell{ background:#0c141f; border:1px solid #142033; border-radius:10px; min-height:90px; padding:4px; position:relative }
+    .cell .d{ position:absolute; top:6px; right:8px; color:#9fb1c3; font-size:12px }
+    .evt{ margin-top:20px; background:#163055; border:1px solid #2a4e86; border-radius:8px; padding:6px 8px; font-size:12.5px; cursor:pointer;
+          max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .evt.c172{ background:var(--c172) }
+    .evt.c150{ background:var(--c150) }
+    .evt.instr{ box-shadow:inset 0 0 0 2px var(--instr) }
+    .evt.mine{ outline:2px dashed var(--mine) }
 
-  .chip{display:inline-block; padding:4px 8px; border-radius:999px; background:#19324a; color:#b5d5ff; font-size:12px; margin-bottom:6px}
-</style>
+    /* Week/Day layouts */
+    .week-grid{ display:grid; grid-template-columns:90px 1fr; }
+    .time-col{ border-right:1px solid #152238; padding:6px 4px; color:#9fb1c3; font-size:12px }
+    .time-col div{ height:40px }
+    .week-cells{ position:relative; height:40px*24 }
+    .slot{ position:absolute; left:0; right:0; min-height:28px; border-radius:8px; padding:6px 8px; font-size:12.5px; background:#163055; border:1px solid #2a4e86; cursor:pointer }
+    .slot.c172{ background:var(--c172) }
+    .slot.c150{ background:var(--c150) }
+    .slot.instr{ box-shadow:inset 0 0 0 2px var(--instr) }
+    .slot.mine{ outline:2px dashed var(--mine) }
+
+    /* ===== Modal (booking form + details) ===== */
+    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); z-index:2000 }
+    .modal.open{ display:grid }
+    .card{ width:min(880px,96vw); max-height:90vh; overflow:auto; background:#0f1722; border:1px solid var(--rule); border-radius:14px; padding:18px; }
+    .card h4{ margin:0 0 10px 0 }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .row-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px }
+    .row-4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px }
+    .label{ font-size:12px; color:#9fb1c3; margin:6px 0 4px }
+    .input, select, textarea{ width:100%; padding:10px 12px; border-radius:10px; background:#0b1117; color:#e6edf3; border:1px solid #1f2a38 }
+    .hint{ font-size:12px; color:#9fb1c3 }
+    .pill{ display:inline-flex; align-items:center; gap:6px; background:#132031; border:1px solid #203148; color:#cfe1ff; padding:4px 8px; border-radius:100px; font-size:12px }
+    .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px }
+    .warn{ background:#2a1d1d; border:1px solid #6b3b3b; color:#ffb4b4; padding:8px 10px; border-radius:10px; font-size:13px }
+
+    @media (max-width:1080px){
+      .wrap{ grid-template-columns:1fr }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ===== NAV ===== -->
-<header class="site-header">
-  <div class="nav">
-    <a href="home.html" class="brand">
-      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
-      <span>The Flying 64th</span>
-    </a>
-    <nav>
-      <a id="signinBtn">Account – <span id="userEmail">guest</span></a>
-      <a href="home.html">Home</a>
-      <a class="active" href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a href="poh&manuals.html">POH &amp; Manuals</a>
-     </nav>
-  </div>
-</header>
+  <!-- ===== NAV ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="home.html">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <span>The Flying 64th</span>
+      </a>
+      <nav>
+        <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
+        <a href="home.html">Home</a>
+        <a class="active" href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="poh&manuals.html">POH &amp; Manuals</a>
+      </nav>
+    </div>
+  </header>
 
-<!-- ===== Tach/Hobbs persistent banner ===== -->
-<div class="banner">
-  <span>🔔</span>
-  <span>Reminder: Enter <b>Tach</b> &amp; <b>Hobbs</b> start/end after every flight. If the prior end is missing, you’ll be prompted to resolve it before <b>closing your flight</b>.</span>
-</div>
-
-<!-- ===== Top controls ===== -->
-<div class="controls">
-  <div>
-    <button class="pill active" data-filter="all">All</button>
-    <button class="pill" data-filter="N78710">N78710 — C172</button>
-    <button class="pill" data-filter="N10921">N10921 — C150</button>
+  <!-- ===== Persistent banner ===== -->
+  <div class="banner" role="note" aria-live="polite">
+    <span>🔔</span>
+    <div><b>Reminder:</b> Enter <b>Tach</b> &amp; <b>Hobbs</b> start/end after every flight. If the prior end is missing, you’ll be prompted to resolve it before <b>closing your flight</b>.</div>
   </div>
-  <div class="right">
+
+  <!-- ===== Top controls ===== -->
+  <div class="topbar">
+    <div class="seg" id="fltFilter">
+      <button data-f="all" class="active">All</button>
+      <button data-f="N78710">N78710 — C172</button>
+      <button data-f="N10921">N10921 — C150</button>
+    </div>
+
+    <div class="seg" id="viewSeg">
+      <button data-v="month" class="active">Month</button>
+      <button data-v="week">Week</button>
+      <button data-v="day">Day</button>
+    </div>
+
     <button id="todayBtn" class="btn">Today</button>
-    <button id="prevBtn" class="btn">‹</button>
-    <div id="viewTitle" style="padding:8px 6px; min-width:180px; text-align:center; color:#cfe1ff; font-weight:700;"></div>
-    <button id="nextBtn" class="btn">›</button>
-    <button id="monthBtn" class="pill active" data-view="month">Month</button>
-    <button id="weekBtn" class="pill" data-view="week">Week</button>
-    <button id="dayBtn" class="pill" data-view="day">Day</button>
-    <button id="newBooking" class="btn primary">+ New booking</button>
-  </div>
-</div>
+    <div class="seg" id="navSeg">
+      <button id="prevBtn">◀</button>
+      <button id="nextBtn">▶</button>
+    </div>
+    <div class="spacer"></div>
+    <button id="newBtn" class="btn primary">+ New booking</button>
 
-<!-- ===== Notes ===== -->
-<div class="notes-wrap">
-  <div class="note-card">
-    <h3>N78710 — Cessna 172</h3>
-    <textarea id="noteN78710" placeholder="e.g., Oil change due at…"></textarea>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button class="btn save" data-aircraft="N78710">Save note</button>
-      <small id="noteTimeN78710" class="muted">Last updated: —</small>
+    <div class="legend">
+      <span class="dot d172"></span> C172
+      <span class="dot d150"></span> C150
+      <span class="dot dInstr"></span> With Instructor
     </div>
   </div>
-  <div class="note-card">
-    <h3>N10921 — Cessna 150</h3>
-    <textarea id="noteN10921" placeholder="e.g., Do not fly after…"></textarea>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button class="btn save" data-aircraft="N10921">Save note</button>
-      <small id="noteTimeN10921" class="muted">Last updated: —</small>
-    </div>
+
+  <!-- ===== Two-airframe calendars ===== -->
+  <div class="wrap">
+    <section class="airframe" id="cal172">
+      <div class="air-h">
+        <h3>N78710 — Cessna 172</h3>
+        <div class="oil">
+          <textarea id="note172" placeholder="e.g., N78710 oil change at 1234.5 or N78710: do not fly after 55555.5 until maintenance."></textarea>
+        </div>
+        <button class="btn saveNote" data-note="N78710">Save note</button>
+      </div>
+      <div class="grid">
+        <div class="cal-controls"><strong id="title172">Loading…</strong></div>
+        <div class="cal" id="grid172"></div>
+      </div>
+    </section>
+
+    <section class="airframe" id="cal150">
+      <div class="air-h">
+        <h3>N10921 — Cessna 150</h3>
+        <div class="oil">
+          <textarea id="note150" placeholder="e.g., N10921: flap motor squawk, avoid touch-and-go’s until cleared."></textarea>
+        </div>
+        <button class="btn saveNote" data-note="N10921">Save note</button>
+      </div>
+      <div class="grid">
+        <div class="cal-controls"><strong id="title150">Loading…</strong></div>
+        <div class="cal" id="grid150"></div>
+      </div>
+    </section>
   </div>
-</div>
 
-<!-- ===== Calendar ===== -->
-<section class="calendar-wrap">
-  <div class="cal-head">
-    <div id="legend">
-      <span class="chip" style="background:rgba(105,183,255,.15);color:#bfe2ff;border:1px solid rgba(105,183,255,.35)">N78710</span>
-      <span class="chip" style="background:rgba(157,209,125,.15);color:#d8f5c8;border:1px solid rgba(157,209,125,.35)">N10921</span>
-      <span class="chip">• = with instructor</span>
-    </div>
-    <div class="cal-title" id="rangeTitle"></div>
-  </div>
-
-  <div id="monthGrid" class="grid-month" aria-label="calendar grid"></div>
-</section>
-
-<!-- ===== CREATE/EDIT MODAL ===== -->
-<div id="modal" class="modal" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button class="modal-x" id="xModal" aria-label="Close">✕</button>
-    <h3 id="modalTitle" class="modal-title">Add title and time</h3>
-
-    <div class="row">
-      <div>
-        <div class="label">First name</div>
-        <input id="firstName" class="in" placeholder="First" />
+  <!-- ===== Booking Modal ===== -->
+  <div id="bookingModal" class="modal" aria-hidden="true">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="bkTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h4 id="bkTitle" style="margin:0;">Add title and time</h4>
+        <button id="bkClose" class="btn">✕</button>
       </div>
-      <div>
-        <div class="label">Last name</div>
-        <input id="lastName" class="in" placeholder="Last" />
-      </div>
-    </div>
 
-    <div class="row">
-      <div>
-        <div class="label">Email (from sign-in)</div>
-        <input id="emailIn" class="in" readonly />
-      </div>
-      <div>
-        <div class="label">Aircraft</div>
-        <select id="aircraftSel" class="in">
-          <option value="N78710">N78710 — Cessna 172</option>
-          <option value="N10921">N10921 — Cessna 150</option>
-        </select>
-      </div>
-    </div>
+      <div id="ownBadge" class="pill" style="display:none;margin-bottom:8px;">Your booking</div>
 
-    <div class="row">
+      <div class="row">
+        <div>
+          <div class="label">First name</div>
+          <input id="firstName" class="input" placeholder="First name">
+        </div>
+        <div>
+          <div class="label">Last name</div>
+          <input id="lastName" class="input" placeholder="Last name">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="label">Email (from sign-in)</div>
+          <input id="emailField" class="input" placeholder="you@example.com" readonly>
+        </div>
+        <div>
+          <div class="label">Aircraft</div>
+          <select id="aircraftSel" class="input">
+            <option value="N78710">N78710 — Cessna 172</option>
+            <option value="N10921">N10921 — Cessna 150</option>
+          </select>
+        </div>
+      </div>
+
       <div>
         <div class="label">Title</div>
-        <input id="titleIn" class="in" placeholder="e.g., Training flight or $100 burger" />
+        <input id="titleField" class="input" placeholder="e.g., Training flight or $100 burger">
       </div>
-      <div class="switch">
-        <input id="allDay" type="checkbox" />
-        <label for="allDay">All day <span class="muted" style="margin-left:8px;">Times disabled when all‑day is on.</span></label>
-      </div>
-    </div>
 
-    <div class="row">
-      <div>
-        <div class="label">Start</div>
-        <input id="startDate" class="in" type="date">
-        <input id="startTime" class="in" type="time" step="900" style="margin-top:6px;">
+      <div class="row">
+        <div>
+          <div class="label">Start date</div>
+          <input id="startDate" type="date" class="input">
+        </div>
+        <div>
+          <div class="label">End date</div>
+          <input id="endDate" type="date" class="input">
+        </div>
       </div>
-      <div>
-        <div class="label">End</div>
-        <input id="endDate" class="in" type="date">
-        <input id="endTime" class="in" type="time" step="900" style="margin-top:6px;">
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="switch">
-        <input id="withInstructor" type="checkbox" />
-        <label for="withInstructor">Book with instructor?</label>
+      <div class="row">
+        <div>
+          <div class="label">Start time</div>
+          <input id="startTime" type="time" step="900" class="input">
+        </div>
+        <div>
+          <div class="label">End time</div>
+          <input id="endTime" type="time" step="900" class="input">
+        </div>
       </div>
-      <div>
-        <div class="label">Instructor</div>
-        <select id="instrSel" class="in" disabled>
-          <option value="">Choose flight instructor</option>
-          <option>Brian Westfall (BW)</option>
-          <option>Justin Cox (JC)</option>
-          <option>Jeff Moersch (JM)</option>
-        </select>
-      </div>
-    </div>
 
-    <div class="row">
-      <div>
-        <div class="label">Tach start</div>
-        <input id="tachStart" class="in" inputmode="decimal" placeholder="e.g., 456.5">
+      <div class="row">
+        <div>
+          <div class="label">Book with instructor?</div>
+          <select id="withInstr" class="input">
+            <option value="no">No</option>
+            <option value="Brian Westfall (BW)">Brian Westfall (BW)</option>
+            <option value="Justin Cox (JC)">Justin Cox (JC)</option>
+            <option value="Jeff Moersch (JM)">Jeff Moersch (JM)</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Instructor</div>
+          <input id="instrName" class="input" placeholder="Auto-filled if chosen above" readonly>
+        </div>
       </div>
-      <div>
-        <div class="label">Tach end</div>
-        <input id="tachEnd" class="in" inputmode="decimal" placeholder="e.g., 457.1">
-      </div>
-    </div>
 
-    <div class="row">
-      <div>
-        <div class="label">Hobbs start</div>
-        <input id="hobbsStart" class="in" inputmode="decimal" placeholder="e.g., 654.2">
+      <div class="row-4">
+        <div>
+          <div class="label">Tach start</div>
+          <input id="tachStart" class="input" inputmode="decimal" placeholder="e.g., 456.5">
+        </div>
+        <div>
+          <div class="label">Tach end</div>
+          <input id="tachEnd" class="input" inputmode="decimal" placeholder="">
+        </div>
+        <div>
+          <div class="label">Hobbs start</div>
+          <input id="hobbsStart" class="input" inputmode="decimal" placeholder="e.g., 654.2">
+        </div>
+        <div>
+          <div class="label">Hobbs end</div>
+          <input id="hobbsEnd" class="input" inputmode="decimal" placeholder="">
+        </div>
       </div>
-      <div>
-        <div class="label">Hobbs end</div>
-        <input id="hobbsEnd" class="in" inputmode="decimal" placeholder="e.g., 655.0">
+
+      <div id="mismatchWrap" class="warn" style="display:none;margin-top:10px;">
+        Your Tach/Hobbs start don’t match the previous flight’s end. Check to overwrite the previous end values:
+        <label style="margin-left:8px;display:inline-flex;gap:6px;align-items:center;">
+          <input type="checkbox" id="overwritePrev"> Overwrite previous end with my starts
+        </label>
       </div>
-    </div>
 
-    <div id="mismatchWrap" class="warn" style="display:none;">
-      Prior flight end doesn't match your starts. Check to overwrite previous end with your start values:
-      <label class="switch"><input id="overwritePrev" type="checkbox" /> <span>Overwrite previous end values</span></label>
-    </div>
-    <div id="overlapErr" class="err" style="display:none;">This time overlaps an existing booking for the selected aircraft.</div>
-
-    <div class="row">
-      <div style="grid-column:1 / -1;">
+      <div style="margin-top:10px;">
         <div class="label">Comments</div>
-        <textarea id="commentsIn" rows="4" placeholder="Notes for this booking…"></textarea>
+        <textarea id="comments" class="input" rows="3"></textarea>
       </div>
-    </div>
 
-    <div class="foot">
-      <button id="deleteBtn" class="btn" style="display:none;">Delete my booking</button>
-      <button id="saveBtn" class="btn primary">Save</button>
+      <div class="modal-actions">
+        <button id="delBtn" class="btn" style="display:none;">Delete my booking</button>
+        <button id="saveBtn" class="btn primary">Save</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-/* ========= Simple in-page auth (placeholder) ========= */
-const user = {
-  email: localStorage.getItem('f64_email') || '',
-  first: localStorage.getItem('f64_first') || '',
-  last:  localStorage.getItem('f64_last')  || ''
-};
-function updateSigninUi(){
-  document.getElementById('userEmail').textContent = user.email || 'guest';
-}
-document.getElementById('signinBtn').addEventListener('click', ()=>{
-  const email = prompt('Enter email to “sign in” (temporary, for demo):', user.email || '');
-  if(email){
-    const first = prompt('First name:', user.first || '' ) || '';
-    const last  = prompt('Last name:',  user.last  || '' ) || '';
-    user.email = email.trim();
-    user.first = first.trim();
-    user.last  = last.trim();
-    localStorage.setItem('f64_email', user.email);
-    localStorage.setItem('f64_first', user.first);
-    localStorage.setItem('f64_last',  user.last);
-    updateSigninUi();
-  }
-});
-updateSigninUi();
+  <!-- ===== AUTH MODAL (copied from home so sign-in works here too) ===== -->
+  <div id="authModal" class="modal" aria-hidden="true">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h4 id="authTitle" style="margin:0;">Member Sign In</h4>
+        <button id="closeAuth" class="btn">✕</button>
+      </div>
+      <label class="label" for="email">Email</label>
+      <input id="email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
+      <label class="label" for="password">Password</label>
+      <input id="password" class="input" type="password" placeholder="••••••••" autocomplete="current-password">
+      <label class="label" for="invite">Invite Code (new accounts)</label>
+      <input id="invite" class="input" type="text" placeholder="Board Admin Will Provide Invite Code">
+      <div class="modal-actions">
+        <button id="doReset" class="btn">Forgot password?</button>
+        <button id="doSignUp" class="btn">Create Account</button>
+        <button id="doSignIn" class="btn primary">Sign In</button>
+      </div>
+      <div id="authMsg" class="hint" style="min-height:18px"></div>
+      <div class="modal-actions">
+        <button id="signOutBtn" class="btn">Sign out</button>
+      </div>
+    </div>
+  </div>
 
-/* ========= Data store (localStorage for now) ========= */
-const LS_KEY = 'f64_bookings_v3';
-let bookings = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); // each: {id, userEmail, first,last, aircraft, title, start, end, instr, tachStart,tachEnd,hobbsStart,hobbsEnd, notes}
-function saveBookings(){ localStorage.setItem(LS_KEY, JSON.stringify(bookings)); }
+  <script type="module">
+    /* ================= Firebase Auth (same config as home) ================= */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      sendPasswordResetEmail, sendEmailVerification, signOut
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, updateDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-/* ========= Notes store ========= */
-['N78710','N10921'].forEach(ac=>{
-  const t = localStorage.getItem('note_'+ac) || '';
-  const when = localStorage.getItem('note_'+ac+'_ts') || '';
-  const ta = document.getElementById('note'+ac);
-  const sm = document.getElementById('noteTime'+ac);
-  ta.value = t;
-  sm.textContent = when ? ('Last updated: '+ new Date(parseInt(when,10)).toLocaleString()) : 'Last updated: —';
-});
-document.querySelectorAll('.save').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const ac = btn.dataset.aircraft;
-    const ta = document.getElementById('note'+ac);
-    localStorage.setItem('note_'+ac, ta.value);
-    const ts = Date.now();
-    localStorage.setItem('note_'+ac+'_ts', ts.toString());
-    document.getElementById('noteTime'+ac).textContent = 'Last updated: '+ new Date(ts).toLocaleString();
-  });
-});
+    const firebaseConfig = {
+      apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
+      authDomain: "flying64th-b7813.firebaseapp.com",
+      projectId: "flying64th-b7813",
+      storageBucket: "flying64th-b7813.firebasestorage.app",
+      messagingSenderId: "244940935157",
+      appId: "1:244940935157:web:58e7305541377ba743dabc"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-/* ========= Calendar state + rendering ========= */
-const monthGrid = document.getElementById('monthGrid');
-const titleEl   = document.getElementById('viewTitle');
-const rangeTitle= document.getElementById('rangeTitle');
+    /* ================= Local data (placeholder for Firestore) ============== */
+    const LS_KEY = "f64_bookings_v1";
+    /** booking shape:
+     * { id, aircraft, title, start: ISO, end: ISO, withInstr, instrName,
+     *   tachStart, tachEnd, hobbsStart, hobbsEnd, comments, ownerEmail, first, last }
+     */
+    let bookings = JSON.parse(localStorage.getItem(LS_KEY)||"[]");
 
-let current = new Date();
-current.setHours(0,0,0,0);
+    const notesKey = "f64_notes_v1";
+    let notes = JSON.parse(localStorage.getItem(notesKey)||"{}"); // { N78710:"...", N10921:"..." }
 
-function setToday(){ const d=new Date(); d.setHours(0,0,0,0); current = d; render(); }
-document.getElementById('todayBtn').addEventListener('click', setToday);
-document.getElementById('prevBtn').addEventListener('click', ()=>{ current.setMonth(current.getMonth()-1); render(); });
-document.getElementById('nextBtn').addEventListener('click', ()=>{ current.setMonth(current.getMonth()+1); render(); });
-
-document.querySelectorAll('[data-view]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('[data-view]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    // Month is implemented; Week/Day buttons are wired for future.
-  });
-});
-
-let filter = 'all';
-document.querySelectorAll('[data-filter]').forEach(p=>{
-  p.addEventListener('click', ()=>{
-    document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));
-    p.classList.add('active');
-    filter = p.dataset.filter;
-    render();
-  });
-});
-
-function monthRange(d){
-  const year = d.getFullYear(), month=d.getMonth();
-  const start = new Date(year, month, 1);
-  const end   = new Date(year, month+1, 0);
-  return {start,end};
-}
-
-function sameDay(a,b){ return a.getFullYear()==b.getFullYear() && a.getMonth()==b.getMonth() && a.getDate()==b.getDate(); }
-
-function render(){
-  const {start,end} = monthRange(current);
-  titleEl.textContent = start.toLocaleString(undefined,{month:'long', year:'numeric'});
-  rangeTitle.textContent = start.toLocaleString(undefined,{month:'long',year:'numeric'});
-  monthGrid.innerHTML = '';
-
-  // Create day cells for 6 weeks grid around month
-  const firstWeekday = new Date(start); firstWeekday.setDate(1); const startWeekday = (firstWeekday.getDay()+6)%7; // Mon=0
-  const gridStart = new Date(start); gridStart.setDate(1 - startWeekday);
-  for(let i=0;i<42;i++){
-    const day = new Date(gridStart); day.setDate(gridStart.getDate()+i);
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    const d = document.createElement('div'); d.className='d'; d.textContent = day.getDate(); cell.appendChild(d);
-
-    // Events in this day
-    const todays = bookings.filter(b=>{
-      if(filter!=='all' && b.aircraft!==filter) return false;
-      const bs = new Date(b.start), be = new Date(b.end);
-      return sameDay(bs,day) || (bs<day && be>day);
-    }).sort((a,b)=> new Date(a.start)-new Date(b.start));
-
-    todays.forEach(ev=>{
-      const div=document.createElement('div');
-      const mine = (user.email && ev.userEmail===user.email);
-      const isC172 = ev.aircraft==='N78710';
-      div.className='event '+(isC172?'c172':'c150')+(ev.instr?' inst':'')+(mine?' mine':'');
-      const s=new Date(ev.start), e=new Date(ev.end);
-      const hhmm = s.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) + '–' + e.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-      div.textContent = (mine?'(Me) ':'') + (ev.title||'Booking') + ' • ' + hhmm;
-      div.title = ev.aircraft + (ev.instr? ' • with instructor':'') + ' • ' + hhmm;
-      div.addEventListener('click', ()=> openModal(ev.id)); // details / edit own
-      cell.appendChild(div);
-    });
-
-    monthGrid.appendChild(cell);
-  }
-}
-setToday();
-
-/* ========= Modal logic ========= */
-const modal = document.getElementById('modal');
-const xModal= document.getElementById('xModal');
-const saveBtn=document.getElementById('saveBtn');
-const deleteBtn=document.getElementById('deleteBtn');
-const withInstructor = document.getElementById('withInstructor');
-const instrSel = document.getElementById('instrSel');
-withInstructor.addEventListener('change', ()=>{ instrSel.disabled = !withInstructor.checked; if(!withInstructor.checked) instrSel.value=''; });
-
-document.getElementById('newBooking').addEventListener('click', ()=> openModal());
-xModal.addEventListener('click', closeModal);
-modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
-
-let editingId = null;
-
-function openModal(id){
-  document.getElementById('overlapErr').style.display='none';
-  document.getElementById('mismatchWrap').style.display='none';
-  document.getElementById('overwritePrev').checked=false;
-  editingId = id || null;
-  document.getElementById('emailIn').value = user.email || '';
-  document.getElementById('firstName').value = user.first || '';
-  document.getElementById('lastName').value  = user.last  || '';
-
-  if(id){
-    const b = bookings.find(x=>x.id===id);
-    const isMine = !!user.email && b.userEmail===user.email;
-    document.getElementById('modalTitle').textContent = isMine? 'Edit your booking' : 'Booking details';
-    document.getElementById('firstName').value = b.first || '';
-    document.getElementById('lastName').value  = b.last  || '';
-    document.getElementById('aircraftSel').value=b.aircraft;
-    document.getElementById('titleIn').value=b.title||'';
-    document.getElementById('allDay').checked=false;
-    const s=new Date(b.start), e=new Date(b.end);
-    document.getElementById('startDate').value = s.toISOString().slice(0,10);
-    document.getElementById('startTime').value = s.toTimeString().slice(0,5);
-    document.getElementById('endDate').value   = e.toISOString().slice(0,10);
-    document.getElementById('endTime').value   = e.toTimeString().slice(0,5);
-    withInstructor.checked = !!b.instr; instrSel.disabled = !withInstructor.checked; instrSel.value = b.instr || '';
-    document.getElementById('tachStart').value = b.tachStart??'';
-    document.getElementById('tachEnd').value   = b.tachEnd??'';
-    document.getElementById('hobbsStart').value= b.hobbsStart??'';
-    document.getElementById('hobbsEnd').value  = b.hobbsEnd??'';
-    document.getElementById('commentsIn').value= b.notes||'';
-
-    // If not mine: make fields read-only
-    const ro = !isMine;
-    document.querySelectorAll('.in, select, textarea, #allDay, #withInstructor').forEach(el=>{
-      if(el.id==='emailIn') { /* remains read-only */ return; }
-      el.disabled = ro;
-    });
-    saveBtn.style.display = isMine ? 'inline-block' : 'none';
-    deleteBtn.style.display = isMine ? 'inline-block' : 'none';
-  }else{
-    document.getElementById('modalTitle').textContent = 'Add title and time';
-    ['titleIn','tachStart','tachEnd','hobbsStart','hobbsEnd','commentsIn'].forEach(id=>document.getElementById(id).value='');
-    withInstructor.checked=false; instrSel.disabled=true; instrSel.value='';
-    document.getElementById('aircraftSel').value='N78710';
-
-    // default date/time to today 10:00–11:00
-    const now = new Date(); now.setMinutes(0,0,0);
-    const s = new Date(now); s.setHours(10);
-    const e = new Date(now); e.setHours(11);
-    document.getElementById('startDate').value = s.toISOString().slice(0,10);
-    document.getElementById('startTime').value = s.toTimeString().slice(0,5);
-    document.getElementById('endDate').value   = e.toISOString().slice(0,10);
-    document.getElementById('endTime').value   = e.toTimeString().slice(0,5);
-
-    document.querySelectorAll('.in, select, textarea').forEach(el=> el.disabled=false);
-    saveBtn.style.display='inline-block'; deleteBtn.style.display='none';
-  }
-  modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
-}
-function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); editingId=null; }
-
-/* ========= Validation helpers ========= */
-function parseDt(d,v){ return new Date(d.value + 'T' + (v.value||'00:00')); }
-function numberOrNull(v){ const n=parseFloat(v); return isFinite(n)? n : null; }
-
-function overlaps(aircraft, start, end, ignoreId=null){
-  return bookings.some(b=> b.aircraft===aircraft && b.id!==ignoreId && !(end<=new Date(b.start) || start>=new Date(b.end)));
-}
-
-function getPreviousFlight(aircraft, start){
-  const prev = bookings
-    .filter(b=> b.aircraft===aircraft && new Date(b.end) <= start)
-    .sort((a,b)=> new Date(b.end)-new Date(a.end))[0];
-  return prev||null;
-}
-
-saveBtn.addEventListener('click', ()=>{
-  const isNew = !editingId;
-  const first = (document.getElementById('firstName').value||'').trim();
-  const last  = (document.getElementById('lastName').value||'').trim();
-  const email = user.email || '';
-  if(!first || !last){ alert('First and last name are required.'); return; }
-  if(!email){ alert('Sign in with an email first.'); return; }
-
-  const ac = document.getElementById('aircraftSel').value;
-  const title = document.getElementById('titleIn').value.trim();
-  const s = parseDt(document.getElementById('startDate'), document.getElementById('startTime'));
-  const e = parseDt(document.getElementById('endDate'),   document.getElementById('endTime'));
-  if(!(s<e)){ alert('End must be after start.'); return; }
-
-  // Overlap check
-  const ov = overlaps(ac, s, e, editingId);
-  document.getElementById('overlapErr').style.display = ov? 'block' : 'none';
-  if(ov) return;
-
-  const tS = numberOrNull(document.getElementById('tachStart').value);
-  const tE = numberOrNull(document.getElementById('tachEnd').value);
-  const hS = numberOrNull(document.getElementById('hobbsStart').value);
-  const hE = numberOrNull(document.getElementById('hobbsEnd').value);
-
-  const instr = document.getElementById('withInstructor').checked ? (document.getElementById('instrSel').value || '') : '';
-
-  // Previous flight end mismatch logic
-  const prev = getPreviousFlight(ac, s);
-  let mismatch = false;
-  if(prev){
-    if(tS!=null && prev.tachEnd!=null && Math.abs(tS - prev.tachEnd) > 0.0001) mismatch = true;
-    if(hS!=null && prev.hobbsEnd!=null && Math.abs(hS - prev.hobbsEnd) > 0.0001) mismatch = true;
-  }
-  document.getElementById('mismatchWrap').style.display = mismatch ? 'block' : 'none';
-
-  const overwrite = document.getElementById('overwritePrev').checked;
-  if(mismatch && !overwrite){
-    // Ask user to confirm by checking the box
-    return;
-  }
-  if(mismatch && overwrite && prev){
-    // Update previous booking's end to match new starts
-    if(tS!=null) prev.tachEnd = tS;
-    if(hS!=null) prev.hobbsEnd = hS;
-  }
-
-  if(isNew){
-    const id = 'b'+Math.random().toString(36).slice(2);
-    bookings.push({
-      id, userEmail: email, first, last,
-      aircraft: ac, title, start:s.toISOString(), end:e.toISOString(),
-      instr, tachStart:tS, tachEnd:tE, hobbsStart:hS, hobbsEnd:hE,
-      notes: (document.getElementById('commentsIn').value||'').trim()
-    });
-  }else{
-    const idx = bookings.findIndex(b=>b.id===editingId);
-    if(idx>-1){
-      const b = bookings[idx];
-      if(b.userEmail !== email){ alert('You can only edit your own booking.'); return; }
-      bookings[idx] = {
-        ...b,
-        first, last, aircraft: ac, title,
-        start:s.toISOString(), end:e.toISOString(),
-        instr, tachStart:tS, tachEnd:tE, hobbsStart:hS, hobbsEnd:hE,
-        notes: (document.getElementById('commentsIn').value||'').trim()
-      };
+    function saveAll(){
+      localStorage.setItem(LS_KEY, JSON.stringify(bookings));
+      localStorage.setItem(notesKey, JSON.stringify(notes));
+      render();
     }
-  }
-  saveBookings(); closeModal(); render();
-});
 
-deleteBtn.addEventListener('click', ()=>{
-  if(!editingId) return;
-  const idx = bookings.findIndex(b=>b.id===editingId);
-  if(idx>-1){
-    const b = bookings[idx];
-    if(!user.email || user.email!==b.userEmail){ alert('You can only delete your own booking.'); return; }
-    if(!confirm('Delete this booking?')) return;
-    bookings.splice(idx,1);
-    saveBookings(); closeModal(); render();
-  }
-});
-</script>
+    /* ================= Auth modal (copied from home) ======================= */
+    const signinBtn  = document.getElementById('signinBtn');
+    const authModal  = document.getElementById('authModal');
+    const closeAuth  = document.getElementById('closeAuth');
+    const emailEl    = document.getElementById('email');
+    const passEl     = document.getElementById('password');
+    const inviteEl   = document.getElementById('invite');
+    const doSignIn   = document.getElementById('doSignIn');
+    const doSignUp   = document.getElementById('doSignUp');
+    const doReset    = document.getElementById('doReset');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const authMsg    = document.getElementById('authMsg');
+
+    function openAuth(){ authModal.classList.add('open'); authModal.setAttribute('aria-hidden','false'); authMsg.textContent=""; }
+    function closeAuthFn(){ authModal.classList.remove('open'); authModal.setAttribute('aria-hidden','true'); }
+    signinBtn.addEventListener('click', openAuth);
+    closeAuth.addEventListener('click', closeAuthFn);
+    authModal.addEventListener('click', e=>{ if(e.target===authModal) closeAuthFn(); });
+
+    doSignIn.addEventListener('click', async ()=>{
+      const email = (emailEl.value||"").trim(); const pass = passEl.value;
+      if(!email||!pass){ authMsg.textContent="Enter email and password."; return; }
+      try{ await signInWithEmailAndPassword(auth,email,pass); authMsg.textContent="Signed in."; closeAuthFn(); }
+      catch(err){ authMsg.textContent = err.message; }
+    });
+    doSignUp.addEventListener('click', async ()=>{
+      const email=(emailEl.value||"").trim(); const pass=passEl.value; const code=(inviteEl.value||"").trim();
+      if(!email||!pass||!code){ authMsg.textContent="Email, password, and invite code are required."; return; }
+      try{
+        // very light check – in production, verify invite in Firestore, omitted here
+        const cred = await createUserWithEmailAndPassword(auth,email,pass);
+        await sendEmailVerification(cred.user);
+        authMsg.textContent="Account created. Check your email to verify.";
+      }catch(err){ authMsg.textContent=err.message; }
+    });
+    doReset.addEventListener('click', async ()=>{
+      const email=(emailEl.value||"").trim(); if(!email){ authMsg.textContent="Enter email first."; return; }
+      try{ await sendPasswordResetEmail(auth,email); authMsg.textContent="Password reset email sent."; }
+      catch(err){ authMsg.textContent=err.message; }
+    });
+    signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); });
+
+    let currentUser = null;
+    onAuthStateChanged(auth, user=>{
+      currentUser = user || null;
+      if(user){
+        const shortEmail = user.email && user.email.length>25 ? user.email.slice(0,25)+"…" : (user.email||"");
+        signinBtn.textContent = `Account – ${shortEmail}`;
+      }else{
+        signinBtn.textContent = "Sign In";
+      }
+      // refresh booking modal defaults
+      if (currentUser) {
+        document.getElementById('emailField').value = currentUser.email||"";
+      }
+      render();
+    });
+
+    /* ================= Calendar logic (vanilla) ============================ */
+    const state = {
+      filter: 'all',  // all | tail
+      view: 'month',  // month | week | day
+      cursor: new Date() // current anchor date
+    };
+
+    // set to today on load
+    state.cursor = new Date();
+
+    // Controls
+    document.getElementById('fltFilter').addEventListener('click', (e)=>{
+      if(e.target.tagName!=='BUTTON') return;
+      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+      state.filter = e.target.dataset.f;
+      render();
+    });
+    document.getElementById('viewSeg').addEventListener('click', (e)=>{
+      if(e.target.tagName!=='BUTTON') return;
+      [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+      state.view = e.target.dataset.v;
+      render();
+    });
+    document.getElementById('prevBtn').addEventListener('click', ()=>{
+      const d = new Date(state.cursor);
+      if(state.view==='month'){ d.setMonth(d.getMonth()-1); }
+      else if(state.view==='week'){ d.setDate(d.getDate()-7); }
+      else { d.setDate(d.getDate()-1); }
+      state.cursor = d; render();
+    });
+    document.getElementById('nextBtn').addEventListener('click', ()=>{
+      const d = new Date(state.cursor);
+      if(state.view==='month'){ d.setMonth(d.getMonth()+1); }
+      else if(state.view==='week'){ d.setDate(d.getDate()+7); }
+      else { d.setDate(d.getDate()+1); }
+      state.cursor = d; render();
+    });
+    document.getElementById('todayBtn').addEventListener('click', ()=>{ state.cursor = new Date(); render(); });
+
+    document.querySelectorAll('.saveNote').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const tail = btn.dataset.note;
+        const txt = (tail==='N78710') ? document.getElementById('note172').value : document.getElementById('note150').value;
+        notes[tail] = txt;
+        saveAll();
+      });
+    });
+
+    document.getElementById('newBtn').addEventListener('click', ()=> openBookingModal());
+
+    // Rendering helpers
+    function fmtMonthTitle(d){ return d.toLocaleString(undefined,{month:'long', year:'numeric'}); }
+    function startOfMonth(d){ const x=new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
+    function endOfMonth(d){ const x=new Date(d); x.setMonth(x.getMonth()+1); x.setDate(0); x.setHours(23,59,59,999); return x; }
+    function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+    function endOfWeek(d){ const s=startOfWeek(d); const x=new Date(s); x.setDate(x.getDate()+6); x.setHours(23,59,59,999); return x; }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+
+    function render(){
+      // titles
+      document.getElementById('title172').textContent = fmtMonthTitle(state.cursor);
+      document.getElementById('title150').textContent = fmtMonthTitle(state.cursor);
+      // notes
+      document.getElementById('note172').value = notes['N78710'] || '';
+      document.getElementById('note150').value = notes['N10921'] || '';
+
+      // which tails visible (filter only affects event display)
+      const g172 = document.getElementById('grid172');
+      const g150 = document.getElementById('grid150');
+      g172.innerHTML = ""; g150.innerHTML = "";
+
+      if(state.view==='month'){
+        renderMonth(g172,'N78710'); renderMonth(g150,'N10921');
+      }else if(state.view==='week'){
+        renderWeek(g172,'N78710'); renderWeek(g150,'N10921');
+      }else{
+        renderDay(g172,'N78710'); renderDay(g150,'N10921');
+      }
+    }
+
+    function relevant(bk, tail, rangeStart, rangeEnd){
+      if(state.filter!=='all' && bk.aircraft!==state.filter) return false;
+      if(bk.aircraft!==tail) return false;
+      const s=new Date(bk.start), e=new Date(bk.end);
+      return e>=rangeStart && s<=rangeEnd;
+    }
+
+    function eventClass(bk){
+      const cls = [];
+      cls.push(bk.aircraft==='N78710'?'c172':'c150');
+      if(bk.withInstr && bk.withInstr!=='no') cls.push('instr');
+      if(currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase()) cls.push('mine');
+      return cls.join(' ');
+    }
+
+    function renderMonth(container, tail){
+      const start = startOfWeek(startOfMonth(state.cursor));
+      const end   = endOfWeek(endOfMonth(state.cursor));
+
+      // weekdays header
+      const head = document.createElement('div');
+      head.className = 'cal-header';
+      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
+        const el=document.createElement('div'); el.textContent=d; head.appendChild(el);
+      });
+      container.appendChild(head);
+
+      // build days
+      const rows = [];
+      let d = new Date(start);
+      while(d<=end){
+        const row=document.createElement('div'); row.className='cal-row';
+        for(let i=0;i<7;i++){
+          const cell=document.createElement('div'); cell.className='cell';
+          const day=document.createElement('div'); day.className='d'; day.textContent=d.getDate();
+          if(sameDate(d,new Date())){ day.style.color='#fff'; day.style.fontWeight='800'; }
+          cell.appendChild(day);
+
+          // events
+          bookings.filter(b=>relevant(b,tail,new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0), new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59,999)))
+            .forEach(bk=>{
+              const e=document.createElement('div');
+              e.className = 'evt '+eventClass(bk);
+              const s=new Date(bk.start), eD=new Date(bk.end);
+              e.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+              e.title = `${bk.title||'Booking'} • ${s.toLocaleString()} → ${eD.toLocaleString()}`;
+              e.addEventListener('click', ()=>openBookingModal(bk));
+              cell.appendChild(e);
+            });
+
+          row.appendChild(cell);
+          d.setDate(d.getDate()+1);
+        }
+        container.appendChild(row);
+        rows.push(row);
+      }
+    }
+
+    function renderWeek(container, tail){
+      const start = startOfWeek(state.cursor);
+      const end   = endOfWeek(state.cursor);
+
+      // header
+      const head = document.createElement('div'); head.className='cal-header';
+      for(let i=0;i<7;i++){
+        const dt=new Date(start); dt.setDate(start.getDate()+i);
+        const el=document.createElement('div'); el.textContent=`${dt.toLocaleDateString(undefined,{weekday:'short'})} ${dt.getMonth()+1}/${dt.getDate()}`;
+        head.appendChild(el);
+      }
+      container.appendChild(head);
+
+      const row=document.createElement('div'); row.className='cal-row';
+      for(let i=0;i<7;i++){
+        const cell=document.createElement('div'); cell.className='cell';
+        const dt=new Date(start); dt.setDate(start.getDate()+i);
+        const d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0,0);
+        const d1=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59,999);
+
+        bookings.filter(b=>relevant(b,tail,d0,d1)).forEach(bk=>{
+          const s=new Date(bk.start), eD=new Date(bk.end);
+          const totalMinutes = (eD - s)/60000;
+          const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+          const height = Math.max(28, (totalMinutes / (24*60))*100);
+          const slot=document.createElement('div');
+          slot.className='slot '+eventClass(bk);
+          slot.style.top = `calc(${top}% - 6px)`;
+          slot.style.height = `calc(${height}% - 6px)`;
+          slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+          slot.addEventListener('click', ()=>openBookingModal(bk));
+          cell.appendChild(slot);
+        });
+
+        row.appendChild(cell);
+      }
+      container.appendChild(row);
+    }
+
+    function renderDay(container, tail){
+      const start=new Date(state.cursor); start.setHours(0,0,0,0);
+      const end=new Date(state.cursor); end.setHours(23,59,59,999);
+
+      const row=document.createElement('div'); row.className='cal-row';
+      const cell=document.createElement('div'); cell.className='cell'; cell.style.minHeight='560px';
+      bookings.filter(b=>relevant(b,tail,start,end)).forEach(bk=>{
+        const s=new Date(bk.start), eD=new Date(bk.end);
+        const totalMinutes = (eD - s)/60000;
+        const top = ((s.getHours()*60 + s.getMinutes())/ (24*60)) * 100;
+        const height = Math.max(28, (totalMinutes / (24*60))*100);
+        const slot=document.createElement('div'); slot.className='slot '+eventClass(bk);
+        slot.style.top=`calc(${top}% - 6px)`; slot.style.height=`calc(${height}% - 6px)`;
+        slot.textContent = `${pad(s.getHours()%12||12)}:${pad(s.getMinutes())}${s.getHours()<12?'a':'p'} – ${bk.title||'Booking'}`;
+        slot.addEventListener('click', ()=>openBookingModal(bk));
+        cell.appendChild(slot);
+      });
+      row.appendChild(cell);
+      container.appendChild(row);
+    }
+
+    /* ================= Booking modal logic ================================ */
+    const modal = document.getElementById('bookingModal');
+    const closeBtn = document.getElementById('bkClose');
+    const saveBtn = document.getElementById('saveBtn');
+    const delBtn  = document.getElementById('delBtn');
+    const ownBadge = document.getElementById('ownBadge');
+
+    const firstName = document.getElementById('firstName');
+    const lastName  = document.getElementById('lastName');
+    const emailField= document.getElementById('emailField');
+    const aircraftSel=document.getElementById('aircraftSel');
+    const titleField= document.getElementById('titleField');
+    const startDate = document.getElementById('startDate');
+    const endDate   = document.getElementById('endDate');
+    const startTime = document.getElementById('startTime');
+    const endTime   = document.getElementById('endTime');
+    const withInstr = document.getElementById('withInstr');
+    const instrName = document.getElementById('instrName');
+    const tachStart = document.getElementById('tachStart');
+    const tachEnd   = document.getElementById('tachEnd');
+    const hobbsStart= document.getElementById('hobbsStart');
+    const hobbsEnd  = document.getElementById('hobbsEnd');
+    const comments  = document.getElementById('comments');
+    const mismatchWrap = document.getElementById('mismatchWrap');
+    const overwritePrev = document.getElementById('overwritePrev');
+
+    withInstr.addEventListener('change', ()=>{
+      if(withInstr.value==='no'){ instrName.value=''; }
+      else{ instrName.value = withInstr.value; }
+    });
+
+    let editingId = null; // null = new
+
+    function openBookingModal(bk=null){
+      editingId = bk ? bk.id : null;
+      ownBadge.style.display='none';
+      delBtn.style.display='none';
+      overwritePrev.checked=false;
+      mismatchWrap.style.display='none';
+
+      // defaults
+      emailField.value = currentUser?.email || "";
+      firstName.value = currentUser?.displayName ? currentUser.displayName.split(' ')[0] || '' : (firstName.value||'');
+      lastName.value  = currentUser?.displayName ? (currentUser.displayName.split(' ').slice(1).join(' ')||'') : (lastName.value||'');
+
+      if(bk){
+        document.getElementById('bkTitle').textContent = "Booking details";
+        const mine = currentUser && (bk.ownerEmail||"").toLowerCase()===(currentUser.email||"").toLowerCase();
+        ownBadge.style.display = mine ? 'inline-flex' : 'none';
+        delBtn.style.display   = mine ? 'inline-block' : 'none';
+        setReadOnly(!mine);
+        fill(bk);
+      }else{
+        document.getElementById('bkTitle').textContent = "Add title and time";
+        setReadOnly(false);
+        const s=new Date(state.cursor);
+        startDate.value = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;
+        endDate.value   = startDate.value;
+        startTime.value = "10:00";
+        endTime.value   = "11:00";
+        aircraftSel.value = (state.filter==='N78710'||state.filter==='N10921')?state.filter:'N78710';
+        titleField.value = "";
+        withInstr.value="no"; instrName.value="";
+        tachStart.value=tachEnd.value=hobbsStart.value=hobbsEnd.value="";
+        comments.value="";
+      }
+
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+      titleField.focus();
+      checkMismatch();
+    }
+
+    function setReadOnly(ro){
+      [firstName,lastName,startDate,endDate,startTime,endTime,titleField,withInstr,instrName,tachStart,tachEnd,hobbsStart,hobbsEnd,comments,aircraftSel]
+        .forEach(el=> el.readOnly = ro);
+      withInstr.disabled = ro;
+      aircraftSel.disabled = ro;
+      saveBtn.style.display = ro ? 'none' : 'inline-block';
+    }
+
+    function fill(bk){
+      firstName.value = bk.first||"";
+      lastName.value  = bk.last||"";
+      emailField.value= bk.ownerEmail||"";
+      aircraftSel.value = bk.aircraft;
+      titleField.value = bk.title||"";
+      const s=new Date(bk.start), e=new Date(bk.end);
+      startDate.value = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;
+      endDate.value   = `${e.getFullYear()}-${pad(e.getMonth()+1)}-${pad(e.getDate())}`;
+      startTime.value = `${pad(s.getHours())}:${pad(s.getMinutes())}`;
+      endTime.value   = `${pad(e.getHours())}:${pad(e.getMinutes())}`;
+      withInstr.value = bk.withInstr||'no';
+      instrName.value = bk.instrName||'';
+      tachStart.value = bk.tachStart||'';
+      tachEnd.value   = bk.tachEnd||'';
+      hobbsStart.value= bk.hobbsStart||'';
+      hobbsEnd.value  = bk.hobbsEnd||'';
+      comments.value  = bk.comments||'';
+    }
+
+    closeBtn.addEventListener('click', ()=>{ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
+
+    // conflict detection (no overlaps on same aircraft)
+    function overlaps(candidate, ignoreId=null){
+      const cs = new Date(candidate.start), ce=new Date(candidate.end);
+      return bookings.some(b=>{
+        if(b.aircraft!==candidate.aircraft) return false;
+        if(ignoreId && b.id===ignoreId) return false;
+        const bs=new Date(b.start), be=new Date(b.end);
+        return (cs < be) && (ce > bs);
+      });
+    }
+
+    function findPrevForTailBefore(tail, when){
+      // last booking that ends before "when"
+      const list = bookings.filter(b=>b.aircraft===tail && new Date(b.end) <= when)
+                           .sort((a,b)=> new Date(b.end)-new Date(a.end));
+      return list[0] || null;
+    }
+
+    function checkMismatch(){
+      const tail = aircraftSel.value;
+      const startIso = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
+      if(isNaN(startIso.getTime())){ mismatchWrap.style.display='none'; return; }
+      const prev = findPrevForTailBefore(tail,startIso);
+      if(!prev){ mismatchWrap.style.display='none'; return; }
+
+      let mismatch=false;
+      if(tachStart.value && prev.tachEnd && Number(tachStart.value) != Number(prev.tachEnd)) mismatch=true;
+      if(hobbsStart.value && prev.hobbsEnd && Number(hobbsStart.value) != Number(prev.hobbsEnd)) mismatch=true;
+
+      mismatchWrap.style.display = mismatch ? 'block' : 'none';
+    }
+
+    [aircraftSel,startDate,startTime,tachStart,hobbsStart].forEach(el=> el.addEventListener('input', checkMismatch));
+
+    saveBtn.addEventListener('click', ()=>{
+      if(!currentUser){ alert("Please sign in first."); return; }
+      const s = new Date(`${startDate.value}T${startTime.value||"00:00"}`);
+      const e = new Date(`${endDate.value}T${endTime.value||"00:00"}`);
+      if(isNaN(s)||isNaN(e)|| e<=s){ alert("Please enter a valid start/end."); return; }
+
+      const data = {
+        id: editingId || crypto.randomUUID(),
+        aircraft: aircraftSel.value,
+        title: (titleField.value||"").trim(),
+        start: s.toISOString(),
+        end:   e.toISOString(),
+        withInstr: withInstr.value,
+        instrName: (withInstr.value==='no'?'':withInstr.value),
+        tachStart: tachStart.value || "",
+        tachEnd:   tachEnd.value   || "",
+        hobbsStart: hobbsStart.value || "",
+        hobbsEnd:   hobbsEnd.value   || "",
+        comments: (comments.value||"").trim(),
+        ownerEmail: (currentUser.email||"").toLowerCase(),
+        first: (firstName.value||"").trim(),
+        last:  (lastName.value||"").trim()
+      };
+
+      if(overlaps(data, editingId)){ alert("This overlaps an existing booking for this aircraft."); return; }
+
+      // previous-flight resolution
+      const prev = findPrevForTailBefore(data.aircraft, s);
+      if(prev){
+        const needFix = (data.tachStart && prev.tachEnd && Number(data.tachStart)!=Number(prev.tachEnd))
+                     || (data.hobbsStart && prev.hobbsEnd && Number(data.hobbsStart)!=Number(prev.hobbsEnd));
+        if(needFix && overwritePrev.checked){
+          // allow overwrite
+          prev.tachEnd   = data.tachStart || prev.tachEnd;
+          prev.hobbsEnd  = data.hobbsStart|| prev.hobbsEnd;
+        }else if(needFix){
+          alert("Start Tach/Hobbs do not match the previous end. Check the overwrite box to proceed.");
+          return;
+        }
+      }
+
+      if(editingId){
+        const i = bookings.findIndex(b=>b.id===editingId);
+        if(i>=0){
+          // can only edit own booking
+          const mine = (bookings[i].ownerEmail||"") === (currentUser.email||"").toLowerCase();
+          if(!mine){ alert("You can only edit your own booking."); return; }
+          bookings[i] = data;
+        }
+      }else{
+        bookings.push(data);
+      }
+
+      saveAll();
+      modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+    });
+
+    delBtn.addEventListener('click', ()=>{
+      if(!currentUser){ alert("Please sign in first."); return; }
+      if(!editingId) return;
+      const i = bookings.findIndex(b=>b.id===editingId);
+      if(i<0) return;
+      const mine = (bookings[i].ownerEmail||"") === (currentUser.email||"").toLowerCase();
+      if(!mine){ alert("You can only delete your own booking."); return; }
+      if(confirm("Delete this booking?")){
+        bookings.splice(i,1);
+        saveAll();
+        modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+      }
+    });
+
+    // initial
+    render();
+  </script>
 </body>
 </html>
