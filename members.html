@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Flying 64th – Home</title>
+  <meta name="description" content="The Flying 64th Flying Club – affordable general aviation in East Tennessee based at Oliver Springs Airport (Braden Field). Operates Cessna 172 & 150." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+ <style>
+    :root{
+      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
+      --card:#0f1722cc;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+
+   /* ===== NAV (matches home.html) ===== */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
+      border-bottom:1px solid var(--rule);
+    }
+    .nav{
+      max-width:1200px; margin:0 auto; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
+      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
+    }
+    .brand img{ height:34px; width:auto }
+    header nav{
+      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
+    }
+    header nav a{
+      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
+      transition:all .18s ease;
+    }
+    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
+    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    @media (max-width:900px){
+      .nav{ padding:10px 14px; flex-wrap:wrap }
+      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+      header nav::-webkit-scrollbar{ display:none }
+      header nav a{ padding:8px 10px; font-size:15px }
+    }
+
+    /* ===== CONTENT ===== */
+    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
+    .grid{display:grid;gap:16px}
+    .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
+    @media (max-width:760px){ .grid.cols-3{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 18px;
+    }
+    .card h2{margin:0 0 8px;font-size:1.25rem}
+    .muted{color:var(--muted)}
+    .list{padding-left:18px;margin:8px 0}
+    .list li{margin:6px 0}
+    .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
+    .iconbtn:hover{background:rgba(255,255,255,.06)}
+<!-- ===== NAV ===== -->
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="home.html">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
+      <span>The Flying 64th</span>
+    </a>
+    <nav>
+      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
+      <a class="active" href="home.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="becomeamember.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="members.html">Members</a>
+      <a href="poh&manuals.html">POH &amp; Manuals</a>
+    </nav>
+  </div>
+</header>
