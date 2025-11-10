@@ -7,11 +7,14 @@
 
   <style>
     :root{
-      /* base palette to match POH page */
       --bg:#0f1115; --ink:#e9eef7; --muted:#b9c2d0;
       --panel:#151924; --panel2:#0d1018;
       --accent:#4da3ff; --rule:rgba(255,255,255,.10); --border:rgba(255,255,255,.12);
       --radius:14px;
+      --blue:#4da3ff;   /* C172 N78710 */
+      --green:#58d68d;  /* C150 N10921 */
+      --warning:#e8b04d;
+      --danger:#ff6b6b;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -21,7 +24,7 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ===== NAV (same as POH) ===== */
+    /* ===== NAV ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -33,13 +36,11 @@
       display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
     .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
-      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
+      display:flex; align-items:center; gap:10px; font-weight:800;
+      color:var(--ink); text-decoration:none; font-size:22px;
     }
     .brand img{ height:34px; width:auto }
-    header nav{
-      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
-    }
+    header nav{ display:flex; align-items:center; gap:18px; flex-wrap:nowrap; }
     header nav a{
       color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
       transition:all .18s ease;
@@ -53,35 +54,100 @@
       header nav a{ padding:8px 10px; font-size:15px }
     }
 
-    /* ===== HERO ===== */
-    .hero{ position:relative; isolation:isolate; background:#0c0f17 }
-    .hero::before{
-      content:""; position:absolute; inset:0; z-index:-1;
-      background:url("images/planesc172.1.jpg") center/cover no-repeat; opacity:.22;
-    }
-    @media (min-width:900px){ .hero::before{ background-attachment:fixed } }
-    .hero-inner{ max-width:1200px; margin:0 auto; padding:28px 18px 20px }
-    .hero h1{ margin:0 0 6px; font-size:clamp(24px,4vw,38px) }
-    .hero p{ margin:0; color:var(--muted) }
-
-    /* ===== UNDER CONSTRUCTION PANEL ===== */
-    .wrap{
-      max-width:900px; margin:22px auto 60px; padding:0 18px;
-    }
-    .panel{
+    /* ===== PERSISTENT REMINDER BANNER ===== */
+    .banner{ max-width:1200px; margin:12px auto 0; padding:0 18px; }
+    .banner-inner{
+      display:flex; align-items:flex-start; gap:12px;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border); border-radius:var(--radius);
-      padding:28px; text-align:center;
+      border:1px solid var(--border); border-left:4px solid var(--accent);
+      border-radius:12px; padding:12px 14px;
     }
-    .hammer{ font-size:56px; line-height:1; margin-bottom:8px; animation:pulse 1.6s infinite }
-    h2{ margin:8px 0 6px; font-size:26px }
-    p{ margin:0; color:var(--muted); font-size:15.5px }
-    @keyframes pulse{ 0%,100%{opacity:.7} 50%{opacity:1} }
+    .banner .icon{ font-size:22px; line-height:1.1 }
+    .banner strong{ color:#cfe1ff }
+
+    /* ===== TOOLBAR ===== */
+    .wrap{ max-width:1200px; margin:16px auto 60px; padding:0 18px; }
+    .toolbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:12px; padding:10px;
+    }
+    .pills{ display:flex; gap:8px; }
+    .pill{
+      border:1px solid var(--border); background:#0c0f18; color:#eaf2ff;
+      padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:600; font-size:14px;
+    }
+    .pill[data-filter="N78710"].active{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border-color:#2b6bb1 }
+    .pill[data-filter="N10921"].active{ background:linear-gradient(180deg,#2b7a55,#1d5139); border-color:#2b7a55 }
+    .pill[data-filter="ALL"].active{ background:linear-gradient(180deg,#3b465a,#242b39) }
+
+    .btn{
+      border:1px solid var(--border); background:#0c1020; color:#eaf2ff;
+      padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:700; cursor:pointer;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn:hover{ border-color:rgba(77,163,255,.45); background:#0e1630 }
+    .btn.primary{ background:linear-gradient(180deg,#2b6bb1,#1c4370); border:1px solid #2b6bb1 }
+
+    /* ===== CALENDAR PLACEHOLDER ===== */
+    .cal{
+      margin-top:12px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:12px; min-height:56vh;
+      display:grid; place-content:center; color:var(--muted); text-align:center; padding:24px;
+    }
+    .cal h3{ margin:0 0 6px }
+
+    /* ===== BOOKING MODAL ===== */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.5);
+      display:none; align-items:center; justify-content:center; z-index:100;
+    }
+    .modal{
+      width:min(760px,92vw); background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border); border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.5);
+      overflow:hidden;
+    }
+    .modal-header{
+      padding:12px 16px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px;
+    }
+    .modal-title{
+      flex:1; font-size:20px; font-weight:700; color:#e5f0ff;
+    }
+    .modal-body{ padding:16px; display:grid; gap:14px; }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .row-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .field span{ font-size:13px; color:#cfe1ff }
+    input,select,textarea{
+      background:#0b0e15; color:var(--ink); border:1px solid var(--border);
+      border-radius:10px; padding:10px 12px; outline:none; width:100%;
+    }
+    textarea{ min-height:84px; resize:vertical }
+    .inline{ display:flex; align-items:center; gap:10px; }
+    .switch{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+    .switch input{ appearance:none; width:36px; height:22px; border-radius:999px; background:#444; position:relative; outline:none; transition:.2s }
+    .switch input:checked{ background:#2b6bb1 }
+    .switch input::after{
+      content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%;
+      background:#fff; transition:.2s;
+    }
+    .switch input:checked::after{ transform:translateX(14px) }
+
+    .modal-footer{
+      padding:12px 16px; border-top:1px solid var(--border);
+      display:flex; justify-content:flex-end; gap:8px;
+    }
+    .hint{ color:var(--muted); font-size:12.5px }
+    @media (max-width:800px){
+      .row,.row-3{ grid-template-columns:1fr }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ===== NAV BAR (matches POH) ===== -->
+  <!-- ===== NAV BAR ===== -->
   <header class="site-header">
     <div class="nav">
       <a href="home.html" class="brand">
@@ -98,34 +164,162 @@
     </div>
   </header>
 
-  <!-- ===== HERO ===== -->
-  <section class="hero" role="img" aria-label="Aircraft background">
-    <div class="hero-inner">
-      <h1>Calendar</h1>
-      <p> Day / Week / Month views to book the airframes are coming soon.</p>
+  <!-- ===== PERSISTENT REMINDER BANNER ===== -->
+  <div id="meterBanner" class="banner">
+    <div class="banner-inner">
+      <div class="icon">⏱️</div>
+      <div>
+        <strong>Reminder:</strong>
+        Enter <strong>Tach</strong> & <strong>Hobbs</strong> start/end after every flight.
+        If the prior end is missing, you’ll be prompted to resolve it before <strong>closing your flight</strong>.
+      </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ===== MAIN ===== -->
+  <!-- ===== TOOLBAR ===== -->
   <main class="wrap">
-    <div class="panel" role="status" aria-live="polite">
-      <div class="hammer">🛠️</div>
-      <h2>Under Development</h2>
-      <p>We’re building an interactive calendar with smooth month/year navigation and multiple views.<br>
-      Check back for the first release.</p>
+    <div class="toolbar">
+      <div class="pills" role="tablist">
+        <button class="pill active" data-filter="ALL">All</button>
+        <button class="pill" data-filter="N78710">N78710 — C172</button>
+        <button class="pill" data-filter="N10921">N10921 — C150</button>
+      </div>
+      <div class="right">
+        <button id="newBooking" class="btn primary">＋ New booking</button>
+        <button class="btn" disabled>Export (coming soon)</button>
+      </div>
     </div>
+
+    <!-- ===== CALENDAR PLACEHOLDER ===== -->
+    <section class="cal">
+      <div>
+        <h3>Interactive calendar under construction</h3>
+        <p>Google-style Day / Week / Month views coming soon. Use <b>New booking</b> to preview the form.</p>
+      </div>
+    </section>
   </main>
 
+  <!-- ===== BOOKING MODAL ===== -->
+  <div id="bookingModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Add title and time</div>
+        <button id="closeModal" class="btn" style="padding:6px 10px">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Aircraft first -->
+        <label class="field">
+          <span>Aircraft</span>
+          <select id="aircraft" required>
+            <option value="" selected disabled>Select aircraft</option>
+            <option value="N78710">N78710 — Cessna 172</option>
+            <option value="N10921">N10921 — Cessna 150</option>
+          </select>
+        </label>
+
+        <!-- Title -->
+        <label class="field">
+          <span>Title</span>
+          <input id="titleInput" type="text" placeholder="e.g., Training flight or $100 burger" />
+        </label>
+
+        <!-- Date & Time -->
+        <div class="row">
+          <label class="field"><span>Start date</span><input id="startDate" type="date" /></label>
+          <label class="field"><span>End date</span><input id="endDate" type="date" /></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Start time</span><input id="startTime" type="time" step="900" /></label>
+          <label class="field"><span>End time</span><input id="endTime" type="time" step="900" /></label>
+        </div>
+        <div class="inline">
+          <label class="switch"><input id="allDay" type="checkbox" /> <span>All day</span></label>
+          <span class="hint">Times disabled when all-day is on.</span>
+        </div>
+
+        <!-- Instructor -->
+        <div class="row">
+          <div class="field">
+            <span>Book with instructor?</span>
+            <label class="switch"><input id="withInstructor" type="checkbox" /> <span>Yes</span></label>
+          </div>
+          <label class="field" id="instructorWrap" hidden>
+            <span>Instructor</span>
+            <select id="instructorSelect">
+              <option value="" selected disabled>Choose flight instructor</option>
+              <option value="BW">Brian Westfall (BW)</option>
+              <option value="JC">Justin Cox (JC)</option>
+              <option value="JM">Jeff Moersch (JM)</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Meter Readings -->
+        <div class="row-3">
+          <label class="field"><span>Tach start</span><input id="tachStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach end</span><input id="tachEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach delta</span><input id="tachDelta" type="number" step="0.1" readonly /></label>
+        </div>
+        <div class="row-3">
+          <label class="field"><span>Hobbs start</span><input id="hobbsStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs end</span><input id="hobbsEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs delta</span><input id="hobbsDelta" type="number" step="0.1" readonly /></label>
+        </div>
+
+        <!-- Comments -->
+        <label class="field"><span>Comments</span><textarea id="comments"></textarea></label>
+      </div>
+
+      <div class="modal-footer">
+        <button id="cancelModal" class="btn">Cancel</button>
+        <button id="saveBooking" class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Highlight active nav (handles &amp; vs & safely)
+    // highlight nav link
     (function(){
       const current = location.pathname.split('/').pop().toLowerCase();
       document.querySelectorAll('header nav a').forEach(a=>{
-        let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
-        href = href.replace(/&amp;/g,'&');
-        if(href && href === current) a.classList.add('active');
+        let href=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href=href.replace(/&amp;/g,'&');
+        if(href && href===current) a.classList.add('active');
       });
     })();
+
+    // Filter pill visual toggle
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        console.log('Filter:',p.dataset.filter);
+      });
+    });
+
+    // Booking modal open/close
+    const modal=document.getElementById('bookingModal');
+    const newBooking=document.getElementById('newBooking');
+    const closeModal=document.getElementById('closeModal');
+    const cancelModal=document.getElementById('cancelModal');
+    newBooking.onclick=()=>modal.style.display='flex';
+    closeModal.onclick=cancelModal.onclick=()=>modal.style.display='none';
+
+    // Instructor toggle
+    const withInst=document.getElementById('withInstructor');
+    const instWrap=document.getElementById('instructorWrap');
+    withInst.onchange=()=>instWrap.hidden=!withInst.checked;
+
+    // Delta calc
+    function calcDelta(start,end,out){
+      const s=parseFloat(start.value)||0, e=parseFloat(end.value)||0;
+      out.value=e>0&&s>0?(e-s).toFixed(1):"";
+    }
+    tachEnd.oninput=()=>calcDelta(tachStart,tachEnd,tachDelta);
+    tachStart.oninput=()=>calcDelta(tachStart,tachEnd,tachDelta);
+    hobbsEnd.oninput=()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta);
+    hobbsStart.oninput=()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta);
   </script>
 </body>
 </html>
