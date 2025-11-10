@@ -17,6 +17,7 @@
       --c172:#2b6bb1;
       --c150:#2b7a55;
       --inst:#e2b93b;
+      --mine:#8bd3ff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -60,9 +61,7 @@
     .sbtn:disabled{ background:var(--accent); color:#001a33; border-color:transparent; font-weight:800; cursor:default }
 
     /* ===== BANNER ===== */
-    .banner{
-      max-width:1200px; margin:12px auto 0; padding:0 18px;
-    }
+    .banner{ max-width:1200px; margin:12px auto 0; padding:0 18px; }
     .banner .inner{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border); border-radius:12px; padding:10px 14px;
@@ -97,7 +96,7 @@
     .note-meta{ color:var(--muted); font-size:12px; margin-bottom:8px }
     .note-card textarea{
       width:100%; min-height:72px; resize:vertical; padding:10px 12px; border-radius:10px;
-      border:1px solid var(--border); background:#0b0f1a; color:var(--ink);
+      border:1px solid var(--border); background:#0b0f1a; color:#var(--ink);
     }
 
     /* ===== CALENDAR VIEWS ===== */
@@ -127,10 +126,14 @@
 
     .evt{
       font-size:12px; margin:6px 0 0; padding:6px 8px; border-radius:8px; border:1px solid transparent;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
+      transition: transform .12s ease;
     }
+    .evt:hover{ transform: translateY(-1px) }
     .evt.c172{ background:#0e1d31; border-color:var(--c172) }
     .evt.c150{ background:#0f261c; border-color:var(--c150) }
+    .evt.mine{ outline:2px solid var(--mine); }
+    .evt.inst-mark{ box-shadow: inset 0 0 0 2px rgba(226,185,59,.4); }
     .inst{ color:var(--inst); font-weight:800; margin-left:6px }
 
     /* Week / Day */
@@ -151,12 +154,14 @@
     .week-col:last-child{ border-right:none }
     .wk-label{ color:#cfe1ff; font-weight:700; margin-bottom:6px }
     .day-list{ padding:10px }
-    .item{ font-size:13px; padding:6px 8px; border-radius:8px; margin:6px 0; border:1px solid transparent; }
+    .item{ font-size:13px; padding:6px 8px; border-radius:8px; margin:6px 0; border:1px solid transparent; cursor:pointer; }
     .item.c172{ background:#0e1d31; border-color:var(--c172) }
     .item.c150{ background:#0f261c; border-color:var(--c150) }
+    .item.mine{ outline:2px solid var(--mine); }
+    .item.inst-mark{ box-shadow: inset 0 0 0 2px rgba(226,185,59,.4); }
     .badge{ font-weight:800; margin-left:6px; opacity:.85 }
 
-    /* ===== MODAL (scroll fix) ===== */
+    /* ===== MODALS ===== */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; place-items:center; z-index:80 }
     .overlay.open{ display:grid }
     .modal{
@@ -185,6 +190,10 @@
     .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
     .switch{ display:inline-flex; align-items:center; gap:8px }
 
+    /* Details modal little chips */
+    .chip{ display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid var(--border); font-size:12px; margin-right:6px }
+    .chip.mine{ border-color:var(--mine); color:var(--mine) }
+    .chip.inst{ border-color:var(--inst); color:var(--inst) }
   </style>
 </head>
 <body>
@@ -268,7 +277,7 @@
     </section>
   </main>
 
-  <!-- ===== BOOKING MODAL ===== -->
+  <!-- ===== BOOKING MODAL (CREATE) ===== -->
   <div id="modalHost" class="overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bkTitle">
       <div class="modal-h">
@@ -385,6 +394,23 @@
     </div>
   </div>
 
+  <!-- ===== BOOKING DETAILS MODAL (VIEW/DELETE OWN) ===== -->
+  <div id="detailsHost" class="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dtTitle">
+      <div class="modal-h">
+        <div id="dtTitle">Booking details</div>
+        <button id="closeDetails" class="xbtn" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-b" id="detailsBody">
+        <!-- populated by JS -->
+      </div>
+      <div class="modal-f">
+        <button class="btn" id="deleteMyBooking" style="display:none;">Delete my booking</button>
+        <button class="btn primary" id="okDetails">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Firebase & Calendar Logic ===== -->
   <script type="module">
     /* ===== Firebase (Auth only for email/label) ===== */
@@ -402,7 +428,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Simple auth launcher: click "Sign In" opens minimal prompt (dev convenience)
+    // Simple auth launcher
     document.getElementById('signinBtn').addEventListener('click', async ()=>{
       if (auth.currentUser) { await signOut(auth); return; }
       const email = prompt("Email:");
@@ -412,7 +438,6 @@
       try{
         await signInWithEmailAndPassword(auth, email.trim(), pass);
       }catch(e){
-        // allow create quick account for testing (no invites here)
         if(confirm("Account not found. Create it?")){
           const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
           await sendEmailVerification(cred.user);
@@ -427,6 +452,7 @@
       document.getElementById('signinBtn').textContent = user ? `Account – ${user.email}` : "Sign In";
       const emailField = document.getElementById('emailFromLogin');
       if (emailField) emailField.value = user?.email || "";
+      render(); // re-render to flag your bookings visually
     });
 
     /* ===== Local storage helpers (temporary data layer) ===== */
@@ -492,6 +518,15 @@
     function inFilter(ev){
       return aircraftFilter==='ALL' || ev.aircraft===aircraftFilter;
     }
+    const amI = (email)=> !!auth.currentUser && (auth.currentUser.email||'').toLowerCase()===(email||'').toLowerCase();
+
+    function attachEventClick(el, id){
+      el.dataset.eid = id;
+      el.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openDetails(id);
+      });
+    }
 
     /* ===== Month view ===== */
     function renderMonth(){
@@ -528,11 +563,14 @@
 
         todays.forEach(ev=>{
           const e = document.createElement('div');
-          e.className = 'evt '+classForAc(ev.aircraft);
+          const mine = amI(ev.member_email);
+          e.className = 'evt '+classForAc(ev.aircraft) + (mine?' mine':'') + (ev.withInstructor?' inst-mark':'');
           const s = new Date(ev.startISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           const eT = new Date(ev.endISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           e.innerHTML = `<strong>${s}–${eT}</strong> ${ev.title||''}
-            <span class="inst">${ev.withInstructor?'• Instructor':''}</span>`;
+            ${ev.withInstructor?'<span class="inst">• Instructor</span>':''}`;
+          e.title = (mine?'Your booking • ':'') + ev.aircraft + (ev.withInstructor?' • with instructor':'');
+          attachEventClick(e, ev.id);
           cell.appendChild(e);
         });
 
@@ -577,12 +615,14 @@
 
         todays.forEach(ev=>{
           const item = document.createElement('div');
-          item.className = `item ${classForAc(ev.aircraft)}`;
+          const mine = amI(ev.member_email);
+          item.className = `item ${classForAc(ev.aircraft)}${mine?' mine':''}${ev.withInstructor?' inst-mark':''}`;
           const s = new Date(ev.startISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           const e = new Date(ev.endISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           item.innerHTML = `<strong>${s}–${e}</strong> ${ev.title||''}
-            <span class="badge">${ev.aircraft}</span>
-            ${ev.withInstructor?'<span class="badge">• Instructor</span>':''}`;
+            <span class="badge">${ev.aircraft}${ev.withInstructor?' • Instructor':''}</span>`;
+          item.title = (mine?'Your booking • ':'') + ev.aircraft + (ev.withInstructor?' • with instructor':'');
+          attachEventClick(item, ev.id);
           col.appendChild(item);
         });
 
@@ -618,12 +658,14 @@
       }else{
         events.forEach(ev=>{
           const item = document.createElement('div');
-          item.className = `item ${classForAc(ev.aircraft)}`;
+          const mine = amI(ev.member_email);
+          item.className = `item ${classForAc(ev.aircraft)}${mine?' mine':''}${ev.withInstructor?' inst-mark':''}`;
           const s = new Date(ev.startISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           const e = new Date(ev.endISO).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
           item.innerHTML = `<strong>${s}–${e}</strong> ${ev.title||''}
-            <span class="badge">${ev.aircraft}</span>
-            ${ev.withInstructor?'<span class="badge">• Instructor</span>':''}`;
+            <span class="badge">${ev.aircraft}${ev.withInstructor?' • Instructor':''}</span>`;
+          item.title = (mine?'Your booking • ':'') + ev.aircraft + (ev.withInstructor?' • with instructor':'');
+          attachEventClick(item, ev.id);
           list.appendChild(item);
         });
       }
@@ -638,7 +680,7 @@
       else renderDay();
     }
 
-    /* ===== Modal wiring ===== */
+    /* ===== Create booking modal wiring ===== */
     const overlay = document.getElementById('modalHost');
     const openModal = ()=>{ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); };
     const closeModal = ()=>{ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); };
@@ -751,7 +793,71 @@
     document.getElementById('saveN78710').addEventListener('click', ()=> saveNote('N78710','txtN78710'));
     document.getElementById('saveN10921').addEventListener('click', ()=> saveNote('N10921','txtN10921'));
 
+    /* ===== DETAILS MODAL (VIEW + DELETE OWN) ===== */
+    const detailsHost = document.getElementById('detailsHost');
+    const detailsBody = document.getElementById('detailsBody');
+    const deleteBtn   = document.getElementById('deleteMyBooking');
+    function openDetails(id){
+      const ev = getEvents().find(x=>x.id===id);
+      if(!ev){ return; }
+      const mine = amI(ev.member_email);
+      const when = (iso)=> new Date(iso).toLocaleString([], {year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+      const lines = [];
+      lines.push(`<div style="margin-bottom:8px;">${mine?'<span class="chip mine">Your booking</span>':'<span class="chip">Member booking</span>'}${ev.withInstructor?'<span class="chip inst">Instructor</span>':''}</div>`);
+      lines.push(`<div class="grid2">
+        <div><label>Aircraft</label><input value="${ev.aircraft}" readonly></div>
+        <div><label>Title</label><input value="${(ev.title||'').replace(/"/g,'&quot;')}" readonly></div>
+      </div>`);
+      lines.push(`<div class="grid2">
+        <div><label>Start</label><input value="${when(ev.startISO)}" readonly></div>
+        <div><label>End</label><input value="${when(ev.endISO)}" readonly></div>
+      </div>`);
+      lines.push(`<div class="grid3">
+        <div><label>Pilot</label><input value="${(ev.member_first||'')} ${(ev.member_last||'')}" readonly></div>
+        <div><label>Email</label><input value="${ev.member_email||''}" readonly></div>
+        <div><label>Instructor</label><input value="${ev.withInstructor ? (ev.instructorId||'Yes') : '—'}" readonly></div>
+      </div>`);
+      lines.push(`<div class="grid4">
+        <div><label>Tach start</label><input value="${ev.tachStart??''}" readonly></div>
+        <div><label>Tach end</label><input value="${ev.tachEnd??''}" readonly></div>
+        <div><label>Hobbs start</label><input value="${ev.hobbsStart??''}" readonly></div>
+        <div><label>Hobbs end</label><input value="${ev.hobbsEnd??''}" readonly></div>
+      </div>`);
+      if(ev.comments){ lines.push(`<div><label>Comments</label><textarea rows="3" readonly>${(ev.comments||'')}</textarea></div>`); }
+      detailsBody.innerHTML = lines.join('');
+
+      deleteBtn.style.display = mine ? 'inline-flex':'none';
+      deleteBtn.onclick = ()=>{
+        if(!amI(ev.member_email)){ return; }
+        if(confirm('Delete your booking?')){
+          const all = getEvents().filter(x=>x.id!==ev.id);
+          setEvents(all);
+          closeDetails();
+          render();
+        }
+      };
+
+      detailsHost.classList.add('open');
+      detailsHost.setAttribute('aria-hidden','false');
+    }
+    function closeDetails(){
+      detailsHost.classList.remove('open');
+      detailsHost.setAttribute('aria-hidden','true');
+    }
+    document.getElementById('closeDetails').addEventListener('click', closeDetails);
+    document.getElementById('okDetails').addEventListener('click', closeDetails);
+    detailsHost.addEventListener('click',(e)=>{ if(e.target===detailsHost) closeDetails(); });
+
     /* ===== Initial load ===== */
+    function highlightActiveNav(){
+      const current = location.pathname.split('/').pop().toLowerCase();
+      document.querySelectorAll('header nav a').forEach(a=>{
+        let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href = href.replace(/&amp;/g,'&');
+        if(href && href === current) a.classList.add('active');
+      });
+    }
+    highlightActiveNav();
     loadNotesUI();
     render();
   </script>
