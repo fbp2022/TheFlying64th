@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Flying 64th – Members</title>
-  <meta name="description" content="Members area for The Flying 64th. Sign-in required." />
+  <meta name="description" content="Members area for The Flying 64th. Sign-in and active membership required." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
   <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
@@ -17,14 +16,8 @@
     *{box-sizing:border-box}
     html,body{margin:0;height:100%}
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;display:flex;flex-direction:column;min-height:100vh}
-
-    /* ===== NAV (matches site) ===== */
-    .site-header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter:saturate(160%) blur(8px);
-      background:rgba(11,17,23,.75);
-      border-bottom:1px solid var(--rule);
-    }
+    /* NAV */
+    .site-header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(160%) blur(8px);background:rgba(11,17,23,.75);border-bottom:1px solid var(--rule)}
     .nav{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--ink);text-decoration:none;font-size:22px;white-space:nowrap}
     .brand img{height:34px;width:auto}
@@ -40,30 +33,39 @@
       header nav::-webkit-scrollbar{display:none}
       header nav a{padding:8px 10px;font-size:15px}
     }
-
-    /* ===== PAGE ===== */
+    /* PAGE */
     main{flex:1;max-width:1100px;margin:0 auto;padding:28px 18px}
     .card{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
     .title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
     .title h1{font-size:1.4rem;margin:0}
     .muted{color:var(--muted)}
     .hidden{display:none !important}
-
     .center-wrap{display:flex;align-items:center;justify-content:center;min-height:40vh;text-align:center}
     .cta{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--rule);padding:10px 14px;border-radius:12px;cursor:pointer}
     .cta:hover{background:rgba(255,255,255,.06)}
     .google-mark{width:18px;height:18px;border-radius:50%;background:#fff;display:inline-block}
-
+    .banner{background:#182233;border:1px solid var(--rule);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+    .banner.warn{background:#2a1a1a}
+    /* Filter bar */
+    .filterbar{display:flex;align-items:center;gap:8px;margin:8px 0 14px}
+    .seg{display:inline-flex;background:transparent;border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+    .seg button{padding:8px 12px;background:transparent;border:0;color:var(--ink);cursor:pointer}
+    .seg button.active{background:rgba(255,255,255,.08);font-weight:600}
+    .counts{font-size:.9rem;color:var(--muted)}
+    /* Table */
     table{width:100%;border-collapse:collapse}
-    th,td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:left}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
     th{font-weight:600;color:var(--muted)}
     tr:hover td{background:rgba(255,255,255,.03)}
     .pill{display:inline-block;padding:2px 8px;border:1px solid var(--rule);border-radius:999px;font-size:.8rem;color:var(--muted)}
+    .row-actions{display:flex;gap:8px}
+    .small-btn{font-size:.85rem;padding:6px 10px;border:1px solid var(--rule);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer}
+    .small-btn:hover{background:rgba(255,255,255,.06)}
+    .small-btn[disabled]{opacity:.6;cursor:not-allowed}
   </style>
 </head>
-
 <body>
-  <!-- ===== NAV ===== -->
+  <!-- NAV -->
   <header class="site-header">
     <div class="nav">
       <a class="brand" href="home.html">
@@ -83,32 +85,41 @@
     </div>
   </header>
 
-  <!-- ===== GATED CONTENT ===== -->
   <main>
-    <!-- Signed-out view -->
-    <section id="signedOut" class="center-wrap">
-      <div class="card" style="max-width:560px;">
+    <!-- Gate -->
+    <section id="gateWrap" class="center-wrap">
+      <div class="card" style="max-width:620px;">
         <h1 style="margin-top:0">🔒 Members Area</h1>
-        <p class="muted" style="margin:6px 0 16px">
-          You must be signed in to view member information.
-        </p>
-        <button id="signinCta" class="cta"><span class="google-mark"></span> Continue with Google</button>
-        <p class="muted" style="margin-top:10px;font-size:.9rem">
-          Access is restricted. Data is protected by Firestore Security Rules.
-        </p>
+        <p id="gateMsg" class="muted" style="margin:6px 0 16px">You must be signed in to view member information.</p>
+        <div id="gateActions"><button id="signinCta" class="cta"><span class="google-mark"></span> Continue with Google</button></div>
+        <div id="verifyBanner" class="banner warn hidden"><strong>Email not verified.</strong> Please verify your email address and then re-sign in.</div>
+        <div id="inactiveBanner" class="banner hidden"><strong>Account inactive.</strong> Your member access isn’t enabled yet. Please contact an admin.</div>
       </div>
     </section>
 
-    <!-- Signed-in view -->
-    <section id="signedIn" class="hidden">
+    <!-- Content -->
+    <section id="contentWrap" class="hidden">
       <div class="card">
         <div class="title">
           <h1>Members Directory</h1>
           <div class="muted" id="userBadge">Signed in</div>
         </div>
-        <div class="muted" style="margin-bottom:12px">Read-only view. Contact an admin for updates.</div>
+
+        <div id="adminBanner" class="banner hidden">Admin tools enabled: you can enable/disable member access.</div>
+
+        <div id="filterbar" class="filterbar hidden">
+          <div class="seg" role="tablist" aria-label="Status filter">
+            <button id="f-active" class="active" role="tab" aria-selected="true" data-filter="active">Active</button>
+            <button id="f-disabled" role="tab" aria-selected="false" data-filter="disabled">Disabled</button>
+            <button id="f-all" role="tab" aria-selected="false" data-filter="all">All</button>
+          </div>
+          <div class="counts" id="counts"></div>
+        </div>
+
+        <div class="muted" style="margin-bottom:12px">Read-only info. Admins can toggle account status.</div>
+
+        <div id="loading" class="muted" style="padding:14px">Loading members…</div>
         <div class="card" style="padding:0">
-          <div id="loading" class="muted" style="padding:14px">Loading members…</div>
           <table id="membersTable" class="hidden" aria-label="Members directory">
             <thead>
               <tr>
@@ -117,6 +128,7 @@
                 <th>Role</th>
                 <th>Joined</th>
                 <th>Status</th>
+                <th id="actionsTh" class="hidden">Actions</th>
               </tr>
             </thead>
             <tbody id="membersBody"></tbody>
@@ -126,19 +138,16 @@
     </section>
   </main>
 
-  <!-- ===== Firebase (Module) ===== -->
+  <!-- Firebase -->
   <script type="module">
-    /***** 1) Firebase init *****/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import {
-      getAuth, onAuthStateChanged, GoogleAuthProvider,
-      signInWithPopup, signOut
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import {
-      getFirestore, collection, query, orderBy, getDocs
+      getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs,
+      updateDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // TODO: replace with your actual config (safe to embed; rules protect data)
+    // TODO: replace with your project config
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -151,108 +160,250 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    /***** 2) UI handles *****/
-    const signedOut = document.getElementById('signedOut');
-    const signedIn  = document.getElementById('signedIn');
-    const signinBtn = document.getElementById('signinBtn');
-    const signinCta = document.getElementById('signinCta');
-    const signoutBtn= document.getElementById('signoutBtn');
-    const userBadge = document.getElementById('userBadge');
-    const loadingEl = document.getElementById('loading');
-    const tableEl   = document.getElementById('membersTable');
-    const bodyEl    = document.getElementById('membersBody');
-
     const provider = new GoogleAuthProvider();
 
-    function showSignedOut(){
-      signedOut.classList.remove('hidden');
-      signedIn.classList.add('hidden');
+    const OWNER_EMAILS = new Set(['theflying64@gmail.com','tristanstuff@denjess.com']);
+
+    // UI refs
+    const gateWrap = document.getElementById('gateWrap');
+    const contentWrap = document.getElementById('contentWrap');
+    const gateMsg = document.getElementById('gateMsg');
+    const gateActions = document.getElementById('gateActions');
+    const verifyBanner = document.getElementById('verifyBanner');
+    const inactiveBanner = document.getElementById('inactiveBanner');
+    const signinBtn = document.getElementById('signinBtn');
+    const signinCta = document.getElementById('signinCta');
+    const signoutBtn = document.getElementById('signoutBtn');
+    const userBadge = document.getElementById('userBadge');
+    const adminBanner = document.getElementById('adminBanner');
+    const loadingEl = document.getElementById('loading');
+    const tableEl = document.getElementById('membersTable');
+    const bodyEl = document.getElementById('membersBody');
+    const actionsTh = document.getElementById('actionsTh');
+    const filterbar = document.getElementById('filterbar');
+    const countsEl = document.getElementById('counts');
+    const segButtons = {
+      active: document.getElementById('f-active'),
+      disabled: document.getElementById('f-disabled'),
+      all: document.getElementById('f-all')
+    };
+
+    let MY_ROLE = { role:null, email:null, isSuper:false, isAdmin:false, isOwner:false };
+    let CURRENT_FILTER = 'active'; // 'active' | 'disabled' | 'all'
+
+    function showGate(){
+      gateWrap.classList.remove('hidden');
+      contentWrap.classList.add('hidden');
       signinBtn.classList.remove('hidden');
       signoutBtn.classList.add('hidden');
     }
-    function showSignedIn(user){
-      signedOut.classList.add('hidden');
-      signedIn.classList.remove('hidden');
+    function showContent(user){
+      gateWrap.classList.add('hidden');
+      contentWrap.classList.remove('hidden');
       signinBtn.classList.add('hidden');
       signoutBtn.classList.remove('hidden');
       userBadge.textContent = `Signed in as ${user.displayName || user.email}`;
     }
-
-    async function signIn(){
-      try { await signInWithPopup(auth, provider); }
-      catch (e){ alert("Sign-in failed: " + (e?.message || e)); }
-    }
-    async function signOutNow(){
-      try { await signOut(auth); }
-      catch (e){ alert("Sign-out failed: " + (e?.message || e)); }
-    }
+    async function signIn(){ try{ await signInWithPopup(auth, provider); } catch(e){ alert("Sign-in failed: " + (e?.message||e)); } }
+    async function signOutNow(){ try{ await signOut(auth); } catch(e){ alert("Sign-out failed: " + (e?.message||e)); } }
     signinBtn?.addEventListener('click', signIn);
     signinCta?.addEventListener('click', signIn);
     signoutBtn?.addEventListener('click', signOutNow);
 
-    /***** 3) Data load (only after auth) *****/
-    async function loadMembers(){
+    function escapeHtml(str){
+      return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+    async function getProfile(uid){
+      try{ const ps = await getDoc(doc(db, "profiles", uid)); return ps.exists() ? ps.data() : null; } catch(_){ return null; }
+    }
+    async function getMyRole(){
+      const u = auth.currentUser;
+      if (!u) return { role:null, email:null, isSuper:false, isAdmin:false, isOwner:false };
+      const p = await getProfile(u.uid);
+      const role = p?.role || null;
+      const email = p?.email || u.email || null;
+      const isOwner = email ? OWNER_EMAILS.has(email) : false;
+      const isSuper = (role === 'superadmin') || isOwner;
+      const isAdmin = isSuper || (role === 'admin');
+      return { role, email, isSuper, isAdmin, isOwner };
+    }
+    async function requireActiveMember(user){
+      verifyBanner.classList.add('hidden');
+      inactiveBanner.classList.add('hidden');
+      if (!user.emailVerified){
+        gateMsg.textContent = "You must verify your email address to access members data.";
+        verifyBanner.classList.remove('hidden');
+        gateActions.classList.remove('hidden');
+        showGate();
+        return false;
+      }
+      const msnap = await getDoc(doc(db, "members", user.uid));
+      if (!msnap.exists() || msnap.data()?.active !== true){
+        gateMsg.textContent = "Your account is not currently active.";
+        inactiveBanner.classList.remove('hidden');
+        gateActions.classList.add('hidden');
+        showGate();
+        return false;
+      }
+      return true;
+    }
+
+    function setFilterUIVisible(isAdmin){
+      if (isAdmin){
+        filterbar.classList.remove('hidden');
+      } else {
+        filterbar.classList.add('hidden');
+        CURRENT_FILTER = 'active';
+      }
+      // header Actions column
+      if (isAdmin) actionsTh.classList.remove('hidden'); else actionsTh.classList.add('hidden');
+    }
+    function activateSeg(key){
+      for (const k of Object.keys(segButtons)){
+        const btn = segButtons[k];
+        if (!btn) continue;
+        if (k === key){ btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+        else { btn.classList.remove('active'); btn.setAttribute('aria-selected','false'); }
+      }
+    }
+    segButtons.active?.addEventListener('click', () => { CURRENT_FILTER='active'; activateSeg('active'); loadRoster(); });
+    segButtons.disabled?.addEventListener('click', () => { CURRENT_FILTER='disabled'; activateSeg('disabled'); loadRoster(); });
+    segButtons.all?.addEventListener('click', () => { CURRENT_FILTER='all'; activateSeg('all'); loadRoster(); });
+
+    function renderToggleCell(myRole, target){
+      const td = document.createElement('td'); td.style.width='1%';
+      if (!myRole.isAdmin){ td.innerHTML=''; return td; }
+      const isSelf = auth.currentUser?.uid === target.uid;
+      const protectedTarget = target.isOwner || target.role === 'superadmin';
+      const canToggle = (myRole.isSuper && !isSelf) || (!myRole.isSuper && !protectedTarget && !isSelf);
+      if (!canToggle){ td.innerHTML=`<div class="row-actions"><span class="pill">locked</span></div>`; return td; }
+      const btn = document.createElement('button');
+      btn.className='small-btn';
+      btn.textContent = target.active ? 'Disable' : 'Enable';
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        const desired = !target.active;
+        try{
+          await updateDoc(doc(db,'members',target.uid), { active: desired, updatedAt: serverTimestamp() });
+          target.active = desired;
+          btn.textContent = desired ? 'Disable' : 'Enable';
+          const row = btn.closest('tr'); const statusCell = row?.querySelector('[data-status]');
+          if (statusCell){ statusCell.innerHTML = `<span class="pill">${desired ? 'active' : 'inactive'}</span>`; }
+        }catch(e){ console.error(e); alert('Action failed. You may not have permission.'); }
+        finally{ btn.disabled = false; }
+      });
+      const wrap=document.createElement('div'); wrap.className='row-actions'; wrap.appendChild(btn); td.appendChild(wrap); return td;
+    }
+
+    async function fetchMembers(filter){
+      // Try efficient query for active/disabled; All => unfiltered.
+      const baseCol = collection(db, "members");
+      async function qList(qry){
+        const snap = await getDocs(qry);
+        return snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+      }
+      try{
+        if (filter === 'active'){
+          return await qList(query(baseCol, where("active","==", true), orderBy("lastName"), orderBy("firstName")));
+        } else if (filter === 'disabled'){
+          return await qList(query(baseCol, where("active","==", false), orderBy("lastName"), orderBy("firstName")));
+        } else {
+          // All
+          const snap = await getDocs(query(baseCol, orderBy("lastName"), orderBy("firstName")));
+          return snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+        }
+      } catch (e){
+        // Likely missing composite index: fall back to unfiltered and client-side filter
+        const snap = await getDocs(baseCol);
+        let arr = snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+        if (filter !== 'all'){ arr = arr.filter(x => !!x && (x.active === (filter === 'active'))); }
+        // Sort locally by lastName, firstName
+        arr.sort((a,b)=>`${a.lastName||''} ${a.firstName||''}`.localeCompare(`${b.lastName||''} ${b.firstName||''}`));
+        return arr;
+      }
+    }
+
+    async function loadRoster(){
       loadingEl.classList.remove('hidden');
       tableEl.classList.add('hidden');
       bodyEl.innerHTML = "";
 
-      try {
-        // Adjust field names to match your documents
-        // Example doc shape: { firstName, lastName, email, role, joinedAt (timestamp), status }
-        const q = query(collection(db, "members"), orderBy("lastName"), orderBy("firstName"));
-        const snap = await getDocs(q);
+      try{
+        const members = await fetchMembers(CURRENT_FILTER);
 
-        if (snap.empty){
-          loadingEl.textContent = "No members found.";
-          return;
+        // Pre-counts for display (based on current query result or all fetched)
+        let activeCount = 0, disabledCount = 0;
+        for (const m of members){ if (m.active === true) activeCount++; else disabledCount++; }
+        countsEl.textContent = `Showing ${members.length} • Active: ${activeCount} • Disabled: ${disabledCount}`;
+
+        for (const m of members){
+          const uid = m.uid;
+          let firstName = m.firstName || "";
+          let lastName  = m.lastName  || "";
+          let email     = m.email     || "";
+          let active    = m.active === true;
+
+          // Enrich from profiles
+          let role = "user";
+          let isOwnerTarget = false;
+          let isSuperTarget = false;
+          try{
+            const p = await getProfile(uid);
+            if (p){
+              firstName = p.firstName || firstName;
+              lastName  = p.lastName  || lastName;
+              role      = p.role      || role;
+              email     = p.email     || email;
+              isOwnerTarget = email ? OWNER_EMAILS.has(email) : false;
+              isSuperTarget = (role === 'superadmin') || isOwnerTarget;
+            }
+          }catch(_){}
+
+          // If non-admin and CURRENT_FILTER is not 'active', hide (shouldn't happen since filterbar hidden)
+          if (!MY_ROLE.isAdmin && !active) continue;
+
+          const fullName = [firstName, lastName].filter(Boolean).join(" ") || "(No name)";
+          const joined   = m.createdAt?.toDate ? m.createdAt.toDate() : (m.createdAt ? new Date(m.createdAt) : null);
+          const joinedStr= joined ? joined.toLocaleDateString() : "—";
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${escapeHtml(fullName)}</td>
+            <td>${escapeHtml(email)}</td>
+            <td><span class="pill">${escapeHtml(role)}</span></td>
+            <td>${joinedStr}</td>
+            <td data-status><span class="pill">${active ? 'active' : 'inactive'}</span></td>
+          `;
+          if (MY_ROLE.isAdmin){
+            tr.appendChild(renderToggleCell(MY_ROLE, { uid, email, role, active, isOwner:isOwnerTarget, isSuper:isSuperTarget }));
+          }
+          bodyEl.appendChild(tr);
         }
 
-        const rows = [];
-        snap.forEach(doc => {
-          const m = doc.data();
-          const fullName = [m.firstName, m.lastName].filter(Boolean).join(" ") || "(No name)";
-          const email = m.email || "";
-          const role = m.role || "user";
-          const status = m.status || "active";
-          const joined = m.joinedAt?.toDate ? m.joinedAt.toDate() : (m.joinedAt ? new Date(m.joinedAt) : null);
-          const joinedStr = joined ? joined.toLocaleDateString() : "—";
-
-          rows.push(`
-            <tr>
-              <td>${escapeHtml(fullName)}</td>
-              <td>${escapeHtml(email)}</td>
-              <td><span class="pill">${escapeHtml(role)}</span></td>
-              <td>${joinedStr}</td>
-              <td><span class="pill">${escapeHtml(status)}</span></td>
-            </tr>
-          `);
-        });
-
-        bodyEl.innerHTML = rows.join("");
         loadingEl.classList.add('hidden');
         tableEl.classList.remove('hidden');
-      } catch (err){
-        loadingEl.textContent = "Error loading members.";
+      }catch(err){
         console.error(err);
+        loadingEl.textContent = "Error loading members.";
         alert("Failed to load members. Your account may not have access.");
       }
     }
 
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-    }
-
-    /***** 4) Auth gate *****/
-    onAuthStateChanged(auth, (user) => {
-      if (user){
-        showSignedIn(user);
-        loadMembers();     // data only fetched when authenticated
-      } else {
-        showSignedOut();
+    onAuthStateChanged(auth, async (user) => {
+      if (!user){
+        gateMsg.textContent = "You must be signed in to view member information.";
+        gateActions.classList.remove('hidden');
+        showGate();
+        return;
       }
+      const ok = await requireActiveMember(user);
+      if (!ok) return;
+
+      MY_ROLE = await getMyRole();
+      setFilterUIVisible(MY_ROLE.isAdmin);        // show/hide filter for admins
+      activateSeg(CURRENT_FILTER);                // ensure UI reflects current
+      showContent(user);
+      await loadRoster();
     });
   </script>
 </body>
