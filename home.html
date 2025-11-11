@@ -274,32 +274,21 @@
 
 <!-- ===== Firebase + Auth + Board Logic ===== -->
 <script type="module">
-  // Firebase SDKs
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  <!-- USE THE SHARED APP -->
   import {
-    getAuth, onAuthStateChanged,
+    auth, db, onAuthChanged, signOut
+  } from './auth.js';
+
+  <!-- ONLY import the functions you still call -->
+  import {
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendPasswordResetEmail, sendEmailVerification, signOut
+    sendPasswordResetEmail, sendEmailVerification
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
   import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
+    doc, getDoc, setDoc, updateDoc, serverTimestamp,
     collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-  // EXACT config from your console
-  const firebaseConfig = {
-    apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
-    authDomain: "flying64th-b7813.firebaseapp.com",
-    projectId: "flying64th-b7813",
-    storageBucket: "flying64th-b7813.firebasestorage.app",
-    messagingSenderId: "244940935157",
-    appId: "1:244940935157:web:58e7305541377ba743dabc"
-  };
-
-  // Init
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
 
   // ===== Admin allow-list (fallback while profiles populate) =====
   const BOARD_EMAILS = ["theflying64@gmail.com"]; // add more if needed
@@ -328,20 +317,26 @@
   const hintEl     = document.getElementById('msgHint');
   const feedEl     = document.getElementById('messages');
   const newPostBtn = document.getElementById('newPostBtn');
-  const notifyBtn  = document.getElementById('notifyBtn'); // may be null (safe check below)
+  const notifyBtn  = document.getElementById('notifyBtn'); // may be null
 
   // New Post modal refs
-  const postModal      = document.getElementById('postModal');
-  const closePost      = document.getElementById('closePost');
-  const postCancel     = document.getElementById('postCancel');
-  const postSubmitOnly = document.getElementById('postSubmitOnly'); // may be null
+  const postModal        = document.getElementById('postModal');
+  const closePost        = document.getElementById('closePost');
+  const postCancel       = document.getElementById('postCancel');
+  const postSubmitOnly   = document.getElementById('postSubmitOnly'); // may be null
   const postSubmitNotify = document.getElementById('postSubmitNotify');
-  const postNameEl     = document.getElementById('postName');
-  const postEmailEl    = document.getElementById('postEmail');
-  const postWhenEl     = document.getElementById('postWhen');
-  const postTextEl     = document.getElementById('postText');
-  const postMsgEl      = document.getElementById('postMsg');
+  const postNameEl       = document.getElementById('postName');
+  const postEmailEl      = document.getElementById('postEmail');
+  const postWhenEl       = document.getElementById('postWhen');
+  const postTextEl       = document.getElementById('postText');
+  const postMsgEl        = document.getElementById('postMsg');
 
+  // Let other pages open this modal via home.html#signin
+  if (location.hash === '#signin') { openBtn?.click(); }
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#signin') openBtn?.click();
+  });
+  
   // Helpers
   const say  = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color  = isErr ? '#ffb4b4' : '#9fb1c3'; };
   const psay = (t, isErr=false)=>{ postMsgEl.textContent = t; postMsgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
