@@ -1,475 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Members – The Flying 64th</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3;
       --panel:#0f1722; --panel2:#0c141f; --rule:#1f2a38; --accent:#58a6ff;
+      --ok:#2e7d32; --bad:#9b2d2d;
       --radius:16px;
     }
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 
     /* NAV */
-    .site-header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter:saturate(160%) blur(8px);
-      background:rgba(11,17,23,.75);
-      border-bottom:1px solid var(--rule);
-    }
-    .nav{
-      max-width:1200px; margin:0 auto; padding:12px 18px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
-      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
-    }
-    .brand img{ height:34px; width:auto }
-    header nav{ display:flex; align-items:center; gap:18px }
-    header nav a{
-      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px; transition:all .18s ease;
-    }
-    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
-    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    .site-header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);border-bottom:1px solid var(--rule)}
+    .nav{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:800;font-size:22px}
+    .brand img{height:34px;width:auto}
+    header nav{display:flex;align-items:center;gap:18px}
+    header nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;transition:all .18s ease}
+    header nav a.active{background:var(--accent);color:#001a33;font-weight:700}
+    header nav a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+    .btn{border:1px solid var(--rule);background:#121b29;color:#e6edf3;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
+    .btn.ghost{background:transparent}
+    .btn.warn{background:#1e1717;border-color:#4b2a2a}
+    .btn.ok{background:#16311f;border-color:#2d5f3b}
 
-    /* Common UI */
-    .container{ max-width:1200px; margin:18px auto; padding:0 18px }
-    .card{
-      background:linear-gradient(180deg, var(--panel), var(--panel2));
-      border:1px solid var(--rule); border-radius:14px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
-      padding:16px;
-    }
-    .btn{ border:1px solid var(--rule); background:#121b29; color:#e6edf3; padding:8px 12px; border-radius:10px; cursor:pointer; }
-    .btn:hover{ border-color:#30507a; background:#142036; }
-    .btn.primary{ background:var(--accent); color:#001a33; border-color:transparent; font-weight:700; }
-    .btn-sm{ font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--rule); background:#121b29; color:#e6edf3; cursor:pointer }
-    .btn-sm.primary{ background:var(--accent); color:#001a33; border-color:transparent; font-weight:700 }
-    .muted{ color:var(--muted) }
-    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
-    @media (max-width:860px){ .row{ grid-template-columns:1fr } }
+    /* LAYOUT */
+    .container{max-width:1100px;margin:16px auto;padding:0 18px 36px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--rule);
+      border-radius:14px;padding:16px 16px 14px}
+    .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}
+    .muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
 
-    /* Search + filters */
-    .filters{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px }
-    .input, select{
-      width:100%; padding:10px 12px; border-radius:10px;
-      background:#0b1117; color:var(--ink); border:1px solid #1f2a38; outline:none;
-    }
-    .input:focus, select:focus{ border-color:#2a4e86; box-shadow:0 0 0 3px rgba(88,166,255,.18) }
+    /* MEMBER ITEM */
+    .member{border:1px solid var(--rule);border-radius:14px;padding:14px;background:#0e1520}
+    .m-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .m-name{font-weight:800;font-size:18px}
+    .m-email{color:var(--muted);font-size:14px;margin-top:2px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#132031;border:1px solid #203148;color:#cfe1ff;padding:6px 10px;border-radius:999px;font-size:12px}
+    .chip.ok{background:#152a1f;border-color:#224a2f;color:#a0e1b2}
+    .chip.bad{background:#2a1515;border-color:#4a2525;color:#ffbaba}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
-    /* Directory grid */
-    .grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px }
-    @media (max-width:1100px){ .grid{ grid-template-columns:repeat(2, 1fr) } }
-    @media (max-width:740px){ .grid{ grid-template-columns:1fr } }
-
-    .member{
-      background:#0f1722; border:1px solid var(--rule); border-radius:12px; padding:12px;
-      display:grid; gap:8px;
-    }
-    .member-top{ display:flex; justify-content:space-between; gap:10px; align-items:center }
-    .name{ font-weight:800 }
-    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid #203148; background:#132031; color:#cfe1ff }
-    .badge.admin{ background:#1f2b3d; border-color:#2f4d7c }
-    .tools{ display:flex; gap:8px; flex-wrap:wrap }
-
-    /* Gate */
-    .gate{
-      max-width:740px; margin:48px auto; padding:16px;
-      background:linear-gradient(180deg, var(--panel), var(--panel2));
-      border:1px solid var(--rule); border-radius:14px;
-    }
-
-    /* Modal */
-    :root{ color-scheme:dark }
-    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); backdrop-filter: blur(6px); z-index:2000 }
-    .modal.open{ display:grid }
-    .auth-card{ width:min(480px,96vw); background:linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--rule); border-radius:14px; padding:16px }
-    .auth-row{ display:flex; justify-content:flex-end; gap:10px; margin-top:12px }
-    .label{ font-size:12px; color:var(--muted); margin:8px 0 6px }
+    /* ADMIN PANEL */
+    .admin-panel{display:none;margin:18px 0 12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .invite{display:flex;gap:10px;align-items:center;background:#0e1520;border:1px dashed var(--rule);
+      padding:10px 12px;border-radius:12px}
+    .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      background:#121b29;border:1px solid var(--rule);padding:8px 10px;border-radius:8px}
+    .hint{min-height:18px;color:#9fb1c3;margin-top:6px}
   </style>
 </head>
 <body>
+
   <!-- NAV -->
   <header class="site-header">
     <div class="nav">
       <a class="brand" href="home.html">
-        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo"/>
         <span>The Flying 64th</span>
       </a>
       <nav>
-        <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
+        <a id="signinBtn" class="btn">Sign In</a>
         <a href="home.html">Home</a>
         <a href="calendar.html">Calendar</a>
-        <a href="becomeamember.html">Become a Member</a>
-        <a href="photos.html">Photos</a>
         <a class="active" href="members.html">Members</a>
+        <a href="photos.html">Photos</a>
         <a href="poh&manuals.html">POH &amp; Manuals</a>
       </nav>
     </div>
   </header>
 
-  <!-- Gate for non-members -->
-  <section id="gate" class="gate" style="display:none">
-    <h3 style="margin:0 0 6px 0;">Members Only</h3>
-    <p class="muted" style="margin:0 0 10px 0">You must be a verified, active member to view the roster.</p>
-    <button id="openGateSignin" class="btn primary">Sign In</button>
-  </section>
+  <main class="container">
 
-  <!-- App -->
-  <main id="app" class="container" style="display:none">
-    <!-- Admin utilities -->
-    <section id="adminTools" class="card" style="display:none; margin-bottom:14px">
-      <h3 style="margin:0 0 8px 0;">Admin Tools</h3>
-      <div class="row">
-        <div class="card" style="padding:12px">
-          <div class="label">Create invite code</div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap">
-            <input id="invNote" class="input" placeholder="Optional note (e.g., “John Doe”)" style="flex:2">
-            <select id="invType" class="input" style="flex:1; max-width:220px">
-              <option value="single">Single-use</option>
-              <option value="multi">Multi-use</option>
-            </select>
-            <button id="makeInvite" class="btn primary">Generate</button>
-          </div>
-          <div id="inviteOut" class="muted" style="margin-top:8px"></div>
-        </div>
-        <div class="card" style="padding:12px">
-          <div class="label">Directory controls</div>
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-            <label style="display:inline-flex; gap:8px; align-items:center">
-              <input id="showInactive" type="checkbox"> Show inactive members
-            </label>
-          </div>
-        </div>
+    <!-- Heading + Admin tools -->
+    <div class="top-row">
+      <h1 style="margin:0;font-size:24px;font-weight:800">Members</h1>
+      <div class="muted" id="meNote"></div>
+    </div>
+
+    <!-- Admin-only simple invite display -->
+    <section id="adminPanel" class="card admin-panel" aria-live="polite">
+      <h3 style="margin:0 0 10px 0">Admin Tools</h3>
+      <div class="invite">
+        <div class="muted">Club Invite Code (display-only):</div>
+        <div id="inviteCode" class="code">F64-CHRIS-2025-9QK7ATJ3</div>
+        <button id="copyInvite" class="btn">Copy</button>
       </div>
+      <div id="adminMsg" class="hint"></div>
     </section>
 
-    <!-- Filters -->
-    <section class="card" style="margin-bottom:14px">
-      <div class="filters">
-        <input id="q" class="input" placeholder="Search name or email…" style="min-width:260px">
-        <select id="roleFilter" class="input" style="max-width:220px">
-          <option value="all">All roles</option>
-          <option value="user">Users</option>
-          <option value="admin">Admins</option>
-        </select>
-        <button id="refresh" class="btn-sm">Refresh</button>
+    <!-- Members list -->
+    <section class="card">
+      <div class="top-row" style="margin-top:0">
+        <div class="muted">Tap buttons below each card to manage status (admins only). Role badges are hidden from public view.</div>
       </div>
+      <div id="membersGrid" class="grid"></div>
+      <div id="listMsg" class="hint"></div>
     </section>
 
-    <!-- Directory -->
-    <section class="grid" id="grid"></section>
-    <p id="empty" class="muted" style="display:none; margin-top:12px">No members found.</p>
   </main>
 
-  <!-- Auth Modal -->
-  <div id="authModal" class="modal" aria-hidden="true">
-    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <h4 id="authTitle" style="margin:0;">Member Sign In</h4>
-        <button id="closeAuth" class="btn-sm">✕</button>
-      </div>
-
-      <div class="label">First name (sign up)</div>
-      <input id="suFirst" class="input" type="text" placeholder="First name">
-
-      <div class="label">Last name (sign up)</div>
-      <input id="suLast" class="input" type="text" placeholder="Last name">
-
-      <div class="label">Email</div>
-      <input id="email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
-
-      <div class="label">Password</div>
-      <input id="password" class="input" type="password" placeholder="••••••••" autocomplete="current-password">
-
-      <div class="label">Invite Code (new accounts)</div>
-      <input id="invite" class="input" type="text" placeholder="Board Admin Will Provide Invite Code">
-
-      <div class="auth-row">
-        <button id="doReset" class="btn-sm">Forgot password?</button>
-        <button id="doSignUp" class="btn-sm">Create Account</button>
-        <button id="doSignIn" class="btn-sm primary">Sign In</button>
-      </div>
-      <div id="authMsg" class="muted" style="min-height:18px; margin-top:6px"></div>
-      <div class="auth-row">
-        <button id="signOutBtn" class="btn-sm">Sign out</button>
-      </div>
-    </div>
-  </div>
+  <!-- Auth modal is centralized in calendar/home; here we just open via #signin -->
+  <script>
+    // allow /members.html#signin to open the site-wide auth modal
+    window.addEventListener('hashchange', ()=>{ if(location.hash==="#signin"){ const a=document.getElementById('signinBtn'); a && a.click(); }});
+  </script>
 
   <script type="module">
-    import { auth, onAuthChanged, requireActiveMember, signOut, db } from './auth.js';
-
+    import { auth, db, onAuthChanged, signOut } from './auth.js';
     import {
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail,
-      sendEmailVerification
+      doc, getDoc, setDoc, updateDoc,
+      collection, query, orderBy, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    import {
+      signInWithEmailAndPassword, sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-    import {
-      collection, query, where, orderBy, onSnapshot, getDocs,
-      doc, getDoc, setDoc, updateDoc, serverTimestamp, addDoc
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
     // UI refs
-    const appEl  = document.getElementById('app');
-    const gateEl = document.getElementById('gate');
-    const openGateSignin = document.getElementById('openGateSignin');
-    const grid = document.getElementById('grid');
-    const empty = document.getElementById('empty');
+    const signinBtn   = document.getElementById('signinBtn');
+    const meNote      = document.getElementById('meNote');
+    const grid        = document.getElementById('membersGrid');
+    const listMsg     = document.getElementById('listMsg');
+    const adminPanel  = document.getElementById('adminPanel');
+    const copyInvite  = document.getElementById('copyInvite');
+    const adminMsg    = document.getElementById('adminMsg');
 
-    const signinBtn  = document.getElementById('signinBtn');
-    const authModal  = document.getElementById('authModal');
-    const closeAuth  = document.getElementById('closeAuth');
-    const emailEl    = document.getElementById('email');
-    const passEl     = document.getElementById('password');
-    const inviteEl   = document.getElementById('invite');
-    const suFirst    = document.getElementById('suFirst');
-    const suLast     = document.getElementById('suLast');
-    const doSignIn   = document.getElementById('doSignIn');
-    const doSignUp   = document.getElementById('doSignUp');
-    const doReset    = document.getElementById('doReset');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const authMsg    = document.getElementById('authMsg');
-
-    const adminTools = document.getElementById('adminTools');
-    const makeInvite = document.getElementById('makeInvite');
-    const invType    = document.getElementById('invType');
-    const invNote    = document.getElementById('invNote');
-    const inviteOut  = document.getElementById('inviteOut');
-    const showInactive = document.getElementById('showInactive');
-
-    const qInput = document.getElementById('q');
-    const roleFilter = document.getElementById('roleFilter');
-    const refreshBtn = document.getElementById('refresh');
-
-    function openAuth(){ authModal.classList.add('open'); authModal.setAttribute('aria-hidden','false'); authMsg.textContent=""; }
-    function closeAuthFn(){ authModal.classList.remove('open'); authModal.setAttribute('aria-hidden','true'); }
-    document.getElementById('openGateSignin').addEventListener('click', openAuth);
-    signinBtn.addEventListener('click', openAuth);
-    closeAuth.addEventListener('click', closeAuthFn);
-    authModal.addEventListener('click', e=>{ if(e.target===authModal) closeAuthFn(); });
-
-    doSignIn.addEventListener('click', async ()=>{
-      const email=(emailEl.value||"").trim(); const pass=passEl.value;
-      if(!email||!pass){ authMsg.textContent="Enter email and password."; return; }
-      try{ await signInWithEmailAndPassword(auth,email,pass); authMsg.textContent="Signed in."; closeAuthFn(); }
-      catch(err){ authMsg.textContent=err.message; }
-    });
-
-    doSignUp.addEventListener('click', async ()=>{
-      const email=(emailEl.value||"").trim();
-      const pass=passEl.value;
-      const code=(inviteEl.value||"").trim();
-      const first=(suFirst.value||"").trim();
-      const last=(suLast.value||"").trim();
-      if(!email||!pass||!code||!first||!last){ authMsg.textContent="First, Last, Email, Password, and Invite Code are required."; return; }
-      try{
-        const cred = await createUserWithEmailAndPassword(auth,email,pass);
-        await sendEmailVerification(cred.user);
-        const baseData = {
-          uid: cred.user.uid, email, firstName:first, lastName:last,
-          emailVerified:false, active:true, role:"user",
-          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-        };
-        await Promise.all([
-          setDoc(doc(db,"profiles",cred.user.uid), baseData, {merge:true}),
-          setDoc(doc(db,"members", cred.user.uid), baseData, {merge:true})
-        ]);
-        // soft-log invite consumption (do not fail if not present)
-        try{ await updateDoc(doc(db,"invites",code), { used:true, usedByLast:cred.user.uid, usedAtLast:serverTimestamp() }); }catch{}
-        authMsg.textContent="Account created. Check your email to verify.";
-      }catch(err){ authMsg.textContent=err.message; }
-    });
-
-    doReset.addEventListener('click', async ()=>{
-      const email=(emailEl.value||"").trim(); if(!email){ authMsg.textContent="Enter email first."; return; }
-      try{ await sendPasswordResetEmail(auth,email); authMsg.textContent="Password reset email sent."; }
-      catch(err){ authMsg.textContent=err.message; }
-    });
-    signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); });
+    // helpers
+    const sayList = (t,isErr=false)=>{ listMsg.textContent=t||""; listMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const sayAdmin= (t,isErr=false)=>{ adminMsg.textContent=t||""; adminMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 
     let currentUser = null;
-    let isAdmin = false;
-    let canView = false;
-    let unsub = null;
+    let iAmAdmin = false;
 
-    onAuthChanged(async (user)=>{
-      currentUser = user || null;
-
-      if (currentUser) {
-        const shortEmail = currentUser.email && currentUser.email.length > 25
-          ? currentUser.email.slice(0, 25) + "…"
-          : (currentUser.email || "");
-        signinBtn.textContent = `Account – ${shortEmail}`;
-      } else {
-        signinBtn.textContent = "Sign In";
-      }
-
-      canView = false;
-      isAdmin = false;
-
-      if (currentUser) {
-        const gate = await requireActiveMember(currentUser);
-        canView = gate.ok;
-
-        // role check
+    // Open auth modal implemented on other pages
+    function openAuthModal(){
+      // try to navigate to a page that has the modal with hash
+      if (location.pathname.endsWith('members.html')){
+        // if your header script on this page wires a modal, call it; else bounce to home with #signin
         try{
-          const snap = await getDoc(doc(db,"profiles", currentUser.uid));
-          const role = snap.exists() ? (snap.data().role||"").toLowerCase() : "";
-          if (role === "admin" || role === "superadmin") isAdmin = true;
-        }catch{}
+          const evt = new Event('click');
+          signinBtn.dispatchEvent(evt);
+        }catch{
+          location.href = 'home.html#signin';
+        }
       }
+    }
+    signinBtn.addEventListener('click', ()=>{ location.href = 'home.html#signin'; });
 
-      adminTools.style.display = isAdmin ? '' : 'none';
-      appEl.style.display  = canView ? '' : 'none';
-      gateEl.style.display = canView ? 'none' : '';
-
-      // (re)load directory
-      if (unsub) { unsub(); unsub = null; }
-      if (canView) attachDirectoryListener();
-      else { grid.innerHTML = ""; empty.style.display = 'none'; }
-    });
-
-    function attachDirectoryListener(){
-      // Use live snapshot; we’ll filter client-side for search/role/inactive toggle
-      const col = collection(db, "profiles");
-      const qy = query(col, orderBy("lastName"), orderBy("firstName"));
-      unsub = onSnapshot(qy, (snap)=>{
-        const all = [];
-        snap.forEach(d=>{
-          const x = d.data() || {};
-          x.uid = d.id;
-          all.push(x);
-        });
-        render(all);
-      });
+    // Load my role and show admin panel if needed
+    async function loadMyRole(){
+      iAmAdmin = false;
+      if (!currentUser) return;
+      try{
+        const p = await getDoc(doc(db,'profiles', currentUser.uid));
+        const role = (p.exists() ? (p.data().role||'') : '').toLowerCase();
+        if (role === 'admin' || role === 'superadmin') iAmAdmin = true;
+      }catch(e){ /* ignore */ }
+      adminPanel.style.display = iAmAdmin ? 'block' : 'none';
     }
 
-    function render(list){
-      const term = (qInput.value||"").toLowerCase().trim();
-      const role = (roleFilter.value||"all").toLowerCase();
-      const wantInactive = !!showInactive.checked;
+    // Render members
+    function renderMembers(docs){
+      grid.innerHTML = '';
+      if (!docs.length){ sayList('No members found.'); return; }
+      sayList('');
 
-      const filtered = list.filter(m=>{
-        if (!wantInactive && m.active === false) return false;
-        if (role !== "all"){
-          const r = (m.role||"user").toLowerCase();
-          if (role === "admin" && !(r==="admin"||r==="superadmin")) return false;
-          if (role === "user" && (r==="admin"||r==="superadmin")) return false;
-        }
-        if (term){
-          const hay = `${m.firstName||""} ${m.lastName||""} ${m.email||""}`.toLowerCase();
-          if (!hay.includes(term)) return false;
-        }
-        return true;
-      });
+      docs.forEach(snap=>{
+        const d = snap.data();
+        const uid   = snap.id;
+        const first = d.firstName || '';
+        const last  = d.lastName || '';
+        const name  = (first || last) ? `${first} ${last}`.trim() : (d.displayName || 'Member');
+        const email = d.email || '';
+        const active = d.active !== false;   // default active if field missing
+        const role = (d.role||'user').toLowerCase();
 
-      grid.innerHTML = "";
-      filtered.forEach(m=>{
         const card = document.createElement('div');
-        card.className = "member";
-
-        const role = (m.role||"user").toLowerCase();
-        const badge = `<span class="badge ${role==='admin'?'admin':''}">${role==='admin'?'Admin':'User'}</span>`;
-        const active = m.active!==false;
-
+        card.className = 'member';
         card.innerHTML = `
-          <div class="member-top">
+          <div class="m-top">
             <div>
-              <div class="name">${escapeHtml(m.firstName||'')} ${escapeHtml(m.lastName||'')}</div>
-              <div class="muted" style="font-size:13px">${escapeHtml(m.email||'')}</div>
+              <div class="m-name">${escapeHtml(name)}</div>
+              <div class="m-email">${escapeHtml(email)}</div>
             </div>
-            <div style="display:flex; gap:6px; align-items:center">
-              ${badge}
-              <span class="badge" style="background:${active?'#142c1b':'#2b1a1a'}; border-color:${active?'#285f3c':'#5f2c2c'}; color:${active?'#b9f7d1':'#ffc6c6'}">
-                ${active ? 'Active' : 'Inactive'}
-              </span>
+            <div class="chips">
+              <span class="chip ${active?'ok':''}">${active?'Active':'Inactive'}</span>
+              <!-- role badge intentionally hidden from public; not rendered -->
             </div>
           </div>
-          <div class="tools" ${isAdmin? '' : 'style="display:none"'} >
-            <button class="btn-sm" data-role="${m.uid}">${role==='admin'?'Make User':'Make Admin'}</button>
-            <button class="btn-sm" data-active="${m.uid}">${active?'Deactivate':'Activate'}</button>
-          </div>
+
+          ${ iAmAdmin ? `
+          <div class="actions">
+            <button class="btn ${role==='admin' || role==='superadmin' ? 'ghost' : 'ok'}" data-act="toggle-admin" data-uid="${uid}" data-current="${role}">
+              ${ role==='admin' || role==='superadmin' ? 'Remove Admin' : 'Make Admin' }
+            </button>
+            <button class="btn ${active?'warn':'ok'}" data-act="toggle-active" data-uid="${uid}" data-current="${active?'active':'inactive'}">
+              ${ active ? 'Deactivate' : 'Activate' }
+            </button>
+          </div>` : ``}
         `;
         grid.appendChild(card);
       });
 
-      empty.style.display = filtered.length ? 'none' : '';
-
       // wire admin buttons
-      if (isAdmin){
-        [...grid.querySelectorAll('[data-role]')].forEach(btn=>{
+      if (iAmAdmin){
+        grid.querySelectorAll('[data-act="toggle-admin"]').forEach(btn=>{
           btn.addEventListener('click', async ()=>{
-            const uid = btn.getAttribute('data-role');
+            const uid = btn.getAttribute('data-uid');
+            const cur = (btn.getAttribute('data-current')||'user').toLowerCase();
+            const toAdmin = !(cur==='admin' || cur==='superadmin');
             try{
-              const ref = doc(db,"profiles", uid);
-              const snap = await getDoc(ref);
-              if (!snap.exists()) return;
-              const cur = (snap.data().role||'user').toLowerCase();
-              const next = cur==='admin' ? 'user' : 'admin';
-              await updateDoc(ref, { role: next, updatedAt: serverTimestamp() });
-            }catch(e){ alert(e.message); }
+              await Promise.all([
+                updateDoc(doc(db,'profiles',uid), { role: toAdmin ? 'admin' : 'user' }),
+                updateDoc(doc(db,'members' ,uid), { role: toAdmin ? 'admin' : 'user' })
+              ]);
+              sayList(toAdmin?'Made admin.':'Removed admin.');
+            }catch(e){ sayList(e.message,true); }
           });
         });
-        [...grid.querySelectorAll('[data-active]')].forEach(btn=>{
+
+        grid.querySelectorAll('[data-act="toggle-active"]').forEach(btn=>{
           btn.addEventListener('click', async ()=>{
-            const uid = btn.getAttribute('data-active');
+            const uid = btn.getAttribute('data-uid');
+            const cur = (btn.getAttribute('data-current')||'active').toLowerCase()==='active';
+            const newVal = !cur;
             try{
-              const ref = doc(db,"profiles", uid);
-              const snap = await getDoc(ref);
-              if (!snap.exists()) return;
-              const active = snap.data().active!==false;
-              await updateDoc(ref, { active: !active, updatedAt: serverTimestamp() });
-            }catch(e){ alert(e.message); }
+              await Promise.all([
+                updateDoc(doc(db,'profiles',uid), { active: newVal }),
+                updateDoc(doc(db,'members' ,uid), { active: newVal })
+              ]);
+              sayList(newVal?'Activated.':'Deactivated.');
+            }catch(e){ sayList(e.message,true); }
           });
         });
       }
     }
 
-    function escapeHtml(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
-
-    // Admin: create invite codes
-    makeInvite?.addEventListener('click', async ()=>{
-      if (!isAdmin) { alert("Admins only."); return; }
-      try{
-        const code = genCode();
-        const data = {
-          code, disabled:false,
-          used:false, multi: invType.value === 'multi',
-          note: invNote.value || '',
-          createdAt: serverTimestamp(),
-          createdBy: currentUser?.uid || null,
-          createdByEmail: currentUser?.email || null
-        };
-        await setDoc(doc(db,"invites", code), data);
-        inviteOut.innerHTML = `Invite created: <code style="font-weight:700">${code}</code> – ${data.multi?'multi-use':'single-use'}.`;
-        try{
-          await navigator.clipboard.writeText(code);
-          inviteOut.innerHTML += ' (copied to clipboard)';
-        }catch{}
-      }catch(e){ alert(e.message); }
-    });
-    function genCode(){
-      // 6-5 pattern e.g., F64-AB12C-7KQ9Z
-      const s="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      const pick = n => [...crypto.getRandomValues(new Uint32Array(n))].map(x=>s[x%s.length]).join('');
-      return `F64-${pick(5)}-${pick(5)}`;
+    // Live query: order by firstName then lastName to ensure *all* show
+    function startLiveList(){
+      const q = query(collection(db,'profiles'), orderBy('firstName'), orderBy('lastName'));
+      onSnapshot(q, (snap)=>{
+        const docs = [];
+        snap.forEach(d=> docs.push(d));   // collect all, not just the first
+        renderMembers(docs);
+      }, (err)=> sayList(err.message,true));
     }
 
-    // Filters
-    [qInput, roleFilter, showInactive].forEach(el=> el.addEventListener('input', ()=>{ if (unsub) { /* snapshot drives render; we just re-render by pulling last cache via onSnapshot callback */ } }));
-    refreshBtn.addEventListener('click', ()=>{ /* snapshot live; noop for now */ });
+    // Copy invite code
+    copyInvite.addEventListener('click', async ()=>{
+      try{
+        const code = document.getElementById('inviteCode').textContent.trim();
+        await navigator.clipboard.writeText(code);
+        sayAdmin('Invite code copied.');
+      }catch(e){ sayAdmin('Could not copy.', true); }
+    });
 
+    // auth state
+    onAuthChanged(async (user)=>{
+      currentUser = user || null;
+
+      if (currentUser){
+        const shortEmail = currentUser.email && currentUser.email.length>25
+          ? currentUser.email.slice(0,25)+'…' : (currentUser.email||'');
+        document.getElementById('signinBtn').textContent = `Account – ${shortEmail}`;
+        meNote.textContent = currentUser.emailVerified ? 'Signed in (verified).' : 'Signed in (verify your email).';
+
+        await loadMyRole();
+        startLiveList();
+      }else{
+        document.getElementById('signinBtn').textContent = 'Sign In';
+        meNote.textContent = 'Sign in to view member details.';
+        adminPanel.style.display = 'none';
+        grid.innerHTML = '';
+        sayList('Please sign in to view members.');
+      }
+    });
   </script>
 </body>
 </html>
