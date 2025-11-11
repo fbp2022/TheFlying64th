@@ -181,10 +181,10 @@
 
     <!-- ===== MEMBER MESSAGE BOARD ===== -->
     <section class="card" id="board">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-  <h2 style="margin:0;">Member Message Board</h2>
-  <button id="newPostBtn" class="btn primary" style="display:none;">Submit &amp; Notify</button>
-</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <h2 style="margin:0;">Member Message Board</h2>
+        <button id="newPostBtn" class="btn primary" style="display:none;">Submit &amp; Notify</button>
+      </div>
       <p id="msgHint" class="muted" style="margin-top:8px;">Board notices and member updates appear here.</p>
 
       <!-- Scrollable feed -->
@@ -214,8 +214,15 @@
 
     <div class="invite-wrap">
       <label class="auth-label" for="invite">Invite Code (new accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code">
+      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
     </div>
+
+    <!-- NEW: First/Last Name (required for new accounts) -->
+    <label class="auth-label" for="firstName">First Name</label>
+    <input id="firstName" class="auth-input" type="text" placeholder="Your first name" required>
+
+    <label class="auth-label" for="lastName">Last Name</label>
+    <input id="lastName" class="auth-input" type="text" placeholder="Your last name" required>
 
     <div class="auth-row">
       <button id="doSignIn" class="auth-btn primary">Sign In</button>
@@ -249,11 +256,13 @@
     <label class="post-label" for="postText">Message</label>
     <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
 
-  <div class="post-row">
-  <button id="postCancel" class="post-btn">Cancel</button>
-  <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
-</div>
- <p id="postMsg" class="auth-msg"></p>
+    <div class="post-row">
+      <button id="postCancel" class="post-btn">Cancel</button>
+      <!-- Optional “Submit Only” button so JS doesn’t error if present/absent -->
+      <button id="postSubmitOnly" class="post-btn">Submit Only</button>
+      <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
+    </div>
+    <p id="postMsg" class="auth-msg"></p>
   </div>
 </div>
 
@@ -271,7 +280,7 @@
     sendPasswordResetEmail, sendEmailVerification, signOut
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, updateDoc, serverTimestamp,
+    getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
     collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
@@ -305,6 +314,8 @@
   const emailEl    = document.getElementById('email');
   const passEl     = document.getElementById('password');
   const inviteEl   = document.getElementById('invite');
+  const firstEl    = document.getElementById('firstName');
+  const lastEl     = document.getElementById('lastName');
   const doSignIn   = document.getElementById('doSignIn');
   const doSignUp   = document.getElementById('doSignUp');
   const doReset    = document.getElementById('doReset');
@@ -315,13 +326,13 @@
   const hintEl     = document.getElementById('msgHint');
   const feedEl     = document.getElementById('messages');
   const newPostBtn = document.getElementById('newPostBtn');
-  const notifyBtn  = document.getElementById('notifyBtn');
+  const notifyBtn  = document.getElementById('notifyBtn'); // may be null (safe check below)
 
   // New Post modal refs
   const postModal      = document.getElementById('postModal');
   const closePost      = document.getElementById('closePost');
   const postCancel     = document.getElementById('postCancel');
-  const postSubmitOnly = document.getElementById('postSubmitOnly');
+  const postSubmitOnly = document.getElementById('postSubmitOnly'); // may be null
   const postSubmitNotify = document.getElementById('postSubmitNotify');
   const postNameEl     = document.getElementById('postName');
   const postEmailEl    = document.getElementById('postEmail');
@@ -363,10 +374,10 @@
     postModal.classList.remove('open');
     postModal.setAttribute('aria-hidden','true');
   }
-  newPostBtn.addEventListener('click', openPost);
-  closePost.addEventListener('click', closePostModal);
-  postCancel.addEventListener('click', closePostModal);
-  postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
+  newPostBtn?.addEventListener('click', openPost);
+  closePost?.addEventListener('click', closePostModal);
+  postCancel?.addEventListener('click', closePostModal);
+  postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
   // Role loader
   async function reloadRole(){
@@ -382,35 +393,37 @@
       const pref = doc(db, "profiles", currentUser.uid);
       const snap = await getDoc(pref);
       const role = snap.exists() ? (snap.data().role || "").toLowerCase() : "";
-      if (role === "admin") isAdmin = true;
+      if (role === "admin" || role === "superadmin") isAdmin = true;
     }catch{
       // ignore; rely on allow-list if needed
     }
   }
 
   // Auth state
-onAuthStateChanged(auth, async (user)=>{
-  currentUser = user || null;
-  const verified = !!user?.emailVerified;
+  onAuthStateChanged(auth, async (user)=>{
+    currentUser = user || null;
+    const verified = !!user?.emailVerified;
 
-  if (user) {
-    const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
-    document.getElementById('signinBtn').textContent = verified
-      ? `Account – ${shortEmail}`
-      : `Unverified – ${shortEmail}`;
+    if (user) {
+      const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
+      document.getElementById('signinBtn').textContent = verified
+        ? `Account – ${shortEmail}`
+        : `Unverified – ${shortEmail}`;
 
-    // Any verified member can submit & notify
-    newPostBtn.style.display = verified ? "inline-block" : "none";
+      await reloadRole();
 
-    hintEl.textContent = verified
-      ? "Share updates with the club."
-      : "Please verify your email to post.";
-  } else {
-    document.getElementById('signinBtn').textContent = "Sign In";
-    newPostBtn.style.display = "none";
-    hintEl.textContent = "Board notices and member updates appear here.";
-  }
-});
+      // Any verified member can open post modal; only admins can notify-all (enforced below)
+      newPostBtn.style.display = verified ? "inline-block" : "none";
+
+      hintEl.textContent = verified
+        ? "Share updates with the club."
+        : "Please verify your email to post.";
+    } else {
+      document.getElementById('signinBtn').textContent = "Sign In";
+      newPostBtn.style.display = "none";
+      hintEl.textContent = "Board notices and member updates appear here.";
+    }
+  });
 
   // Sign in / up / reset / out
   doSignIn.addEventListener('click', async ()=>{
@@ -425,8 +438,14 @@ onAuthStateChanged(auth, async (user)=>{
     const email = emailEl.value.trim();
     const pass  = passEl.value;
     const code  = (inviteEl.value || "").trim();
-    if (!email || !pass || !code) return say("Email, password, and invite code are required.", true);
+    const first = firstEl.value.trim();
+    const last  = lastEl.value.trim();
+
+    if (!email || !pass || !code || !first || !last)
+      return say("Email, password, invite code, first and last name are required.", true);
+
     try {
+      // Validate invite
       const inviteRef  = doc(db, "invites", code);
       const inviteSnap = await getDoc(inviteRef);
       if (!inviteSnap.exists()) return say("Invalid invite code.", true);
@@ -434,9 +453,28 @@ onAuthStateChanged(auth, async (user)=>{
       if (d.disabled === true) return say("This invite code is disabled.", true);
       if (d.used === true && d.multi !== true) return say("This invite code has already been used.", true);
 
+      // Create auth user
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await sendEmailVerification(cred.user);
 
+      // Create profile + member docs immediately
+      const baseData = {
+        uid: cred.user.uid,
+        email,
+        firstName: first,
+        lastName : last,
+        emailVerified: false,
+        active: true,
+        role: "user",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      await Promise.all([
+        setDoc(doc(db, "profiles", cred.user.uid), baseData, { merge: true }),
+        setDoc(doc(db, "members",  cred.user.uid), baseData, { merge: true })
+      ]);
+
+      // Mark invite touched (soft use log)
       await updateDoc(inviteRef, {
         used: true,
         usedByLast: cred.user.uid,
@@ -479,14 +517,14 @@ onAuthStateChanged(auth, async (user)=>{
       authorEmail: currentUser.email || "",
       authorName: displayName,
       authorUid: currentUser.uid,
-      createdAt: whenTs
+      createdAt: whenTs,
+      updatedAt: serverTimestamp()
     });
     return { id: ref.id, text, displayName, when: whenTs.toDate() };
   }
 
   // Fetch active member emails (admin only)
   async function getActiveEmails(){
-    // first try profiles where active==true
     if (isAdmin){
       try{
         const emails = [];
@@ -510,15 +548,17 @@ onAuthStateChanged(auth, async (user)=>{
     window.location.href = mailto;
   }
 
-  // Submit buttons
-  document.getElementById('postSubmitOnly').addEventListener('click', async ()=>{
-    try{
-      const created = await createPost();
-      if (created){ closePostModal(); }
-    }catch(err){ psay(err.message, true); }
-  });
+  // Submit listeners (guard for optional elements)
+  if (postSubmitOnly) {
+    postSubmitOnly.addEventListener('click', async ()=>{
+      try{
+        const created = await createPost();
+        if (created){ closePostModal(); }
+      }catch(err){ psay(err.message, true); }
+    });
+  }
 
-  document.getElementById('postSubmitNotify').addEventListener('click', async ()=>{
+  postSubmitNotify?.addEventListener('click', async ()=>{
     try{
       if (!isAdmin){ psay("Only admins can notify all members.", true); return; }
       const created = await createPost();
@@ -542,8 +582,7 @@ ${created.text}
     }catch(err){ psay(err.message, true); }
   });
 
-  // Big convenience button (admins only)
-  notifyBtn.addEventListener('click', ()=>{
+  notifyBtn && notifyBtn.addEventListener('click', ()=>{
     if (!currentUser){ openAuth(); return; }
     if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
     if (!isAdmin){ alert("Only admins can notify all members."); return; }
