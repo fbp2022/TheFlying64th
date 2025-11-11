@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Flying 64th – Members</title>
-  <meta name="description" content="The Flying 64th Flying Club – Members area currently under development." />
+  <meta name="description" content="Members area for The Flying 64th. Sign-in required." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -12,81 +12,53 @@
   <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
-      --card:#0f1722cc;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius:16px;
+      --card:#0f1722cc; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%}
-    body{
-      font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);color:var(--ink);line-height:1.6;
-      display:flex;flex-direction:column;min-height:100vh;
-    }
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;display:flex;flex-direction:column;min-height:100vh}
 
-    /* ===== NAV (matches home.html) ===== */
+    /* ===== NAV (matches site) ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
       background:rgba(11,17,23,.75);
       border-bottom:1px solid var(--rule);
     }
-    .nav{
-      max-width:1200px; margin:0 auto; padding:12px 18px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
-      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
-    }
-    .brand img{ height:34px; width:auto }
-    header nav{
-      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
-    }
-    header nav a{
-      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
-      transition:all .18s ease;
-    }
-    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
-    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
+    .nav{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--ink);text-decoration:none;font-size:22px;white-space:nowrap}
+    .brand img{height:34px;width:auto}
+    header nav{display:flex;align-items:center;gap:18px;flex-wrap:nowrap}
+    header nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;transition:all .18s ease}
+    header nav a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+    header nav a.active{color:#001a33;background:var(--accent);font-weight:700}
+    .btn-like{border:1px solid var(--rule);border-radius:10px;padding:8px 12px;cursor:pointer}
+    .btn-like:hover{background:rgba(255,255,255,.06)}
     @media (max-width:900px){
-      .nav{ padding:10px 14px; flex-wrap:wrap }
-      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
-      header nav::-webkit-scrollbar{ display:none }
-      header nav a{ padding:8px 10px; font-size:15px }
+      .nav{padding:10px 14px;flex-wrap:wrap}
+      header nav{width:100%;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+      header nav::-webkit-scrollbar{display:none}
+      header nav a{padding:8px 10px;font-size:15px}
     }
 
-    /* ===== UNDER DEVELOPMENT ===== */
-    main{
-      flex:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:40px 20px;
-    }
-    .dev-box{
-      background:var(--card);
-      border:1px solid var(--rule);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:50px 40px;
-      max-width:600px;
-      animation:fadeIn 1.2s ease both;
-    }
-    .dev-box h1{
-      font-size:2rem;
-      margin:0 0 10px;
-      color:var(--accent);
-    }
-    .dev-box p{
-      color:var(--muted);
-      margin:0;
-    }
-    @keyframes fadeIn{
-      from{opacity:0;transform:translateY(20px)}
-      to{opacity:1;transform:translateY(0)}
-    }
+    /* ===== PAGE ===== */
+    main{flex:1;max-width:1100px;margin:0 auto;padding:28px 18px}
+    .card{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .title h1{font-size:1.4rem;margin:0}
+    .muted{color:var(--muted)}
+    .hidden{display:none !important}
+
+    .center-wrap{display:flex;align-items:center;justify-content:center;min-height:40vh;text-align:center}
+    .cta{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--rule);padding:10px 14px;border-radius:12px;cursor:pointer}
+    .cta:hover{background:rgba(255,255,255,.06)}
+    .google-mark{width:18px;height:18px;border-radius:50%;background:#fff;display:inline-block}
+
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:left}
+    th{font-weight:600;color:var(--muted)}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .pill{display:inline-block;padding:2px 8px;border:1px solid var(--rule);border-radius:999px;font-size:.8rem;color:var(--muted)}
   </style>
 </head>
 
@@ -99,7 +71,8 @@
         <span>The Flying 64th</span>
       </a>
       <nav>
-        <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
+        <a id="signinBtn" class="btn-like">Sign In</a>
+        <a id="signoutBtn" class="btn-like hidden">Sign Out</a>
         <a href="home.html">Home</a>
         <a href="calendar.html">Calendar</a>
         <a href="becomeamember.html">Become a Member</a>
@@ -110,13 +83,177 @@
     </div>
   </header>
 
-  <!-- ===== MAIN CONTENT ===== -->
+  <!-- ===== GATED CONTENT ===== -->
   <main>
-    <div class="dev-box">
-      <h1>🚧 Under Development 🚧</h1>
-      <p>The Members area is currently being built.<br>
-      Please check back soon for updates.</p>
-    </div>
+    <!-- Signed-out view -->
+    <section id="signedOut" class="center-wrap">
+      <div class="card" style="max-width:560px;">
+        <h1 style="margin-top:0">🔒 Members Area</h1>
+        <p class="muted" style="margin:6px 0 16px">
+          You must be signed in to view member information.
+        </p>
+        <button id="signinCta" class="cta"><span class="google-mark"></span> Continue with Google</button>
+        <p class="muted" style="margin-top:10px;font-size:.9rem">
+          Access is restricted. Data is protected by Firestore Security Rules.
+        </p>
+      </div>
+    </section>
+
+    <!-- Signed-in view -->
+    <section id="signedIn" class="hidden">
+      <div class="card">
+        <div class="title">
+          <h1>Members Directory</h1>
+          <div class="muted" id="userBadge">Signed in</div>
+        </div>
+        <div class="muted" style="margin-bottom:12px">Read-only view. Contact an admin for updates.</div>
+        <div class="card" style="padding:0">
+          <div id="loading" class="muted" style="padding:14px">Loading members…</div>
+          <table id="membersTable" class="hidden" aria-label="Members directory">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="membersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <!-- ===== Firebase (Module) ===== -->
+  <script type="module">
+    /***** 1) Firebase init *****/
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged, GoogleAuthProvider,
+      signInWithPopup, signOut
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {
+      getFirestore, collection, query, orderBy, getDocs
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // TODO: replace with your actual config (safe to embed; rules protect data)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /***** 2) UI handles *****/
+    const signedOut = document.getElementById('signedOut');
+    const signedIn  = document.getElementById('signedIn');
+    const signinBtn = document.getElementById('signinBtn');
+    const signinCta = document.getElementById('signinCta');
+    const signoutBtn= document.getElementById('signoutBtn');
+    const userBadge = document.getElementById('userBadge');
+    const loadingEl = document.getElementById('loading');
+    const tableEl   = document.getElementById('membersTable');
+    const bodyEl    = document.getElementById('membersBody');
+
+    const provider = new GoogleAuthProvider();
+
+    function showSignedOut(){
+      signedOut.classList.remove('hidden');
+      signedIn.classList.add('hidden');
+      signinBtn.classList.remove('hidden');
+      signoutBtn.classList.add('hidden');
+    }
+    function showSignedIn(user){
+      signedOut.classList.add('hidden');
+      signedIn.classList.remove('hidden');
+      signinBtn.classList.add('hidden');
+      signoutBtn.classList.remove('hidden');
+      userBadge.textContent = `Signed in as ${user.displayName || user.email}`;
+    }
+
+    async function signIn(){
+      try { await signInWithPopup(auth, provider); }
+      catch (e){ alert("Sign-in failed: " + (e?.message || e)); }
+    }
+    async function signOutNow(){
+      try { await signOut(auth); }
+      catch (e){ alert("Sign-out failed: " + (e?.message || e)); }
+    }
+    signinBtn?.addEventListener('click', signIn);
+    signinCta?.addEventListener('click', signIn);
+    signoutBtn?.addEventListener('click', signOutNow);
+
+    /***** 3) Data load (only after auth) *****/
+    async function loadMembers(){
+      loadingEl.classList.remove('hidden');
+      tableEl.classList.add('hidden');
+      bodyEl.innerHTML = "";
+
+      try {
+        // Adjust field names to match your documents
+        // Example doc shape: { firstName, lastName, email, role, joinedAt (timestamp), status }
+        const q = query(collection(db, "members"), orderBy("lastName"), orderBy("firstName"));
+        const snap = await getDocs(q);
+
+        if (snap.empty){
+          loadingEl.textContent = "No members found.";
+          return;
+        }
+
+        const rows = [];
+        snap.forEach(doc => {
+          const m = doc.data();
+          const fullName = [m.firstName, m.lastName].filter(Boolean).join(" ") || "(No name)";
+          const email = m.email || "";
+          const role = m.role || "user";
+          const status = m.status || "active";
+          const joined = m.joinedAt?.toDate ? m.joinedAt.toDate() : (m.joinedAt ? new Date(m.joinedAt) : null);
+          const joinedStr = joined ? joined.toLocaleDateString() : "—";
+
+          rows.push(`
+            <tr>
+              <td>${escapeHtml(fullName)}</td>
+              <td>${escapeHtml(email)}</td>
+              <td><span class="pill">${escapeHtml(role)}</span></td>
+              <td>${joinedStr}</td>
+              <td><span class="pill">${escapeHtml(status)}</span></td>
+            </tr>
+          `);
+        });
+
+        bodyEl.innerHTML = rows.join("");
+        loadingEl.classList.add('hidden');
+        tableEl.classList.remove('hidden');
+      } catch (err){
+        loadingEl.textContent = "Error loading members.";
+        console.error(err);
+        alert("Failed to load members. Your account may not have access.");
+      }
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+
+    /***** 4) Auth gate *****/
+    onAuthStateChanged(auth, (user) => {
+      if (user){
+        showSignedIn(user);
+        loadMembers();     // data only fetched when authenticated
+      } else {
+        showSignedOut();
+      }
+    });
+  </script>
 </body>
 </html>
