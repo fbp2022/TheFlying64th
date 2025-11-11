@@ -444,7 +444,7 @@
     const last  = lastEl.value.trim();
 
     if (!email || !pass || !code || !first || !last)
-      return say("Email, password, invite code, first and last name are required.", true);
+      return say("First and last name, email, password, and invite code are required.", true);
 
     try {
       // Validate invite
