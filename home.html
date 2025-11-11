@@ -205,7 +205,14 @@
   <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
     <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+    
+  <!-- NEW: First/Last Name (required for new accounts) -->
+    <label class="auth-label" for="firstName">First Name</label>
+    <input id="firstName" class="auth-input" type="text" placeholder="Your first name" required>
 
+    <label class="auth-label" for="lastName">Last Name</label>
+    <input id="lastName" class="auth-input" type="text" placeholder="Your last name" required>
+    
     <label class="auth-label" for="email">Email</label>
     <input id="email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
 
@@ -217,12 +224,7 @@
       <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
     </div>
 
-    <!-- NEW: First/Last Name (required for new accounts) -->
-    <label class="auth-label" for="firstName">First Name</label>
-    <input id="firstName" class="auth-input" type="text" placeholder="Your first name" required>
-
-    <label class="auth-label" for="lastName">Last Name</label>
-    <input id="lastName" class="auth-input" type="text" placeholder="Your last name" required>
+  
 
     <div class="auth-row">
       <button id="doSignIn" class="auth-btn primary">Sign In</button>
