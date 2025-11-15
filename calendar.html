@@ -65,6 +65,7 @@
       display:flex;
       gap:18px;
       align-items:center;
+      flex-wrap:nowrap;
     }
     nav.links a{
       color:var(--muted);
@@ -72,6 +73,7 @@
       padding:8px 12px;
       border-radius:10px;
       transition:.18s;
+      white-space:nowrap;
     }
     nav.links a:hover{
       color:var(--ink);
@@ -95,7 +97,7 @@
       background:linear-gradient(180deg,#2b6bb1,#1c4370);
       border:1px solid #2b6bb1;
     }
-    #signinBtn{ margin-right:8px; }
+    #signinBtn{ margin-right:8px; cursor:pointer; }
 
     /* ===== BANNER ===== */
     .banner{
@@ -306,9 +308,8 @@
       border-color:#2b7a55;
     }
 
-    /* ===== MODALS (Auth + Booking) ===== */
-    .auth-modal,
-    .modal-backdrop{
+    /* ===== AUTH MODAL (same pattern as home.html) ===== */
+    .auth-modal{
       position:fixed;
       inset:0;
       background:rgba(0,0,0,.5);
@@ -316,25 +317,18 @@
       place-items:center;
       z-index:1000;
     }
-    .auth-modal.open,
-    .modal-backdrop.open{ display:grid; }
-
-    .auth-card,
-    .modal{
-      width:min(820px,92vw);
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 10px 40px rgba(0,0,0,.5);
-      color:#e6edf3;
-    }
-
+    .auth-modal.open{ display:grid; }
     .auth-card{
+      width:min(480px,92vw);
+      background:#0f1722;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
       padding:18px 18px 12px;
       position:relative;
     }
     .auth-title{
-      margin:0 0 10px;
+      margin:0 0 12px 0;
       font-size:20px;
       font-weight:800;
     }
@@ -396,7 +390,48 @@
       color:#9fb1c3;
       margin:8px 0 4px;
     }
+    .view{ display:none; }
+    .view.active{ display:block; }
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .tab{
+      flex:1;
+      padding:8px 10px;
+      border:1px solid #1f2a38;
+      border-radius:10px;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .tab.active{
+      background:#58a6ff;
+      color:#001a33;
+      font-weight:700;
+      border-color:transparent;
+    }
 
+    /* ===== BOOKING MODAL ===== */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      display:none;
+      place-items:center;
+      z-index:900;
+    }
+    .modal-backdrop.open{ display:grid; }
+
+    .modal{
+      width:min(820px,92vw);
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);
+      color:#e6edf3;
+    }
     .modal-header{
       padding:12px 16px;
       border-bottom:1px solid var(--border);
@@ -515,44 +550,59 @@
         <a class="active" href="calendar.html">Calendar</a>
         <a href="becomeamember.html">Become a Member</a>
         <a href="photos.html">Photos</a>
+        <a href="members.html">Members</a>
         <a href="poh&manuals.html">POH &amp; Manuals</a>
       </nav>
     </div>
   </header>
 
-  <!-- ===== AUTH MODAL ===== -->
+  <!-- ===== AUTH MODAL (copied pattern from home.html) ===== -->
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
-      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
 
-      <label class="auth-label" for="em">Email</label>
-      <input id="em" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
-
-      <label class="auth-label" for="pw">Password</label>
-      <input id="pw" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
-
-      <!-- New fields for sign-up to match auth.js -->
-      <label class="auth-label" for="firstAuth">First name (new accounts)</label>
-      <input id="firstAuth" class="auth-input" type="text" placeholder="John">
-
-      <label class="auth-label" for="lastAuth">Last name (new accounts)</label>
-      <input id="lastAuth" class="auth-input" type="text" placeholder="Smith">
-
-      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code">
-
-      <div class="auth-row">
-        <button id="doSignIn" class="auth-btn primary">Sign In</button>
-        <button id="doSignUp" class="auth-btn">Create Account</button>
+      <div class="tabs">
+        <button id="tabSignIn" class="tab active">Sign In</button>
+        <button id="tabSignUp" class="tab">Create Account</button>
       </div>
 
-      <div class="auth-row">
-        <button id="doReset" class="auth-link" type="button">Forgot password?</button>
-        <button id="doSignOut" class="auth-link" type="button">Sign out</button>
-      </div>
+      <!-- Sign In view -->
+      <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+        <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+        <label class="auth-label" for="si_email">Email</label>
+        <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="auth-label" for="si_password">Password</label>
+        <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
 
-      <p id="authMsg" class="auth-msg"></p>
+        <div class="auth-row">
+          <button id="doSignIn" class="auth-btn primary">Sign In</button>
+        </div>
+        <div class="auth-row">
+          <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+          <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+        </div>
+        <p id="authMsg" class="auth-msg"></p>
+      </section>
+
+      <!-- Create Account view -->
+      <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+        <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+        <label class="auth-label" for="su_first">First Name</label>
+        <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
+        <label class="auth-label" for="su_last">Last Name</label>
+        <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
+        <label class="auth-label" for="su_email">Email</label>
+        <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="auth-label" for="su_password">Password</label>
+        <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
+        <label class="auth-label" for="su_invite">Invite Code</label>
+        <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
+
+        <div class="auth-row">
+          <button id="doSignUp" class="auth-btn primary">Create Account</button>
+        </div>
+        <p id="createMsg" class="auth-msg"></p>
+      </section>
     </div>
   </div>
 
@@ -777,115 +827,150 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // ----- Auth modal wiring -----
+    /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
     const signinBtn  = document.getElementById('signinBtn');
+
+    // Auth modal + tabs
     const authModal  = document.getElementById('authModal');
     const closeAuth  = document.getElementById('closeAuth');
-    const em         = document.getElementById('em');
-    const pw         = document.getElementById('pw');
-    const firstAuth  = document.getElementById('firstAuth');
-    const lastAuth   = document.getElementById('lastAuth');
-    const invite     = document.getElementById('invite');
-    const doSignIn   = document.getElementById('doSignIn');
-    const doSignUp   = document.getElementById('doSignUp');
-    const doReset    = document.getElementById('doReset');
-    const doSignOut  = document.getElementById('doSignOut');
-    const authMsg    = document.getElementById('authMsg');
+    const tabSignIn  = document.getElementById('tabSignIn');
+    const tabSignUp  = document.getElementById('tabSignUp');
+    const viewSignIn = document.getElementById('viewSignIn');
+    const viewSignUp = document.getElementById('viewSignUp');
 
-    function say(t, err=false){
-      authMsg.textContent = t || "";
-      authMsg.style.color = err ? '#ffb4b4' : '#9fb1c3';
-    }
+    // Sign-in inputs
+    const si_email    = document.getElementById('si_email');
+    const si_password = document.getElementById('si_password');
+    const doSignInBtn = document.getElementById('doSignIn');
+    const doResetBtn  = document.getElementById('doReset');
+    const signOutBtn  = document.getElementById('signOutBtn');
+    const authMsg     = document.getElementById('authMsg');
 
+    // Sign-up inputs
+    const su_first    = document.getElementById('su_first');
+    const su_last     = document.getElementById('su_last');
+    const su_email    = document.getElementById('su_email');
+    const su_password = document.getElementById('su_password');
+    const su_invite   = document.getElementById('su_invite');
+    const doSignUpBtn = document.getElementById('doSignUp');
+    const createMsg   = document.getElementById('createMsg');
+
+    // Calendar-specific auth deps
+    const emailField  = document.getElementById('emailField');
+    const authHint    = document.getElementById('authHint');
+    const saveBtn     = document.getElementById('saveBooking');
+
+    const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+    const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+
+    /* ---------- Auth modal open/close & tabs ---------- */
     function openAuth(){
       authModal.classList.add('open');
       authModal.setAttribute('aria-hidden','false');
       say("");
+      csay("");
     }
     function closeAuthModal(){
       authModal.classList.remove('open');
       authModal.setAttribute('aria-hidden','true');
     }
 
-    signinBtn.addEventListener('click', openAuth);
-    closeAuth.addEventListener('click', closeAuthModal);
-    authModal.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
+    signinBtn?.addEventListener('click', openAuth);
+    closeAuth?.addEventListener('click', closeAuthModal);
+    authModal?.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
 
-    doSignIn.addEventListener('click', async ()=>{
+    function activate(view){
+      [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
+      [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
+      if (view === 'in'){
+        tabSignIn.classList.add('active');
+        viewSignIn.classList.add('active');
+      } else {
+        tabSignUp.classList.add('active');
+        viewSignUp.classList.add('active');
+      }
+    }
+    tabSignIn.addEventListener('click', ()=>activate('in'));
+    tabSignUp.addEventListener('click', ()=>activate('up'));
+
+    // Deep link #signin
+    if (location.hash === '#signin') openAuth();
+    window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
+
+    /* ---------- Auth state handling (hooked into booking UI) ---------- */
+    onAuthChanged((user)=>{
+      const verified = !!user?.emailVerified;
+      if (user){
+        const shortEmail = user.email && user.email.length>28
+          ? user.email.slice(0,28)+'…'
+          : (user.email || '');
+        signinBtn.textContent = verified
+          ? `Account – ${shortEmail}`
+          : `Unverified – ${shortEmail}`;
+
+        if (emailField) emailField.value = user.email || "";
+        if (saveBtn)   saveBtn.disabled = false;
+        if (authHint)  authHint.style.display = "none";
+      } else {
+        signinBtn.textContent = "Sign In";
+        if (emailField) emailField.value = "";
+        if (saveBtn)   saveBtn.disabled = true;
+        if (authHint)  authHint.style.display = "block";
+      }
+    });
+
+    /* ---------- Sign in / up / reset / out ---------- */
+    doSignInBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      const pass  = si_password.value;
+      if (!email || !pass) return say("Enter email and password.", true);
       try{
-        if(!em.value || !pw.value){
-          return say("Enter email and password.", true);
-        }
-        await signInEmailPassword(em.value.trim(), pw.value);
+        await signInEmailPassword(email, pass);
         say("Signed in.");
         closeAuthModal();
-      }catch(err){
-        say(err.message || String(err), true);
-      }
+      }catch(err){ say(err.message || String(err), true); }
     });
 
-    doSignUp.addEventListener('click', async ()=>{
+    doSignUpBtn.addEventListener('click', async ()=>{
+      const first = su_first.value.trim();
+      const last  = su_last.value.trim();
+      const email = su_email.value.trim();
+      const pass  = su_password.value;
+      const code  = su_invite.value.trim();
+      if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
       try{
-        const payload = {
-          email: em.value,
-          password: pw.value,
-          firstName: firstAuth.value,
-          lastName:  lastAuth.value,
-          code: invite.value
-        };
-        await signUpWithInvite(payload);
-        say("Account created! Check your inbox to verify your email.");
-      }catch(err){
-        say(err.message || String(err), true);
-      }
+        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
+        csay("Account created! Check your inbox to verify your email.");
+        activate('in');
+      }catch(err){ csay(err.message || String(err), true); }
     });
 
-    doReset.addEventListener('click', async ()=>{
+    doResetBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      if (!email) return say("Enter your email first.", true);
       try{
-        if(!em.value){
-          return say("Enter your email first.", true);
-        }
-        await resetPassword(em.value.trim());
+        await resetPassword(email);
         say("Password reset email sent.");
-      }catch(err){
-        say(err.message || String(err), true);
-      }
+      }catch(err){ say(err.message || String(err), true); }
     });
 
-    doSignOut.addEventListener('click', async ()=>{
+    signOutBtn.addEventListener('click', async ()=>{
       try{
         await signOut();
         say("Signed out.");
-      }catch(err){
-        say(err.message || String(err), true);
-      }
+      }catch(err){ say(err.message || String(err), true); }
     });
 
-    // Booking controls that depend on auth state
-    const emailField = document.getElementById('emailField');
-    const authHint   = document.getElementById('authHint');
-    const saveBtn    = document.getElementById('saveBooking');
+    // Enter key behavior
+    function handleEnter(e){
+      if (e.key !== 'Enter') return;
+      if (viewSignIn.classList.contains('active')) doSignInBtn.click();
+      else doSignUpBtn.click();
+    }
+    [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
+      .forEach(el => el.addEventListener('keydown', handleEnter));
 
-    onAuthChanged((user)=>{
-      if(user){
-        const short = user.email && user.email.length>25
-          ? user.email.slice(0,25)+"…"
-          : (user.email || "");
-        signinBtn.textContent = user.emailVerified
-          ? `Account – ${short}`
-          : `Unverified – ${short}`;
-        emailField.value = user.email || "";
-        saveBtn.disabled = false;
-        authHint.style.display = "none";
-      }else{
-        signinBtn.textContent = "Sign In";
-        emailField.value = "";
-        saveBtn.disabled = true;
-        authHint.style.display = "block";
-      }
-    });
-
-    // ===== Calendar logic (month grid) =====
+    /* ===== Calendar logic (month grid) ===== */
     const grid    = document.getElementById('grid');
     const titleEl = document.getElementById('rangeTitle');
     let today     = new Date();
@@ -961,19 +1046,19 @@
     });
 
     // ===== Booking modal behavior =====
-    const modal     = document.getElementById('bookingModal');
-    const openBtn   = document.getElementById('newBooking');
-    const closeBtn  = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelModal');
-    const withInst  = document.getElementById('withInstructor');
-    const instWrap  = document.getElementById('instructorWrap');
-    const allDay    = document.getElementById('allDay');
-    const startTime = document.getElementById('startTime');
-    const endTime   = document.getElementById('endTime');
+    const bookingModal = document.getElementById('bookingModal');
+    const openBtn      = document.getElementById('newBooking');
+    const closeBtn     = document.getElementById('closeModal');
+    const cancelBtn    = document.getElementById('cancelModal');
+    const withInst     = document.getElementById('withInstructor');
+    const instWrap     = document.getElementById('instructorWrap');
+    const allDay       = document.getElementById('allDay');
+    const startTime    = document.getElementById('startTime');
+    const endTime      = document.getElementById('endTime');
 
     function openModal(){
-      modal.classList.add('open');
-      // defaults to today / rounded time
+      bookingModal.classList.add('open');
+      bookingModal.setAttribute('aria-hidden','false');
       const now=new Date();
       const pad=n=>String(n).padStart(2,'0');
       const yyyy=now.getFullYear(), mm=pad(now.getMonth()+1), dd=pad(now.getDate());
@@ -987,12 +1072,15 @@
       startTime.value=`${hh}:${min}`;
       endTime.value  =`${hh}:${pad((parseInt(min,10)+30)%60)}`;
     }
-    function closeModal(){ modal.classList.remove('open'); }
+    function closeBookingModal(){
+      bookingModal.classList.remove('open');
+      bookingModal.setAttribute('aria-hidden','true');
+    }
 
     openBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+    closeBtn.addEventListener('click', closeBookingModal);
+    cancelBtn.addEventListener('click', closeBookingModal);
+    bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
 
     withInst.onchange = ()=>{ instWrap.hidden = !withInst.checked; };
     allDay.onchange   = ()=>{
@@ -1061,7 +1149,7 @@
           createdAt: serverTimestamp()
         });
         console.log('Booking saved:', data);
-        closeModal();
+        closeBookingModal();
       }catch(err){
         console.error(err);
         alert('Could not save booking: ' + (err.message || String(err)));
