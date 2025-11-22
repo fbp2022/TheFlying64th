@@ -128,7 +128,6 @@
     <!-- Members list -->
     <section class="card">
       <div class="top-row" style="margin-top:0">
-        <div class="muted">Tap buttons below each card to manage status (admins only).</div>
       </div>
       <div id="membersGrid" class="grid"></div>
       <div id="listMsg" class="hint"></div>
@@ -380,18 +379,7 @@
             </div>
           </div>
 
-          ${ iAmAdmin ? `
-          <div class="actions">
-            <button class="btn ${role==='admin' ? 'ghost' : 'ok'}"
-                    data-act="toggle-admin" data-uid="${uid}" data-current="${role}">
-              ${ role==='admin' ? 'Remove Admin' : 'Make Admin' }
-            </button>
-            <button class="btn ${active?'warn':'ok'}"
-                    data-act="toggle-active" data-uid="${uid}" data-current="${active?'active':'inactive'}">
-              ${ active ? 'Deactivate' : 'Activate' }
-            </button>
-          </div>` : ``}
-        `;
+          `;
         grid.appendChild(card);
       });
 
