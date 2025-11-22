@@ -4,497 +4,934 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Flying 64th – Home</title>
-  <meta name="description" content="The Flying 64th Flying Club – affordable general aviation in East Tennessee based at Oliver Springs Airport (Braden Field). Operates Cessna 172 & 150." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta name="color-scheme" content="dark light" />
 
   <style>
     :root{
-      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
-      --card:#0f1722cc; --shadow: 0 10px 30px rgba(0,0,0,.35); --radius:16px;
+      --bg:#0f1115;
+      --ink:#e9eef7;
+      --muted:#b9c2d0;
+      --panel:#151924;
+      --panel2:#0d1018;
+      --accent:#4da3ff;
+      --rule:rgba(255,255,255,.10);
+      --border:rgba(255,255,255,.12);
+      --radius:12px;
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(circle at top,#161b2b 0,#05060a 46%,#020308 100%);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
 
     /* ===== NAV ===== */
-    .site-header{position:sticky; top:0; z-index:50; backdrop-filter:saturate(160%) blur(8px); background:rgba(11,17,23,.75); border-bottom:1px solid var(--rule)}
-    .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
-    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px; color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap}
-    .brand img{ height:34px; width:auto }
-    header nav{display:flex; align-items:center; gap:18px; flex-wrap:nowrap}
-    header nav a{color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px; transition:all .18s ease}
-    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
-    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
-    @media (max-width:900px){
-      .nav{ padding:10px 14px; flex-wrap:wrap }
-      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
-      header nav::-webkit-scrollbar{ display:none }
-      header nav a{ padding:8px 10px; font-size:15px }
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter:saturate(160%) blur(12px);
+      background:linear-gradient(120deg,rgba(4,8,20,.95),rgba(4,10,30,.92));
+      border-bottom:1px solid var(--rule);
+    }
+    .nav{
+      max-width:1400px;
+      margin:0 auto;
+      padding:12px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      color:var(--ink);
+      text-decoration:none;
+      font-size:22px;
+    }
+    .brand img{ height:34px; }
+    nav.links{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      flex-wrap:nowrap;
+    }
+    nav.links a{
+      color:var(--muted);
+      text-decoration:none;
+      padding:8px 12px;
+      border-radius:10px;
+      transition:.18s;
+      white-space:nowrap;
+    }
+    nav.links a:hover{
+      color:var(--ink);
+      background:rgba(255,255,255,.06);
+    }
+    nav.links a.active{
+      color:#001a33;
+      background:var(--accent);
+      font-weight:700;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background:#0c1020;
+      color:#eaf2ff;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .btn.primary{
+      background:linear-gradient(180deg,#2b6bb1,#1c4370);
+      border:1px solid #2b6bb1;
+    }
+    #signinBtn{ margin-right:8px; cursor:pointer; }
+
+    /* ===== LAYOUT ===== */
+    main{
+      max-width:1400px;
+      margin:16px auto 80px;
+      padding:0 18px 32px;
     }
 
-    /* ===== HERO ===== */
-    .hero{position:relative;min-height:56vh;display:grid;place-items:end;isolation:isolate;background:#000 url("images/bothplanes_homepage.jpg") center/cover no-repeat}
-    .hero::after{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(11,17,23,.15) 0%, rgba(11,17,23,.65) 55%, rgba(11,17,23,1) 100%)}
-    .hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 18px 24px;width:100%}
-    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
-    .hero p{margin:0;color:#d0d9e3;max-width:900px}
+    .hero{
+      display:grid;
+      grid-template-columns:2fr 1.3fr;
+      gap:18px;
+      margin-top:16px;
+    }
+    .hero-left{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:18px 18px 16px;
+    }
+    .hero-left h1{
+      margin:0 0 8px;
+      font-size:26px;
+      letter-spacing:.2px;
+    }
+    .hero-left p{
+      margin:0;
+      color:var(--muted);
+      font-size:14.5px;
+      line-height:1.5;
+    }
+    .hero-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+      font-size:12px;
+    }
+    .tag{
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:#0d1120;
+      color:#cfe1ff;
+    }
 
-    /* ===== CONTENT ===== */
-    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
-    .grid{display:grid;gap:16px}
-    .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
-    @media (max-width:760px){ .grid.cols-3{grid-template-columns:1fr} }
+    .hero-right{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:13.5px;
+      color:var(--muted);
+    }
+    .card h3{
+      margin:0 0 4px;
+      font-size:15px;
+      color:var(--ink);
+    }
+    .card strong{ color:#cfe1ff; }
 
-    .card{background:var(--card); border:1px solid var(--rule); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px}
-    .card h2{margin:0 0 8px;font-size:1.25rem}
-    .muted{color:var(--muted)}
-    .list{padding-left:18px;margin:8px 0}
-    .list li{margin:6px 0}
-    .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
-    .iconbtn:hover{background:rgba(255,255,255,.06)}
+    /* ===== MESSAGE BOARD ===== */
+    .board-section{
+      margin-top:24px;
+      display:grid;
+      grid-template-columns:2fr 1.3fr;
+      gap:18px;
+    }
+    .board{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 14px 10px;
+    }
+    .board-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .board-header h2{
+      margin:0;
+      font-size:18px;
+    }
+    .board-header small{
+      color:var(--muted);
+      font-size:12px;
+    }
+    #msgHint{
+      color:var(--muted);
+      font-size:12.5px;
+      margin:4px 0 8px;
+      min-height:18px;
+    }
+    #messages{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:420px;
+      overflow-y:auto;
+      padding-right:4px;
+    }
+    .msg{
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#101420;
+      padding:8px 10px;
+      font-size:13px;
+    }
+    .msg-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .msg-meta strong{
+      font-size:13px;
+      color:#e9f3ff;
+    }
+    .msg-meta span{
+      font-size:12px;
+      color:#9fb1c3;
+    }
 
-    /* ===== MESSAGE BOARD SCROLL AREA ===== */
-    #messages{display:grid; gap:12px; max-height:48vh; overflow:auto; padding-right:4px}
-    @media (max-width:760px){ #messages{ max-height:40vh } }
-    .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;background:#0e1520}
-    .msg-top{display:flex;justify-content:space-between;gap:10px}
-    .msg-meta{font-size:12px;color:#9fb1c3}
+    .side-info{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .side-card{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .side-card h3{
+      margin:0 0 4px;
+      font-size:15px;
+      color:var(--ink);
+    }
 
-    /* ===== MODALS (Auth + New Post) ===== */
-    .auth-modal,.post-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
-    .auth-modal.open,.post-modal.open{display:grid}
-    .auth-card,.post-card{width:min(480px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
-    .auth-title,.post-title{margin:0 0 12px 0;font-size:20px;font-weight:800}
-    .auth-x,.post-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
-    .auth-label,.post-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
-    .auth-input,.post-input,.post-text{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#0b1117;color:#e6edf3}
-    .auth-row,.post-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
-    .auth-btn,.post-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#141b26;color:#e6edf3;cursor:pointer}
-    .auth-btn.primary,.post-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
-    .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
-    .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
-    .foot{max-width:1100px;margin:0 auto;padding:24px 18px;color:#9fb1c3;border-top:1px solid var(--rule)}
+    /* ===== FOOTER ===== */
+    footer{
+      max-width:1400px;
+      margin:0 auto 22px;
+      padding:0 18px;
+      color:#6f7a90;
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+    }
 
-    /* Auth views toggle */
-    .view{display:none}
-    .view.active{display:block}
-    .tabs{display:flex;gap:8px;margin-bottom:8px}
-    .tab{flex:1;padding:8px 10px;border:1px solid var(--rule);border-radius:10px;background:#141b26;color:#e6edf3;cursor:pointer}
-    .tab.active{background:#58a6ff;color:#001a33;font-weight:700;border-color:transparent}
+    /* ===== AUTH MODAL (same pattern as calendar/members) ===== */
+    .auth-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      place-items:center;
+      z-index:1000;
+    }
+    .auth-modal.open{ display:grid; }
+    .auth-card{
+      width:min(480px,92vw);
+      background:#0f1722;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
+      padding:18px 18px 12px;
+      position:relative;
+    }
+    .auth-title{
+      margin:0 0 12px 0;
+      font-size:20px;
+      font-weight:800;
+    }
+    .auth-x{
+      position:absolute;
+      right:14px;
+      top:12px;
+      border:0;
+      background:transparent;
+      color:#9fb1c3;
+      font-size:18px;
+      cursor:pointer;
+    }
+    .auth-label{
+      display:block;
+      margin-top:10px;
+      margin-bottom:4px;
+      color:#9fb1c3;
+      font-size:13px;
+    }
+    .auth-input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#0b1117;
+      color:#e6edf3;
+    }
+    .auth-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+    }
+    .auth-btn{
+      flex:1;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .auth-btn.primary{
+      background:#58a6ff;
+      color:#001a33;
+      border-color:transparent;
+      font-weight:700;
+    }
+    .auth-link{
+      background:none;
+      border:0;
+      color:#9fb1c3;
+      cursor:pointer;
+      padding:0;
+    }
+    .auth-msg{
+      min-height:18px;
+      color:#9fb1c3;
+      margin:8px 0 4px;
+    }
+    .view{ display:none; }
+    .view.active{ display:block; }
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .tab{
+      flex:1;
+      padding:8px 10px;
+      border:1px solid #1f2a38;
+      border-radius:10px;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .tab.active{
+      background:#58a6ff;
+      color:#001a33;
+      font-weight:700;
+      border-color:transparent;
+    }
+
+    /* ===== POST MODAL (board) ===== */
+    #postModal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      place-items:center;
+      z-index:950;
+    }
+    #postModal.open{ display:grid; }
+    .post-card{
+      width:min(520px,92vw);
+      background:#0f1722;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
+      padding:16px 16px 12px;
+      position:relative;
+    }
+    .post-card h3{
+      margin:0 0 8px;
+      font-size:18px;
+      font-weight:800;
+    }
+    .post-card .auth-label{ margin-top:8px; }
+    .post-card textarea{
+      width:100%;
+      min-height:110px;
+      resize:vertical;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#0b1117;
+      color:#e6edf3;
+      padding:10px 12px;
+    }
+    .post-footer{
+      margin-top:12px;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    #postMsg{
+      min-height:18px;
+      color:#9fb1c3;
+      font-size:12.5px;
+      margin-top:6px;
+    }
+
+    @media (max-width:900px){
+      .hero{ grid-template-columns:1fr; }
+      .board-section{ grid-template-columns:1fr; }
+      footer{ flex-direction:column; align-items:flex-start; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ===== NAV ===== -->
-<header class="site-header">
-  <div class="nav">
-    <a class="brand" href="home.html">
-      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
-      <span>The Flying 64th</span>
-    </a>
-    <nav>
-      <a id="signinBtn" class="btn" style="margin-left:8px;cursor:pointer;">Sign In</a>
-      <a class="active" href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a href="members.html">Members</a>
-      <a href="poh&manuals.html">POH &amp; Manuals</a>
-    </nav>
-  </div>
-</header>
-
-<!-- ===== HERO ===== -->
-<section class="hero">
-  <div class="hero-inner">
-    <h1>Affordable General Aviation in East Tennessee</h1>
-    <p>The Flying 64th is a member-owned flying club based at Oliver Springs Airport (Braden Field). We operate a Cessna 172K and a Cessna 150L, both ADS-B equipped and maintained to FAA standards.</p>
-  </div>
-</section>
-
-<!-- ===== CONTENT ===== -->
-<main class="container">
-  <div class="grid cols-3">
-    <article class="card">
-      <h2>About the Club</h2>
-      <p class="muted">The Flying 64th is a general aviation flying club offering the most affordable flying in East Tennessee. Convenient to Oak Ridge, West Knoxville, Lenoir City, Harriman, and Oliver Springs, members buy into the club rather than simply renting from a pool. Every member is an owner in each aircraft.</p>
-      <p class="muted">The club has a <strong>Cessna 172K</strong> and a <strong>Cessna 150L</strong>. Both planes are equipped with ADSB-IN/OUT. The 172 is equipped with Garmin 355 GPS Navigation.</p>
-      <p class="muted">The Flying 64th has been operating out of Oliver Springs Airport as a club for pilots of all ages and skill levels since its formation in 1954 by the merger of two smaller clubs which trace their roots to 1946. The name originated from the association of charter members with the 9964th local Air Force Reserve Squadron.</p>
-    </article>
-
-    <aside class="card">
-      <h2>Why Join?</h2>
-      <ul class="list">
-        <li>Shared ownership keeps costs low</li>
-        <li>Two well-equipped aircraft (2-seat & 4-seat)</li>
-        <li>Supportive pilot community & mentorship</li>
-        <li>Great for training and time-building</li>
-      </ul>
-    </aside>
-
-    <!-- ===== MEMBER MESSAGE BOARD (gated to signed-in) ===== -->
-    <section class="card" id="board">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <h2 style="margin:0;">Member Message Board</h2>
-        <button id="newPostBtn" class="btn primary" style="display:none;">Post</button>
-      </div>
-      <p id="msgHint" class="muted" style="margin-top:8px;">Sign in to view and post messages.</p>
-      <div id="messages"></div>
-    </section>
-  </div>
-</main>
-
-<!-- ===== FOOTER ===== -->
-<footer class="site-footer">
-  <div class="foot">© <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee</div>
-</footer>
-
-<!-- ===== AUTH MODAL (two views: sign-in vs create-account) ===== -->
-<div id="authModal" class="auth-modal" aria-hidden="true">
-  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
-    <div class="tabs">
-      <button id="tabSignIn"  class="tab active">Sign In</button>
-      <button id="tabSignUp"  class="tab">Create Account</button>
+  <!-- ===== NAV ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a href="home.html" class="brand">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <span>The Flying 64th</span>
+      </a>
+      <nav class="links">
+        <a id="signinBtn" class="btn">Sign In</a>
+        <a class="active" href="home.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="members.html">Members</a>
+        <a href="poh&manuals.html">POH &amp; Manuals</a>
+      </nav>
     </div>
+  </header>
 
-    <!-- Sign In view -->
-    <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
-      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
-      <label class="auth-label" for="si_email">Email</label>
-      <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
-      <label class="auth-label" for="si_password">Password</label>
-      <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
-      <div class="auth-row">
-        <button id="doSignIn" class="auth-btn primary">Sign In</button>
+  <!-- ===== AUTH MODAL (sign in / create account) ===== -->
+  <div id="authModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
+
+      <div class="tabs">
+        <button id="tabSignIn" class="tab active">Sign In</button>
+        <button id="tabSignUp" class="tab">Create Account</button>
       </div>
-      <div class="auth-row">
-        <button id="doReset" class="auth-link" type="button">Forgot password?</button>
-        <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
-      </div>
-      <p id="authMsg" class="auth-msg"></p>
-    </section>
 
-    <!-- Create Account view -->
-    <section id="viewSignUp" class="view" aria-labelledby="createTitle">
-      <h3 id="createTitle" class="auth-title">Create a New Account</h3>
-      <label class="auth-label" for="su_first">First Name</label>
-      <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
-      <label class="auth-label" for="su_last">Last Name</label>
-      <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
-      <label class="auth-label" for="su_email">Email</label>
-      <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
-      <label class="auth-label" for="su_password">Password</label>
-      <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
-      <label class="auth-label" for="su_invite">Invite Code</label>
-      <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
-      <div class="auth-row">
-        <button id="doSignUp" class="auth-btn primary">Create Account</button>
-      </div>
-      <p id="createMsg" class="auth-msg"></p>
-    </section>
-  </div>
-</div>
+      <!-- Sign In view -->
+      <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+        <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+        <label class="auth-label" for="si_email">Email</label>
+        <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="auth-label" for="si_password">Password</label>
+        <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
 
-<!-- ===== NEW POST MODAL (Submit & Notify only) ===== -->
-<div id="postModal" class="post-modal" aria-hidden="true">
-  <div class="post-card" role="dialog" aria-modal="true" aria-labelledby="postTitle">
-    <button id="closePost" class="post-x" aria-label="Close">✕</button>
-    <h3 id="postTitle" class="post-title">New Message</h3>
+        <div class="auth-row">
+          <button id="doSignIn" class="auth-btn primary">Sign In</button>
+        </div>
+        <div class="auth-row">
+          <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+          <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+        </div>
+        <p id="authMsg" class="auth-msg"></p>
+      </section>
 
-    <label class="post-label" for="postName">Display Name</label>
-    <input id="postName" class="post-input" type="text" placeholder="e.g., Chris B.">
+      <!-- Create Account view -->
+      <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+        <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+        <label class="auth-label" for="su_first">First Name</label>
+        <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
+        <label class="auth-label" for="su_last">Last Name</label>
+        <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
+        <label class="auth-label" for="su_email">Email</label>
+        <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="auth-label" for="su_password">Password</label>
+        <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
+        <label class="auth-label" for="su_invite">Invite Code</label>
+        <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
 
-    <label class="post-label" for="postEmail">Email (from your account)</label>
-    <input id="postEmail" class="post-input" type="email" readonly>
-
-    <label class="post-label" for="postWhen">Post Date &amp; Time</label>
-    <input id="postWhen" class="post-input" type="datetime-local">
-
-    <label class="post-label" for="postText">Message</label>
-    <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
-
-    <div class="post-row">
-      <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
-      <button id="postCancel" class="post-btn">Cancel</button>
+        <div class="auth-row">
+          <button id="doSignUp" class="auth-btn primary">Create Account</button>
+        </div>
+        <p id="createMsg" class="auth-msg"></p>
+      </section>
     </div>
-    <p id="postMsg" class="auth-msg"></p>
   </div>
-</div>
 
-<script>
-  document.getElementById("y").textContent = new Date().getFullYear();
-</script>
+  <main>
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Welcome to The Flying 64th</h1>
+        <p>
+          Member-run flying club based at Oliver Springs Airport. Book aircraft,
+          track Hobbs/Tach, and keep up with club updates all from one place.
+        </p>
+        <div class="hero-tags">
+          <span class="tag">N78710 – C172</span>
+          <span class="tag">N10921 – C150</span>
+          <span class="tag">Member message board</span>
+          <span class="tag">Online scheduling</span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="card">
+          <h3>New here?</h3>
+          <p>
+            Prospective members can review our <strong>POH &amp; Manuals</strong> and
+            visit <strong>Become a Member</strong> for details on joining the club.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Existing members</h3>
+          <p>
+            Sign in with your club account to access the <strong>calendar</strong>,
+            manage your bookings, and view the <strong>member message board</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
 
-<!-- ===== Firebase + Auth + Board Logic ===== -->
-<script type="module">
-  import {
-    auth, db, onAuthChanged, signOut,
-    signInEmailPassword, signUpWithInvite, resetPassword
-  } from './auth.js';
-
-  import {
-    doc, getDoc, setDoc, serverTimestamp,
-    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-  /* ---------- BroadcastChannel to nudge other tabs to reload ---------- */
-  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('f64-global') : null;
-  bc?.addEventListener?.('message', (e)=>{ if (e?.data === 'reload') location.reload(); });
-  const broadcastReload = ()=> bc?.postMessage?.('reload');
-
-  /* ---------- UI refs ---------- */
-  const signinBtn = document.getElementById('signinBtn');
-
-  // Auth modal
-  const modal      = document.getElementById('authModal');
-  const closeModal = document.getElementById('closeModal');
-  const tabSignIn  = document.getElementById('tabSignIn');
-  const tabSignUp  = document.getElementById('tabSignUp');
-  const viewSignIn = document.getElementById('viewSignIn');
-  const viewSignUp = document.getElementById('viewSignUp');
-
-  // Sign-in inputs
-  const si_email    = document.getElementById('si_email');
-  const si_password = document.getElementById('si_password');
-  const doSignInBtn = document.getElementById('doSignIn');
-  const doResetBtn  = document.getElementById('doReset');
-  const signOutBtn  = document.getElementById('signOutBtn');
-  const authMsg     = document.getElementById('authMsg');
-
-  // Sign-up inputs
-  const su_first    = document.getElementById('su_first');
-  const su_last     = document.getElementById('su_last');
-  const su_email    = document.getElementById('su_email');
-  const su_password = document.getElementById('su_password');
-  const su_invite   = document.getElementById('su_invite');
-  const doSignUpBtn = document.getElementById('doSignUp');
-  const createMsg   = document.getElementById('createMsg');
-
-  // Board
-  const hintEl     = document.getElementById('msgHint');
-  const feedEl     = document.getElementById('messages');
-  const newPostBtn = document.getElementById('newPostBtn');
-
-  // Post modal
-  const postModal        = document.getElementById('postModal');
-  const closePost        = document.getElementById('closePost');
-  const postCancel       = document.getElementById('postCancel');
-  const postSubmitNotify = document.getElementById('postSubmitNotify');
-  const postNameEl       = document.getElementById('postName');
-  const postEmailEl      = document.getElementById('postEmail');
-  const postWhenEl       = document.getElementById('postWhen');
-  const postTextEl       = document.getElementById('postText');
-  const postMsgEl        = document.getElementById('postMsg');
-
-  const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
-  const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
-  const psay = (t, err=false)=>{ postMsgEl.textContent=t||""; postMsgEl.style.color=err?'#ffb4b4':'#9fb1c3'; };
-  const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  const toLocalDatetimeValue = (d=new Date())=>{
-    const pad = (n)=> String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
-
-  /* ---------- Auth modal open/close & tabs ---------- */
-  function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); say(""); csay(""); }
-  function closeAuth(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
-  signinBtn?.addEventListener('click', openAuth);
-  closeModal?.addEventListener('click', closeAuth);
-  modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
-
-  function activate(view){
-    [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
-    [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
-    if (view === 'in'){ tabSignIn.classList.add('active'); viewSignIn.classList.add('active'); }
-    else { tabSignUp.classList.add('active'); viewSignUp.classList.add('active'); }
-  }
-  tabSignIn.addEventListener('click', ()=>activate('in'));
-  tabSignUp.addEventListener('click', ()=>activate('up'));
-
-  // deep link
-  if (location.hash === '#signin') openAuth();
-  window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
-
-  /* ---------- Auth state & board gating ---------- */
-  let currentUser = null;
-  let unsubscribeBoard = null;
-
-  function startBoardListener(){
-    if (unsubscribeBoard) unsubscribeBoard();
-    const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
-    unsubscribeBoard = onSnapshot(qBoard, (snap)=>{
-      feedEl.innerHTML = "";
-      snap.forEach(d=>{
-        const m = d.data();
-        const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-        const when = ts ? ts.toLocaleString() : "…";
-        const canDelete = currentUser && (currentUser.uid === m.createdByUid);
-        const div = document.createElement("div");
-        div.className = "msg";
-        div.innerHTML = `
-          <div class="msg-top">
-            <div class="msg-meta">
-              <strong>${escapeHtml(m.authorName || "Member")}</strong>
-              <span> • ${when}</span>
-              <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
-            </div>
-            ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
+    <!-- ===== MESSAGE BOARD + SIDE INFO ===== -->
+    <section class="board-section">
+      <!-- Board -->
+      <div class="board">
+        <div class="board-header">
+          <div>
+            <h2>Member Message Board</h2>
+            <small>Admins post updates here. Members can read and stay in the loop.</small>
           </div>
-          <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
-        `;
-        feedEl.appendChild(div);
-      });
+          <button id="newPostBtn" class="btn primary" style="display:none;">＋ Post &amp; notify</button>
+        </div>
+        <p id="msgHint"></p>
+        <div id="messages"></div>
+      </div>
 
-      [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
-          const id = btn.getAttribute("data-del");
-          if (!id) return;
-          if (!confirm("Delete this message?")) return;
-          try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
+      <!-- Side info -->
+      <div class="side-info">
+        <div class="side-card">
+          <h3>How the board works</h3>
+          <p>
+            All signed-in club members can <strong>see</strong> posts on this board.
+            Only <strong>admins</strong> can create or edit posts.
+          </p>
+          <p>
+            When an admin clicks <em>Post &amp; notify</em>, their email client opens
+            with all active members in BCC for quick announcements.
+          </p>
+        </div>
+        <div class="side-card">
+          <h3>Need help?</h3>
+          <p>
+            If you have trouble signing in, use <strong>Forgot password</strong>.
+            For account or invite-code issues, contact a board member.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; <span id="y"></span> The Flying 64th. All rights reserved.</span>
+    <span>Based at Oliver Springs Airport (TN08).</span>
+  </footer>
+
+  <!-- ===== POST MODAL (Board) ===== -->
+  <div id="postModal" aria-hidden="true">
+    <div class="post-card" role="dialog" aria-modal="true" aria-labelledby="postTitle">
+      <button id="closePost" class="auth-x" aria-label="Close">✕</button>
+      <h3 id="postTitle">New board post</h3>
+
+      <label class="auth-label" for="postName">Display name</label>
+      <input id="postName" class="auth-input" type="text" placeholder="How this should appear on the board">
+
+      <label class="auth-label" for="postEmail">From (your email)</label>
+      <input id="postEmail" class="auth-input" type="email" readonly>
+
+      <label class="auth-label" for="postWhen">Time of this message</label>
+      <input id="postWhen" class="auth-input" type="datetime-local">
+
+      <label class="auth-label" for="postText">Message</label>
+      <textarea id="postText" placeholder="Club update, maintenance note, scheduling change, etc."></textarea>
+
+      <p id="postMsg"></p>
+
+      <div class="post-footer">
+        <button id="postCancel" class="auth-btn">Cancel</button>
+        <button id="postSubmitNotify" class="auth-btn primary">Post &amp; notify members</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== YEAR ===== -->
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
+
+  <!-- ===== Firebase + Auth + Board Logic ===== -->
+  <script type="module">
+    import {
+      auth,
+      db,
+      onAuthChanged,
+      signOut,
+      signInEmailPassword,
+      signUpWithInvite,
+      resetPassword,
+      getMyRole
+    } from './auth.js';
+
+    import {
+      doc, getDoc, setDoc, serverTimestamp,
+      collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+    /* ---------- BroadcastChannel to nudge other tabs to reload ---------- */
+    const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('f64-global') : null;
+    bc?.addEventListener?.('message', (e)=>{ if (e?.data === 'reload') location.reload(); });
+    const broadcastReload = ()=> bc?.postMessage?.('reload');
+
+    /* ---------- UI refs ---------- */
+    const signinBtn = document.getElementById('signinBtn');
+
+    // Auth modal
+    const modal      = document.getElementById('authModal');
+    const closeModal = document.getElementById('closeModal');
+    const tabSignIn  = document.getElementById('tabSignIn');
+    const tabSignUp  = document.getElementById('tabSignUp');
+    const viewSignIn = document.getElementById('viewSignIn');
+    const viewSignUp = document.getElementById('viewSignUp');
+
+    // Sign-in inputs
+    const si_email    = document.getElementById('si_email');
+    const si_password = document.getElementById('si_password');
+    const doSignInBtn = document.getElementById('doSignIn');
+    const doResetBtn  = document.getElementById('doReset');
+    const signOutBtn  = document.getElementById('signOutBtn');
+    const authMsg     = document.getElementById('authMsg');
+
+    // Sign-up inputs
+    const su_first    = document.getElementById('su_first');
+    const su_last     = document.getElementById('su_last');
+    const su_email    = document.getElementById('su_email');
+    const su_password = document.getElementById('su_password');
+    const su_invite   = document.getElementById('su_invite');
+    const doSignUpBtn = document.getElementById('doSignUp');
+    const createMsg   = document.getElementById('createMsg');
+
+    // Board
+    const hintEl     = document.getElementById('msgHint');
+    const feedEl     = document.getElementById('messages');
+    const newPostBtn = document.getElementById('newPostBtn');
+
+    // Post modal
+    const postModal        = document.getElementById('postModal');
+    const closePost        = document.getElementById('closePost');
+    const postCancel       = document.getElementById('postCancel');
+    const postSubmitNotify = document.getElementById('postSubmitNotify');
+    const postNameEl       = document.getElementById('postName');
+    const postEmailEl      = document.getElementById('postEmail');
+    const postWhenEl       = document.getElementById('postWhen');
+    const postTextEl       = document.getElementById('postText');
+    const postMsgEl        = document.getElementById('postMsg');
+
+    const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+    const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+    const psay = (t, err=false)=>{ postMsgEl.textContent=t||""; postMsgEl.style.color=err?'#ffb4b4':'#9fb1c3'; };
+    const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
+                                     .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+                                     .replace(/'/g,"&#039;");
+    const toLocalDatetimeValue = (d=new Date())=>{
+      const pad = (n)=> String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    /* ---------- Auth modal open/close & tabs ---------- */
+    function openAuth(){
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      say(""); csay("");
+    }
+    function closeAuth(){
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+    }
+    signinBtn?.addEventListener('click', openAuth);
+    closeModal?.addEventListener('click', closeAuth);
+    modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
+
+    function activate(view){
+      [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
+      [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
+      if (view === 'in'){
+        tabSignIn.classList.add('active');
+        viewSignIn.classList.add('active');
+      } else {
+        tabSignUp.classList.add('active');
+        viewSignUp.classList.add('active');
+      }
+    }
+    tabSignIn.addEventListener('click', ()=>activate('in'));
+    tabSignUp.addEventListener('click', ()=>activate('up'));
+
+    // deep link
+    if (location.hash === '#signin') openAuth();
+    window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
+
+    /* ---------- Auth state & board gating ---------- */
+    let currentUser = null;
+    let unsubscribeBoard = null;
+    let iAmAdmin = false;
+    let canSeeBoard = false;
+
+    function startBoardListener(){
+      if (unsubscribeBoard) unsubscribeBoard();
+      const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
+      unsubscribeBoard = onSnapshot(qBoard, (snap)=>{
+        feedEl.innerHTML = "";
+        snap.forEach(d=>{
+          const m = d.data();
+          const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+          const when = ts ? ts.toLocaleString() : "…";
+          const div = document.createElement("div");
+          div.className = "msg";
+          div.innerHTML = `
+            <div class="msg-top">
+              <div class="msg-meta">
+                <strong>${escapeHtml(m.authorName || "Member")}</strong>
+                <span> • ${when}</span>
+                <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
+          `;
+          feedEl.appendChild(div);
         });
+      }, (err)=>{
+        feedEl.innerHTML = "";
+        hintEl.textContent = "Could not load board: " + (err.message || String(err));
       });
-    });
-  }
-
-  onAuthChanged(async (user)=>{
-    currentUser = user || null;
-    const verified = !!user?.emailVerified;
-    if (user){
-      const shortEmail = user.email && user.email.length > 28 ? user.email.slice(0,28) + "…" : (user.email || "");
-      signinBtn.textContent = verified ? `Account – ${shortEmail}` : `Unverified – ${shortEmail}`;
-      newPostBtn.style.display = verified ? "inline-block" : "none";
-      hintEl.textContent = verified ? "Share updates with the club." : "Please verify your email to post.";
-      startBoardListener(); // subscribe only when signed-in
-    } else {
-      signinBtn.textContent = "Sign In";
-      newPostBtn.style.display = "none";
-      hintEl.textContent = "Sign in to view and post messages.";
-      feedEl.innerHTML = "";
-      if (unsubscribeBoard){ unsubscribeBoard(); unsubscribeBoard=null; }
-    }
-  });
-
-  /* ---------- Sign in / up / reset / out ---------- */
-  doSignInBtn.addEventListener('click', async ()=>{
-    const email = si_email.value.trim();
-    const pass  = si_password.value;
-    if (!email || !pass) return say("Enter email and password.", true);
-    try{
-      await signInEmailPassword(email, pass);
-      say("Signed in.");
-      closeAuth();
-    }catch(err){ say(err.message, true); }
-  });
-
-  doSignUpBtn.addEventListener('click', async ()=>{
-    const first = su_first.value.trim();
-    const last  = su_last.value.trim();
-    const email = su_email.value.trim();
-    const pass  = su_password.value;
-    const code  = su_invite.value.trim();
-    if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
-    try{
-      await signUpWithInvite({ email, password: pass, firstName:first, lastName:last, code });
-      csay("Account created! Check your inbox to verify your email.");
-      // optional: auto-switch back to sign-in view
-      activate('in');
-    }catch(err){ csay(err.message, true); }
-  });
-
-  doResetBtn.addEventListener('click', async ()=>{
-    const email = si_email.value.trim();
-    if (!email) return say("Enter your email first.", true);
-    try{ await resetPassword(email); say("Password reset email sent."); }
-    catch(err){ say(err.message, true); }
-  });
-
-  signOutBtn.addEventListener('click', async ()=>{ await signOut(); say("Signed out."); });
-
-  // Enter key behavior: sign-in view triggers sign-in; sign-up view triggers sign-up
-  function handleEnter(e){
-    if (e.key !== 'Enter') return;
-    if (viewSignIn.classList.contains('active')) doSignInBtn.click();
-    else doSignUpBtn.click();
-  }
-  [si_email, si_password, su_first, su_last, su_email, su_password, su_invite].forEach(el=> el.addEventListener('keydown', handleEnter));
-
-  /* ---------- Post modal ---------- */
-  function openPost(){
-    if (!currentUser){ openAuth(); return; }
-    if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
-    postEmailEl.value = currentUser.email || "";
-    postNameEl.value  = (currentUser.email || "").split("@")[0];
-    postTextEl.value  = "";
-    postWhenEl.value  = toLocalDatetimeValue(new Date());
-    psay("");
-    postModal.classList.add('open'); postModal.setAttribute('aria-hidden','false');
-    postNameEl.focus();
-  }
-  function closePostModal(){ postModal.classList.remove('open'); postModal.setAttribute('aria-hidden','true'); }
-  newPostBtn?.addEventListener('click', openPost);
-  closePost?.addEventListener('click', closePostModal);
-  postCancel?.addEventListener('click', closePostModal);
-  postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
-
-  // 🔴 UPDATED: use /profiles instead of /members for active member emails
-  async function getActiveMemberEmails(){
-    const q = query(collection(db,"profiles"), where("active","==", true));
-    const snap = await getDocs(q);
-    const emails = [];
-    snap.forEach(d=>{
-      const e = (d.data().email || "").trim();
-      if (e) emails.push(e);
-    });
-    return emails;
-  }
-
-  async function createPost(){
-    if (!currentUser){ psay("Please sign in.", true); return null; }
-    if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
-
-    const displayName = (postNameEl.value || "").trim();
-    const text        = (postTextEl.value || "").trim();
-    if (!displayName) return psay("Display name is required.", true), null;
-    if (!text)        return psay("Message cannot be empty.", true), null;
-
-    let whenTs = Timestamp.fromDate(new Date());
-    const raw = (postWhenEl.value || "").trim();
-    if (raw){
-      const dt = new Date(raw);
-      if (!isNaN(dt.getTime())) whenTs = Timestamp.fromDate(dt);
     }
 
-    const ref = await addDoc(collection(db,"board"), {
-      text,
-      authorEmail: currentUser.email || "",
-      authorName: displayName,
-      createdByUid: currentUser.uid,           // ✅ rules expect this
-      createdAt: whenTs,                       // ✅ rules expect this
-      updatedAt: serverTimestamp()
+    onAuthChanged(async (user)=>{
+      currentUser = user || null;
+      iAmAdmin    = false;
+      canSeeBoard = false;
+
+      if (user){
+        // figure out role
+        try{
+          const info = await getMyRole();
+          iAmAdmin    = !!info.isAdmin;
+          const role  = (info.role || "").toLowerCase();
+          canSeeBoard = iAmAdmin || role === "member";
+        }catch(_){
+          iAmAdmin    = false;
+          canSeeBoard = false;
+        }
+
+        const verified = !!user.emailVerified;
+        const shortEmail = user.email && user.email.length > 28
+          ? user.email.slice(0,28) + "…"
+          : (user.email || "");
+
+        signinBtn.textContent = verified
+          ? `Account – ${shortEmail}`
+          : `Unverified – ${shortEmail}`;
+
+        // Board visibility rules
+        if (canSeeBoard){
+          hintEl.textContent = iAmAdmin
+            ? (verified
+                ? "Share updates with the club."
+                : "Please verify your email to post.")
+            : "Only admins can post to the board. Check here for club updates.";
+
+          if (!unsubscribeBoard) startBoardListener();
+          // Post button: only admins AND verified
+          newPostBtn.style.display = (iAmAdmin && verified) ? "inline-block" : "none";
+        } else {
+          hintEl.textContent = "You don’t have access to the member board.";
+          newPostBtn.style.display = "none";
+          feedEl.innerHTML = "";
+          if (unsubscribeBoard){ unsubscribeBoard(); unsubscribeBoard = null; }
+        }
+      } else {
+        signinBtn.textContent = "Sign In";
+        newPostBtn.style.display = "none";
+        hintEl.textContent = "Sign in to view and post messages.";
+        feedEl.innerHTML = "";
+        if (unsubscribeBoard){ unsubscribeBoard(); unsubscribeBoard = null; }
+      }
     });
-    return { id: ref.id, text, displayName, when: whenTs.toDate() };
-  }
 
-  function openMailto(allBcc, subject, body){
-    const link = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = link;
-  }
+    /* ---------- Sign in / up / reset / out ---------- */
+    doSignInBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      const pass  = si_password.value;
+      if (!email || !pass) return say("Enter email and password.", true);
+      try{
+        await signInEmailPassword(email, pass);
+        say("Signed in.");
+        closeAuth();
+      }catch(err){ say(err.message, true); }
+    });
 
-  postSubmitNotify?.addEventListener('click', async ()=>{
-    try{
-      const created = await createPost();
-      if (!created) return;
+    doSignUpBtn.addEventListener('click', async ()=>{
+      const first = su_first.value.trim();
+      const last  = su_last.value.trim();
+      const email = su_email.value.trim();
+      const pass  = su_password.value;
+      const code  = su_invite.value.trim();
+      if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
+      try{
+        await signUpWithInvite({ email, password: pass, firstName:first, lastName:last, code });
+        csay("Account created! Check your inbox to verify your email.");
+        activate('in');
+      }catch(err){ csay(err.message, true); }
+    });
 
-      const all = await getActiveMemberEmails();
-      if (!all.length){ closePostModal(); alert("Post created, but no active member emails found."); return; }
+    doResetBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      if (!email) return say("Enter your email first.", true);
+      try{ await resetPassword(email); say("Password reset email sent."); }
+      catch(err){ say(err.message, true); }
+    });
 
-      const whenStr = created.when.toLocaleString();
-      const subject = "New Message on The Flying 64th Website";
-      const body =
+    signOutBtn.addEventListener('click', async ()=>{
+      await signOut();
+      say("Signed out.");
+    });
+
+    // Enter key behavior
+    function handleEnter(e){
+      if (e.key !== 'Enter') return;
+      if (viewSignIn.classList.contains('active')) doSignInBtn.click();
+      else doSignUpBtn.click();
+    }
+    [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
+      .forEach(el=> el.addEventListener('keydown', handleEnter));
+
+    /* ---------- Post modal ---------- */
+    function openPost(){
+      if (!currentUser){ openAuth(); return; }
+      if (!iAmAdmin){
+        alert("Only admins can post to the board.");
+        return;
+      }
+      if (!currentUser.emailVerified){
+        alert("Verify your email first.");
+        return;
+      }
+      postEmailEl.value = currentUser.email || "";
+      postNameEl.value  = (currentUser.email || "").split("@")[0];
+      postTextEl.value  = "";
+      postWhenEl.value  = toLocalDatetimeValue(new Date());
+      psay("");
+      postModal.classList.add('open');
+      postModal.setAttribute('aria-hidden','false');
+      postNameEl.focus();
+    }
+    function closePostModal(){
+      postModal.classList.remove('open');
+      postModal.setAttribute('aria-hidden','true');
+    }
+    newPostBtn?.addEventListener('click', openPost);
+    closePost?.addEventListener('click', closePostModal);
+    postCancel?.addEventListener('click', closePostModal);
+    postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
+
+    async function getActiveMemberEmails(){
+      // Uses /members collection with active==true for BCC notifications
+      const q = query(collection(db,"members"), where("active","==", true));
+      const snap = await getDocs(q);
+      const emails = [];
+      snap.forEach(d=>{
+        const e = (d.data().email || "").trim();
+        if (e) emails.push(e);
+      });
+      return emails;
+    }
+
+    async function createPost(){
+      if (!currentUser){ psay("Please sign in.", true); return null; }
+      if (!iAmAdmin){ psay("Only admins can post to the board.", true); return null; }
+      if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
+
+      const displayName = (postNameEl.value || "").trim();
+      const text        = (postTextEl.value || "").trim();
+      if (!displayName) return psay("Display name is required.", true), null;
+      if (!text)        return psay("Message cannot be empty.", true), null;
+
+      let whenTs = Timestamp.fromDate(new Date());
+      const raw = (postWhenEl.value || "").trim();
+      if (raw){
+        const dt = new Date(raw);
+        if (!isNaN(dt.getTime())) whenTs = Timestamp.fromDate(dt);
+      }
+
+      const ref = await addDoc(collection(db,"board"), {
+        text,
+        authorEmail: currentUser.email || "",
+        authorName: displayName,
+        createdByUid: currentUser.uid,
+        createdAt: whenTs,
+        updatedAt: serverTimestamp()
+      });
+      return { id: ref.id, text, displayName, when: whenTs.toDate() };
+    }
+
+    function openMailto(allBcc, subject, body){
+      const link = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = link;
+    }
+
+    postSubmitNotify?.addEventListener('click', async ()=>{
+      try{
+        const created = await createPost();
+        if (!created) return;
+
+        const all = await getActiveMemberEmails();
+        if (!all.length){
+          closePostModal();
+          alert("Post created, but no active member emails found.");
+          return;
+        }
+
+        const whenStr = created.when.toLocaleString();
+        const subject = "New Message on The Flying 64th Website";
+        const body =
 `From: ${created.displayName}
 When: ${whenStr}
 
@@ -502,11 +939,11 @@ ${created.text}
 
 — This message was posted on the Member Message Board (The Flying 64th).`;
 
-      openMailto(all, subject, body);
-      closePostModal();
-      broadcastReload(); // nudge other tabs to refresh shell if needed
-    }catch(err){ psay(err.message, true); }
-  });
-</script>
+        openMailto(all, subject, body);
+        closePostModal();
+        broadcastReload();
+      }catch(err){ psay(err.message, true); }
+    });
+  </script>
 </body>
 </html>
