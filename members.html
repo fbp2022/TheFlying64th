@@ -33,8 +33,6 @@
     .btn{border:1px solid var(--rule);background:#121b29;color:#e6edf3;padding:8px 12px;border-radius:10px;cursor:pointer}
     .btn.primary{background:var(--accent);border-color:transparent;color:#001a33;font-weight:700}
     .btn.ghost{background:transparent}
-    .btn.warn{background:#1e1717;border-color:#4b2a2a}
-    .btn.ok{background:#16311f;border-color:#2d5f3b}
 
     /* LAYOUT */
     .container{max-width:1100px;margin:16px auto;padding:0 18px 36px}
@@ -52,9 +50,10 @@
     .m-email{color:var(--muted);font-size:14px;margin-top:2px}
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .chip{display:inline-flex;align-items:center;gap:6px;background:#132031;border:1px solid #203148;color:#cfe1ff;padding:6px 10px;border-radius:999px;font-size:12px}
-    .chip.ok{background:#152a1f;border-color:#224a2f;color:#a0e1b2}
-    .chip.bad{background:#2a1515;border-color:#4a2525;color:#ffbaba}
-    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .role-chip{
+      font-weight:600;
+      text-transform:capitalize;
+    }
 
     /* ADMIN PANEL */
     .admin-panel{display:none;margin:18px 0 12px}
@@ -128,6 +127,7 @@
     <!-- Members list -->
     <section class="card">
       <div class="top-row" style="margin-top:0">
+        <div class="muted">All current member profiles are listed below.</div>
       </div>
       <div id="membersGrid" class="grid"></div>
       <div id="listMsg" class="hint"></div>
@@ -191,14 +191,11 @@
       signInEmailPassword,
       signUpWithInvite,
       resetPassword,
-      getMyRole,
-      toggleMemberActive
+      getMyRole
     } from './auth.js';
 
     import {
       doc,
-      updateDoc,
-      serverTimestamp,
       collection,
       query,
       orderBy,
@@ -360,11 +357,16 @@
         const d = snap.data();
         const uid   = snap.id;
         const first = d.firstName || '';
-        const last  = d.lastName || '';
+        const last  = d.lastName  || '';
         const name  = (first || last) ? `${first} ${last}`.trim() : (d.displayName || 'Member');
         const email = d.email || '';
-        const active = d.active !== false;
-        const role = (d.role||'member').toLowerCase();
+        const role  = (d.role || 'member').toLowerCase();
+
+        // Tristan should display as "Member" on UI even if admin
+        let displayRole = role;
+        if (email === 'tristanstuff@denjess.com') {
+          displayRole = 'member';
+        }
 
         const card = document.createElement('div');
         card.className = 'member';
@@ -375,76 +377,28 @@
               <div class="m-email">${escapeHtml(email)}</div>
             </div>
             <div class="chips">
-              <span class="chip ${active?'ok':''}">${active?'Active':'Inactive'}</span>
+              <span class="chip role-chip">${displayRole === 'admin' ? 'Admin' : 'Member'}</span>
             </div>
           </div>
-
-          `;
+        `;
         grid.appendChild(card);
       });
-
-      // Wire admin buttons
-      if (iAmAdmin){
-        grid.querySelectorAll('[data-act="toggle-admin"]').forEach(btn=>{
-          btn.addEventListener('click', async ()=>{
-            const uid = btn.getAttribute('data-uid');
-            const cur = (btn.getAttribute('data-current')||'member').toLowerCase();
-            const toAdmin = cur !== 'admin';
-            try{
-              // keep role in sync in both collections
-              await Promise.all([
-                updateDoc(doc(db,'profiles',uid), { role: toAdmin ? 'admin' : 'member', updatedAt: serverTimestamp() }),
-                updateDoc(doc(db,'members' ,uid), { role: toAdmin ? 'admin' : 'member', updatedAt: serverTimestamp() })
-              ]);
-              sayList(toAdmin?'Made admin.':'Removed admin.');
-            }catch(e){ sayList(e.message,true); }
-          });
-        });
-
-        grid.querySelectorAll('[data-act="toggle-active"]').forEach(btn=>{
-          btn.addEventListener('click', async ()=>{
-            const uid = btn.getAttribute('data-uid');
-            const curIsActive = (btn.getAttribute('data-current')||'active').toLowerCase()==='active';
-            const newVal = !curIsActive;
-            try{
-              await toggleMemberActive(uid, newVal);  // updates /members + timestamp
-              sayList(newVal?'Activated.':'Deactivated.');
-            }catch(e){ sayList(e.message,true); }
-          });
-        });
-      }
     }
 
-    /* ===== Live list (show everyone from /members) ===== */
-function startLiveList(){
-  if (unsubscribeMembers){
-    unsubscribeMembers();
-    unsubscribeMembers = null;
-  }
+    /* ===== Live list (show everyone from /profiles) ===== */
+    function startLiveList(){
+      if (unsubscribeMembers){
+        unsubscribeMembers();
+        unsubscribeMembers = null;
+      }
 
-  // ✅ Single orderBy so no composite index is required
-  const qy = query(collection(db, 'profiles'), orderBy('lastName'));
-
-  unsubscribeMembers = onSnapshot(qy, (snap)=>{
-    const docs = [];
-    snap.forEach(d => docs.push(d));
-
-    // ✅ Secondary sort: lastName, then firstName in JS
-    docs.sort((a, b) => {
-      const da = a.data();
-      const dbd = b.data();
-      const lnA = (da.lastName  || '').toLowerCase();
-      const lnB = (dbd.lastName || '').toLowerCase();
-      if (lnA !== lnB) return lnA.localeCompare(lnB);
-      const fnA = (da.firstName  || '').toLowerCase();
-      const fnB = (dbd.firstName || '').toLowerCase();
-      return fnA.localeCompare(fnB);
-    });
-
-    renderMembers(docs);
-  }, (err)=> sayList(err.message, true));
-}
-
+      const qy = query(collection(db, 'profiles'), orderBy('firstName'), orderBy('lastName'));
+      unsubscribeMembers = onSnapshot(qy, (snap)=>{
+        const docs = [];
+        snap.forEach(d => docs.push(d));
+        renderMembers(docs);
+      }, (err)=> sayList(err.message, true));
+    }
 
     /* ===== Copy invite code ===== */
     copyInvite.addEventListener('click', async ()=>{
@@ -463,7 +417,7 @@ function startLiveList(){
         const shortEmail = currentUser.email && currentUser.email.length>25
           ? currentUser.email.slice(0,25)+'…' : (currentUser.email||'');
         signinBtn.textContent = `Account – ${shortEmail}`;
-        meNote.textContent = currentUser.emailVerified ? 'Signed in (verified).' : 'Signed in (verify your email).';
+        meNote.textContent = currentUser.emailVerified ? 'Signed in (verified your email).' : 'Signed in (verify your email).';
 
         await loadMyRole();
         startLiveList();
