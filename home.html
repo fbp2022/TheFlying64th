@@ -3,663 +3,1420 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Flying 64th – Home</title>
-  <meta name="description" content="The Flying 64th Flying Club – affordable general aviation in East Tennessee based at Oliver Springs Airport (Braden Field). Operates Cessna 172 & 150." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>Calendar - The Flying 64th</title>
 
   <style>
     :root{
-      --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
-      --card:#0f1722cc;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+      --bg:#0f1115;
+      --ink:#e9eef7;
+      --muted:#b9c2d0;
+      --panel:#151924;
+      --panel2:#0d1018;
+      --accent:#4da3ff;
+      --rule:rgba(255,255,255,.10);
+      --border:rgba(255,255,255,.12);
+      --radius:12px;
 
-    /* ===== NAV (matches home.html) ===== */
+      --blue:#4da3ff;   /* N78710 C172 / default bookings */
+      --green:#58d68d;  /* N10921 C150 / my bookings */
+      --red:#ff5c5c;    /* Maintenance */
+    }
+
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(circle at top,#161b2b 0,#05060a 46%,#020308 100%);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ===== NAV ===== */
     .site-header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter:saturate(160%) blur(8px);
-      background:rgba(11,17,23,.75);
+      position:sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter:saturate(160%) blur(12px);
+      background:linear-gradient(120deg,rgba(4,8,20,.95),rgba(4,10,30,.92));
       border-bottom:1px solid var(--rule);
     }
     .nav{
-      max-width:1200px; margin:0 auto; padding:12px 18px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      max-width:1400px;
+      margin:0 auto;
+      padding:12px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
     .brand{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
-      color:var(--ink); text-decoration:none; font-size:22px; white-space:nowrap;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      color:var(--ink);
+      text-decoration:none;
+      font-size:22px;
+      white-space:nowrap;
     }
-    .brand img{ height:34px; width:auto }
-    header nav{
-      display:flex; align-items:center; gap:18px; flex-wrap:nowrap;
+    .brand img{ height:34px; width:auto; }
+
+    nav.links{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      flex-wrap:nowrap;
     }
-    header nav a{
-      color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px;
-      transition:all .18s ease;
+    nav.links a{
+      color:var(--muted);
+      text-decoration:none;
+      padding:8px 12px;
+      border-radius:10px;
+      transition:.18s;
+      white-space:nowrap;
     }
-    header nav a:hover{ color:var(--ink); background:rgba(255,255,255,.06) }
-    header nav a.active{ color:#001a33; background:var(--accent); font-weight:700 }
-    @media (max-width:900px){
-      .nav{ padding:10px 14px; flex-wrap:wrap }
-      header nav{ width:100%; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
-      header nav::-webkit-scrollbar{ display:none }
-      header nav a{ padding:8px 10px; font-size:15px }
+    nav.links a:hover{
+      color:var(--ink);
+      background:rgba(255,255,255,.06);
+    }
+    nav.links a.active{
+      color:#001a33;
+      background:var(--accent);
+      font-weight:700;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background:#0c1020;
+      color:#eaf2ff;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .btn.primary{
+      background:linear-gradient(180deg,#2b6bb1,#1c4370);
+      border:1px solid #2b6bb1;
+    }
+    #signinBtn{ margin-right:8px; cursor:pointer; }
+
+    .hamburger{
+      display:none;
+      background:none;
+      border:1px solid var(--border);
+      color:var(--ink);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:18px;
     }
 
-    /* ===== HERO ===== */
-    .hero{
-      position:relative;min-height:56vh;display:grid;place-items:end;
-      isolation:isolate;
-      background:#000 url("images/bothplanes_homepage.jpg") center/cover no-repeat;
+    @media (max-width:900px){
+      .nav{
+        position:relative;
+      }
+      nav.links{
+        display:none;
+        position:absolute;
+        top:100%;
+        left:8px;
+        right:8px;
+        margin-top:8px;
+        flex-direction:column;
+        gap:8px;
+        padding:10px;
+        background:linear-gradient(180deg,var(--panel),var(--panel2));
+        border-radius:12px;
+        border:1px solid var(--border);
+      }
+      nav.links.open{
+        display:flex;
+      }
+      .hamburger{
+        display:inline-flex;
+        margin-left:auto;
+      }
+      #signinBtn{
+        width:100%;
+        text-align:center;
+      }
     }
-    .hero::after{
-      content:"";position:absolute;inset:0;z-index:0;
-      background:linear-gradient(180deg, rgba(11,17,23,.15) 0%, rgba(11,17,23,.65) 55%, rgba(11,17,23,1) 100%);
+
+    /* ===== BANNER ===== */
+    .banner{
+      max-width:1400px;
+      margin:12px auto 0;
+      padding:0 18px;
     }
-    .hero-inner{
-      position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 18px 24px;
+    .banner-inner{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-left:4px solid var(--accent);
+      border-radius:12px;
+      padding:12px 14px;
+    }
+    .banner .icon{ font-size:22px }
+    .banner strong{ color:#cfe1ff }
+
+    /* ===== WRAP / TOOLBAR ===== */
+    .wrap{
+      max-width:1400px;
+      margin:16px auto 80px;
+      padding:0 18px;
+    }
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+    }
+    .pills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--border);
+      background:#0c0f18;
+      color:#eaf2ff;
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+    }
+    .pill.active{
+      background:#0e1630;
+      border-color:rgba(77,163,255,.45);
+    }
+
+    /* ===== STATUS CARDS ===== */
+    .status-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 14px;
+    }
+    .card h3{
+      margin:0 0 6px;
+      font-size:16px;
+    }
+    .chip{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .chip.blue{
+      background:#1a2d46;
+      color:#cfe1ff;
+      border:1px solid rgba(77,163,255,.35);
+    }
+    .chip.green{
+      background:#123326;
+      color:#d7ffea;
+      border:1px solid rgba(88,214,141,.35);
+    }
+    .meter{
+      display:flex;
+      gap:16px;
+      color:#cfe1ff;
+    }
+    .meter b{ color:#fff }
+    .sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    /* ===== CALENDAR BAR ===== */
+    .calbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      padding:10px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    .navbtns,
+    .viewbtns{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .sbtn{
+      border:1px solid var(--border);
+      background:#0c0f18;
+      color:#eaf2ff;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .title{
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    /* ===== MONTH GRID ===== */
+    .calendar{
+      margin-top:12px;
+      width:100%;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .dow{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      background:#0c0f18;
+      border-bottom:1px solid var(--border);
+    }
+    .dow div{
+      padding:10px;
+      text-align:center;
+      color:#cfe1ff;
+      font-weight:700;
+      font-size:13px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+    }
+    .cell{
+      min-height:120px;
+      border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      padding:8px;
+      position:relative;
+      cursor:pointer;
+    }
+    .cell:nth-child(7n){ border-right:none; }
+    .date{
+      position:absolute;
+      top:6px;
+      right:8px;
+      font-size:12px;
+      color:#cfe1ff;
+      padding:2px 6px;
+      border-radius:6px;
+      background:rgba(255,255,255,.05);
+    }
+    .other-month .date{ opacity:.35; }
+    .today .date{
+      background:#2b6bb1;
+      color:#001a33;
+      font-weight:800;
+    }
+    .events{
+      margin-top:22px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .evt{
+      font-size:12px;
+      padding:4px 6px;
+      border-radius:6px;
+      border:1px solid transparent;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .evt.other{
+      background:#0e1d31;
+      border-color:#2b6bb1;
+    }
+    .evt.mine{
+      background:#0f261c;
+      border-color:#2b7a55;
+    }
+    .evt.maint{
+      background:#311010;
+      border-color:#b12b2b;
+    }
+
+    /* ===== AUTH MODAL (same pattern as home.html) ===== */
+    .auth-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      display:none;
+      place-items:center;
+      z-index:1000;
+    }
+    .auth-modal.open{ display:grid; }
+    .auth-card{
+      width:min(480px,92vw);
+      background:#0f1722;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
+      padding:18px 18px 12px;
+      position:relative;
+    }
+    .auth-title{
+      margin:0 0 12px 0;
+      font-size:20px;
+      font-weight:800;
+    }
+    .auth-x{
+      position:absolute;
+      right:14px;
+      top:12px;
+      border:0;
+      background:transparent;
+      color:#9fb1c3;
+      font-size:18px;
+      cursor:pointer;
+    }
+    .auth-label{
+      display:block;
+      margin-top:10px;
+      margin-bottom:4px;
+      color:#9fb1c3;
+      font-size:13px;
+    }
+    .auth-input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#0b1117;
+      color:#e6edf3;
+    }
+    .auth-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+    }
+    .auth-btn{
+      flex:1;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .auth-btn.primary{
+      background:#58a6ff;
+      color:#001a33;
+      border-color:transparent;
+      font-weight:700;
+    }
+    .auth-link{
+      background:none;
+      border:0;
+      color:#9fb1c3;
+      cursor:pointer;
+    }
+    .auth-msg{
+      min-height:18px;
+      color:#9fb1c3;
+      margin:8px 0 4px;
+    }
+    .view{ display:none; }
+    .view.active{ display:block; }
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .tab{
+      flex:1;
+      padding:8px 10px;
+      border:1px solid #1f2a38;
+      border-radius:10px;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .tab.active{
+      background:#58a6ff;
+      color:#001a33;
+      font-weight:700;
+      border-color:transparent;
+    }
+
+    /* ===== BOOKING MODAL ===== */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      display:none;
+      place-items:center;
+      z-index:900;
+    }
+    .modal-backdrop.open{ display:grid; }
+
+    .modal{
+      width:min(820px,92vw);
+      max-height:90vh;
+      overflow-y:auto;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);
+      color:#e6edf3;
+    }
+    .modal-header{
+      padding:12px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .modal-title{
+      flex:1;
+      font-size:20px;
+      font-weight:700;
+      color:#e5f0ff;
+    }
+    .modal-body{
+      padding:16px;
+      display:grid;
+      gap:14px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .row-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field span{
+      font-size:13px;
+      color:#cfe1ff;
+    }
+    input,select,textarea{
+      background:#0b0e15;
+      color:var(--ink);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
       width:100%;
     }
-    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);font-weight:800}
-    .hero p{margin:0;color:#d0d9e3;max-width:900px}
-
-    /* ===== CONTENT ===== */
-    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
-    .grid{display:grid;gap:16px}
-    .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
-    @media (max-width:760px){ .grid.cols-3{grid-template-columns:1fr} }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--rule);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px 18px;
+    textarea{
+      min-height:84px;
+      resize:vertical;
     }
-    .card h2{margin:0 0 8px;font-size:1.25rem}
-    .muted{color:var(--muted)}
-    .list{padding-left:18px;margin:8px 0}
-    .list li{margin:6px 0}
-    .iconbtn{background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
-    .iconbtn:hover{background:rgba(255,255,255,.06)}
-
-    /* ===== MESSAGE BOARD SCROLL AREA ===== */
-    #messages{
-      display:grid; gap:12px;
-      max-height:48vh;
-      overflow:auto;
-      padding-right:4px;
+    .inline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    @media (max-width:760px){
-      #messages{ max-height:40vh; }
+    .modal-footer{
+      padding:12px 16px;
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
     }
-    .msg{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;background:#0e1520}
-    .msg-top{display:flex;justify-content:space-between;gap:10px}
-    .msg-meta{font-size:12px;color:#9fb1c3}
+    .hint{
+      color:#b9c2d0;
+      font-size:12.5px;
+    }
 
-    /* ===== MODALS (Auth + New Post) ===== */
-    .auth-modal,
-    .post-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
-    .auth-modal.open,
-    .post-modal.open{display:grid}
-    .auth-card,
-    .post-card{width:min(460px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
-    .auth-title,
-    .post-title{margin:0 0 10px 0;font-size:20px;font-weight:800}
-    .auth-x,
-    .post-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
-    .auth-label,
-    .post-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
-    .auth-input,
-    .post-input,
-    .post-text{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#0b1117;color:#e6edf3}
-    .auth-row,
-    .post-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
-    .auth-btn,
-    .post-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #1f2a38;background:#141b26;color:#e6edf3;cursor:pointer}
-    .auth-btn.primary,
-    .post-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
-    .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
-    .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
+    @media (max-width:900px){
+      .status-row{ grid-template-columns:1fr; }
+      .row,
+      .row-3{ grid-template-columns:1fr; }
+    }
+
+    /* ===== Make date/time picker icons white (better on dark) ===== */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator{
+      filter: invert(1);
+    }
   </style>
 </head>
 <body>
 
-<!-- ===== NAV ===== -->
-<header class="site-header">
-  <div class="nav">
-    <a class="brand" href="home.html">
-      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
-      <span>The Flying 64th</span>
-    </a>
-    <nav>
-      <a id="signinBtn" class="btn" style="margin-left:8px;">Sign In</a>
-      <a class="active" href="home.html">Home</a>
-      <a href="calendar.html">Calendar</a>
-      <a href="becomeamember.html">Become a Member</a>
-      <a href="photos.html">Photos</a>
-      <a href="members.html">Members</a>
-      <a href="poh&manuals.html">POH &amp; Manuals</a>
-    </nav>
-  </div>
-</header>
+  <!-- ===== NAV ===== -->
+  <header class="site-header">
+    <div class="nav">
+      <a href="home.html" class="brand">
+        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
+        <span>The Flying 64th</span>
+      </a>
 
-<!-- ===== HERO ===== -->
-<section class="hero">
-  <div class="hero-inner">
-    <h1>Affordable General Aviation in East Tennessee</h1>
-    <p>The Flying 64th is a member-owned flying club based at Oliver Springs Airport (Braden Field). We operate a Cessna 172K and a Cessna 150L, both ADS-B equipped and maintained to FAA standards.</p>
-  </div>
-</section>
+      <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
 
-<!-- ===== CONTENT ===== -->
-<main class="container">
-  <div class="grid cols-3">
-    <article class="card">
-      <h2>About the Club</h2>
-      <p class="muted">The Flying 64th is a general aviation flying club offering the most affordable flying in East Tennessee. Convenient to Oak Ridge, West Knoxville, Lenoir City, Harriman, and Oliver Springs, members buy into the club rather than simply renting from a pool. Every member is an owner in each aircraft.</p>
-      <p class="muted">The club has a <strong>Cessna 172K</strong> and a <strong>Cessna 150L</strong>. Both planes are equipped with ADSB-IN/OUT. The 172 is equipped with Garmin 355 GPS Navigation.</p>
-      <p class="muted">The Flying 64th has been operating out of Oliver Springs Airport as a club for pilots of all ages and skill levels since its formation in 1954 by the merger of two smaller clubs which trace their roots to 1946. The name originated from the association of charter members with the 9964th local Air Force Reserve Squadron.</p>
-    </article>
+      <nav class="links" id="mainNav">
+        <a id="signinBtn" class="btn">Sign In</a>
+        <a href="home.html">Home</a>
+        <a class="active" href="calendar.html">Calendar</a>
+        <a href="becomeamember.html">Become a Member</a>
+        <a href="photos.html">Photos</a>
+        <a href="members.html">Members</a>
+        <a href="poh&manuals.html">POH &amp; Manuals</a>
+      </nav>
+    </div>
+  </header>
 
-    <aside class="card">
-      <h2>Why Join?</h2>
-      <ul class="list">
-        <li>Shared ownership keeps costs low</li>
-        <li>Two well-equipped aircraft (2-seat & 4-seat)</li>
-        <li>Supportive pilot community & mentorship</li>
-        <li>Great for training and time-building</li>
-      </ul>
-    </aside>
+  <!-- ===== AUTH MODAL (same pattern as home.html) ===== -->
+  <div id="authModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
 
-    <!-- ===== MEMBER MESSAGE BOARD ===== -->
-    <section class="card" id="board">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <h2 style="margin:0;">Member Message Board</h2>
-        <!-- Only admins will see this button -->
-        <button id="newPostBtn" class="btn primary" style="display:none;">Post</button>
+      <div class="tabs">
+        <button id="tabSignIn" class="tab active">Sign In</button>
+        <button id="tabSignUp" class="tab">Create Account</button>
       </div>
-      <p id="msgHint" class="muted" style="margin-top:8px;">
-        Sign in to read member announcements. Only board admins can post.
-      </p>
 
-      <!-- Scrollable feed -->
-      <div id="messages"></div>
+      <!-- Sign In view -->
+      <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+        <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+        <label class="auth-label" for="si_email">Email</label>
+        <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="auth-label" for="si_password">Password</label>
+        <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
+
+        <div class="auth-row">
+          <button id="doSignIn" class="auth-btn primary">Sign In</button>
+        </div>
+        <div class="auth-row">
+          <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+          <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+        </div>
+        <p id="authMsg" class="auth-msg"></p>
+      </section>
+
+      <!-- Create Account view -->
+      <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+        <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+        <label class="auth-label" for="su_first">First Name</label>
+        <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
+        <label class="auth-label" for="su_last">Last Name</label>
+        <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
+        <label class="auth-label" for="su_email">Email</label>
+        <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="auth-label" for="su_password">Password</label>
+        <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
+        <label class="auth-label" for="su_invite">Invite Code</label>
+        <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
+
+        <div class="auth-row">
+          <button id="doSignUp" class="auth-btn primary">Create Account</button>
+        </div>
+        <p id="createMsg" class="auth-msg"></p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===== BANNER ===== -->
+  <div class="banner">
+    <div class="banner-inner">
+      <div class="icon">⏱️</div>
+      <div>
+        <strong>Reminder:</strong>
+        Enter <strong>Tach</strong> &amp; <strong>Hobbs</strong> start/end after every flight.
+        If the prior end is missing, you’ll be prompted to resolve it before <strong>closing your flight</strong>.
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <!-- ===== FILTER / NEW BOOKING ===== -->
+    <div class="toolbar">
+      <div class="pills" role="tablist">
+        <button class="pill active" data-filter="ALL">All</button>
+        <button class="pill" data-filter="N78710">N78710 — C172</button>
+        <button class="pill" data-filter="N10921">N10921 — C150</button>
+      </div>
+      <div>
+        <button id="newBooking" class="btn primary">＋ New booking</button>
+        <button class="btn" title="Export coming soon" disabled>Export</button>
+      </div>
+    </div>
+
+    <!-- ===== AIRCRAFT STATUS ===== -->
+    <div class="status-row">
+      <div class="card" id="card-78710">
+        <h3><span class="chip blue">N78710 — C172</span></h3>
+        <div class="meter">
+          <div>Tach: <b id="tach-78710">—</b></div>
+          <div>Hobbs: <b id="hobbs-78710">—</b></div>
+        </div>
+        <div class="sub" id="sub-78710">Last updated: —</div>
+      </div>
+      <div class="card" id="card-10921">
+        <h3><span class="chip green">N10921 — C150</span></h3>
+        <div class="meter">
+          <div>Tach: <b id="tach-10921">—</b></div>
+          <div>Hobbs: <b id="hobbs-10921">—</b></div>
+        </div>
+        <div class="sub" id="sub-10921">Last updated: —</div>
+      </div>
+    </div>
+
+    <!-- ===== CALENDAR BAR ===== -->
+    <div class="calbar">
+      <div class="navbtns">
+        <button class="sbtn" id="prevBtn">◀</button>
+        <button class="sbtn" id="todayBtn">Today</button>
+        <button class="sbtn" id="nextBtn">▶</button>
+      </div>
+      <div class="title" id="rangeTitle">Month</div>
+      <div class="viewbtns">
+        <span style="font-size:12px;color:#9fb1c3;">(Month view only for now)</span>
+      </div>
+    </div>
+
+    <!-- ===== CALENDAR GRID ===== -->
+    <section class="calendar" aria-label="Club bookings calendar">
+      <div class="dow">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="grid" id="grid"></div>
     </section>
-  </div>
-</main>
+  </main>
 
-<!-- ===== FOOTER ===== -->
-<footer class="site-footer">
-  <div class="foot">
-    © <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee
-  </div>
-</footer>
+  <!-- ===== BOOKING MODAL ===== -->
+  <div id="bookingModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+      <div class="modal-header">
+        <h3 id="bookingTitle" class="modal-title">New Booking</h3>
+        <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
+      </div>
 
-<!-- ===== AUTH MODAL (login / create account with invite) ===== -->
-<div id="authModal" class="auth-modal" aria-hidden="true">
-  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
-    <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+      <div class="modal-body">
+        <div class="row">
+          <label class="field">
+            <span>Aircraft</span>
+            <select id="aircraft">
+              <option value="N78710">N78710 — C172</option>
+              <option value="N10921">N10921 — C150</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Title / purpose</span>
+            <select id="purpose">
+              <!-- Options populated via JS so we can hide Maintenance for non-admins -->
+            </select>
+          </label>
+        </div>
 
-    <!-- NEW: First/Last Name (required for new accounts) -->
-    <label class="auth-label" for="firstName">First Name (Not required for existing accounts)</label>
-    <input id="firstName" class="auth-input" type="text" placeholder="Your first name" required>
-
-    <label class="auth-label" for="lastName">Last Name (Not required for existing accounts)</label>
-    <input id="lastName" class="auth-input" type="text" placeholder="Your last name" required>
-
-    <label class="auth-label" for="email">Email</label>
-    <input id="email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
-
-    <label class="auth-label" for="password">Password</label>
-    <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
-
-    <div class="invite-wrap">
-      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
-    </div>
-
-    <div class="auth-row">
-      <button id="doSignIn" class="auth-btn primary">Sign In</button>
-      <button id="doSignUp" class="auth-btn">Create Account</button>
-    </div>
-
-    <div class="auth-row">
-      <button id="doReset" class="auth-link" type="button">Forgot password?</button>
-      <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
-    </div>
-
-    <p id="authMsg" class="auth-msg"></p>
-  </div>
-</div>
-
-<!-- ===== NEW POST MODAL ===== -->
-<div id="postModal" class="post-modal" aria-hidden="true">
-  <div class="post-card" role="dialog" aria-modal="true" aria-labelledby="postTitle">
-    <button id="closePost" class="post-x" aria-label="Close">✕</button>
-    <h3 id="postTitle" class="post-title">New Message</h3>
-
-    <label class="post-label" for="postName">Display Name</label>
-    <input id="postName" class="post-input" type="text" placeholder="e.g., Chris B.">
-
-    <label class="post-label" for="postEmail">Email (from your account)</label>
-    <input id="postEmail" class="post-input" type="email" readonly>
-
-    <label class="post-label" for="postWhen">Post Date &amp; Time</label>
-    <input id="postWhen" class="post-input" type="datetime-local">
-
-    <label class="post-label" for="postText">Message</label>
-    <textarea id="postText" class="post-text" rows="5" placeholder="Write your update for members…"></textarea>
-
-    <div class="post-row">
-      <button id="postCancel" class="post-btn">Cancel</button>
-      <!-- Optional “Submit Only” button so JS doesn’t error if present/absent -->
-      <button id="postSubmitOnly" class="post-btn">Submit Only</button>
-      <button id="postSubmitNotify" class="post-btn primary">Submit &amp; Notify</button>
-    </div>
-    <p id="postMsg" class="auth-msg"></p>
-  </div>
-</div>
-
-<script>
-  document.getElementById("y").textContent = new Date().getFullYear();
-</script>
-
-<!-- ===== Firebase + Auth + Board Logic ===== -->
-<script type="module">
-  // Use the shared app
-  import { auth, db, onAuthChanged, signOut } from './auth.js';
-
-  // Only import the auth functions you call
-  import {
-    signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendPasswordResetEmail, sendEmailVerification
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-
-  import {
-    doc, getDoc, setDoc, updateDoc, serverTimestamp,
-    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-  // ===== Admin allow-list (fallback while profiles populate) =====
-  const BOARD_EMAILS = ["theflying64@gmail.com"];
-  const FALLBACK_EMAILS = [];
-
-  // Role / profile state
-  let currentUser = null;
-  let isAdmin = false;
-
-  // UI refs (auth)
-  const openBtn    = document.getElementById('signinBtn');
-  const modal      = document.getElementById('authModal');
-  const closeBtn   = document.getElementById('closeModal');
-  const emailEl    = document.getElementById('email');
-  const passEl     = document.getElementById('password');
-  const inviteEl   = document.getElementById('invite');
-  const firstEl    = document.getElementById('firstName');
-  const lastEl     = document.getElementById('lastName');
-  const doSignIn   = document.getElementById('doSignIn');
-  const doSignUp   = document.getElementById('doSignUp');
-  const doReset    = document.getElementById('doReset');
-  const signOutBtn = document.getElementById('signOutBtn');
-  const msgEl      = document.getElementById('authMsg');
-
-  // Board UI refs
-  const hintEl     = document.getElementById('msgHint');
-  const feedEl     = document.getElementById('messages');
-  const newPostBtn = document.getElementById('newPostBtn');
-  const notifyBtn  = document.getElementById('notifyBtn'); // may be null
-
-  // New Post modal refs
-  const postModal        = document.getElementById('postModal');
-  const closePost        = document.getElementById('closePost');
-  const postCancel       = document.getElementById('postCancel');
-  const postSubmitOnly   = document.getElementById('postSubmitOnly'); // may be null
-  const postSubmitNotify = document.getElementById('postSubmitNotify');
-  const postNameEl       = document.getElementById('postName');
-  const postEmailEl      = document.getElementById('postEmail');
-  const postWhenEl       = document.getElementById('postWhen');
-  const postTextEl       = document.getElementById('postText');
-  const postMsgEl        = document.getElementById('postMsg');
-
-  // Allow opening via #signin
-  if (location.hash === '#signin') { openBtn?.click(); }
-  window.addEventListener('hashchange', () => {
-    if (location.hash === '#signin') openBtn?.click();
-  });
-
-  // Helpers
-  const say  = (t, isErr=false)=>{ msgEl.textContent = t; msgEl.style.color  = isErr ? '#ffb4b4' : '#9fb1c3'; };
-  const psay = (t, isErr=false)=>{ postMsgEl.textContent = t; postMsgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
-  const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  function toLocalDatetimeValue(d=new Date()){
-    const pad = (n)=> String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  // Auth modal open/close
-  function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); say(""); }
-  function closeAuth(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
-  openBtn?.addEventListener('click', openAuth);
-  closeBtn?.addEventListener('click', closeAuth);
-  modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
-
-  // New Post modal open/close
-  function openPost(){
-    if (!currentUser){ openAuth(); return; }
-    if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
-    if (!isAdmin){ alert("Only board admins can post to the message board."); return; }
-
-    postEmailEl.value = currentUser.email || "";
-    postNameEl.value = (currentUser.email || "").split("@")[0];
-    postTextEl.value = "";
-    postWhenEl.value = toLocalDatetimeValue(new Date());
-    psay("");
-    postModal.classList.add('open');
-    postModal.setAttribute('aria-hidden','false');
-    postNameEl.focus();
-  }
-  function closePostModal(){
-    postModal.classList.remove('open');
-    postModal.setAttribute('aria-hidden','true');
-  }
-  newPostBtn?.addEventListener('click', openPost);
-  closePost?.addEventListener('click', closePostModal);
-  postCancel?.addEventListener('click', closePostModal);
-  postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
-
-  // Role loader
-  async function reloadRole(){
-    isAdmin = false;
-    if (!currentUser) return;
-    if (currentUser.email && BOARD_EMAILS.includes(currentUser.email)) {
-      isAdmin = true;
-      return;
-    }
-    try{
-      const pref = doc(db, "profiles", currentUser.uid);
-      const snap = await getDoc(pref);
-      const role = snap.exists() ? (snap.data().role || "").toLowerCase() : "";
-      if (role === "admin" || role === "superadmin") isAdmin = true;
-    }catch{/* ignore */}
-  }
-
-  // ===== Board listener (only when signed in) =====
-  const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
-  let boardUnsub = null;
-
-  function attachBoardListener(){
-    if (boardUnsub) return;
-    boardUnsub = onSnapshot(qBoard, (snap)=>{
-      const verified = !!currentUser?.emailVerified;
-      feedEl.innerHTML = "";
-      snap.forEach(d=>{
-        const m = d.data();
-        const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-        const when = ts ? ts.toLocaleString() : "…";
-        const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
-
-        const div = document.createElement("div");
-        div.className = "msg";
-        div.innerHTML = `
-          <div class="msg-top">
-            <div class="msg-meta">
-              <strong>${escapeHtml(m.authorName || "Member")}</strong>
-              <span> • ${when}</span>
-              <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
+        <!-- Dates / Times -->
+        <div class="row">
+          <label class="field">
+            <span>Start date</span>
+            <input id="startDate" type="date">
+          </label>
+          <label class="field">
+            <span>End date</span>
+            <input id="endDate" type="date">
+          </label>
+        </div>
+        <div class="row">
+          <div class="field">
+            <span>Time window</span>
+            <div class="inline">
+              <input id="startTime" type="time">
+              <span>to</span>
+              <input id="endTime" type="time">
+              <label style="font-size:12px;color:#9fb1c3;">(leave blank for all-day)</label>
             </div>
-            ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
           </div>
-          <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
-        `;
-        feedEl.appendChild(div);
+          <label class="field">
+            <span>Instructor</span>
+            <select id="instructorSelect">
+              <!-- N/A + instructors loaded from Firestore -->
+            </select>
+          </label>
+        </div>
+
+        <!-- Member info -->
+        <div class="row">
+          <label class="field">
+            <span>First name</span>
+            <input id="firstName" type="text" placeholder="Your first name">
+          </label>
+          <label class="field">
+            <span>Last name</span>
+            <input id="lastName" type="text" placeholder="Your last name">
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>Email (from your account)</span>
+            <input id="emailField" type="email" readonly>
+          </label>
+          <div class="field">
+            <span>&nbsp;</span>
+            <div class="inline">
+              <small style="color:#9fb1c3;">Linked to your Flying 64th login.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meter Readings -->
+        <div class="row-3">
+          <label class="field"><span>Tach start</span><input id="tachStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach end</span><input id="tachEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach delta</span><input id="tachDelta" type="number" step="0.1" readonly /></label>
+        </div>
+        <div class="row-3">
+          <label class="field"><span>Hobbs start</span><input id="hobbsStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs end</span><input id="hobbsEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs delta</span><input id="hobbsDelta" type="number" step="0.1" readonly /></label>
+        </div>
+
+        <!-- Comments -->
+        <label class="field">
+          <span>Comments</span>
+          <textarea id="comments"></textarea>
+        </label>
+
+        <div id="authHint" class="hint" style="display:none">
+          Sign in to book. Your email is shared with members for coordination.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="cancelModal" class="btn">Cancel</button>
+        <button id="saveBooking" class="btn primary" disabled>Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Highlight active nav & hamburger ===== -->
+  <script>
+    (function(){
+      const current = location.pathname.split('/').pop().toLowerCase();
+      document.querySelectorAll('nav.links a').forEach(a=>{
+        let href=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href=href.replace(/&amp;/g,'&');
+        if(href && href===current) a.classList.add('active');
       });
 
-      // Wire delete buttons
-      [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
-          const id = btn.getAttribute("data-del");
-          if (!id) return;
-          if (!confirm("Delete this message?")) return;
-          try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
-        });
+      const navToggle = document.getElementById('navToggle');
+      const mainNav  = document.getElementById('mainNav');
+      navToggle?.addEventListener('click', ()=>{
+        mainNav.classList.toggle('open');
       });
-    }, err=>{
-      console.error("Board listener error:", err);
-      feedEl.innerHTML = "<p class='muted'>Unable to load board messages (permissions or network).</p>";
-    });
-  }
+      mainNav?.querySelectorAll('a').forEach(link=>{
+        link.addEventListener('click', ()=> mainNav.classList.remove('open'));
+      });
+    })();
+  </script>
 
-  function detachBoardListener(){
-    if (boardUnsub){
-      boardUnsub();
-      boardUnsub = null;
+  <!-- ===== Firebase auth + calendar wiring via auth.js ===== -->
+  <script type="module">
+    import {
+      auth,
+      db,
+      onAuthChanged,
+      signInEmailPassword,
+      signUpWithInvite,
+      resetPassword,
+      signOut
+    } from "./auth.js";
+
+    import {
+      collection,
+      addDoc,
+      serverTimestamp,
+      onSnapshot,
+      getDocs,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+    /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
+    const signinBtn  = document.getElementById('signinBtn');
+
+    // Auth modal + tabs
+    const authModal  = document.getElementById('authModal');
+    const closeAuth  = document.getElementById('closeAuth');
+    const tabSignIn  = document.getElementById('tabSignIn');
+    const tabSignUp  = document.getElementById('tabSignUp');
+    const viewSignIn = document.getElementById('viewSignIn');
+    const viewSignUp = document.getElementById('viewSignUp');
+
+    // Sign-in inputs
+    const si_email    = document.getElementById('si_email');
+    const si_password = document.getElementById('si_password');
+    const doSignInBtn = document.getElementById('doSignIn');
+    const doResetBtn  = document.getElementById('doReset');
+    const signOutBtn  = document.getElementById('signOutBtn');
+    const authMsg     = document.getElementById('authMsg');
+
+    // Sign-up inputs
+    const su_first    = document.getElementById('su_first');
+    const su_last     = document.getElementById('su_last');
+    const su_email    = document.getElementById('su_email');
+    const su_password = document.getElementById('su_password');
+    const su_invite   = document.getElementById('su_invite');
+    const doSignUpBtn = document.getElementById('doSignUp');
+    const createMsg   = document.getElementById('createMsg');
+
+    // Calendar-specific auth deps
+    const emailField  = document.getElementById('emailField');
+    const authHint    = document.getElementById('authHint');
+    const saveBtn     = document.getElementById('saveBooking');
+
+    // Booking form fields
+    const aircraftSel   = document.getElementById('aircraft');
+    const purposeSel    = document.getElementById('purpose');
+    const instructorSel = document.getElementById('instructorSelect');
+    const startDateEl   = document.getElementById('startDate');
+    const endDateEl     = document.getElementById('endDate');
+    const startTimeEl   = document.getElementById('startTime');
+    const endTimeEl     = document.getElementById('endTime');
+    const firstNameEl   = document.getElementById('firstName');
+    const lastNameEl    = document.getElementById('lastName');
+    const commentsEl    = document.getElementById('comments');
+
+    const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+    const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+
+    let currentUser = null;
+    let isAdmin = false;
+    let bookings = [];
+
+    /* ---------- Auth modal open/close & tabs ---------- */
+    function openAuth(){
+      authModal.classList.add('open');
+      authModal.setAttribute('aria-hidden','false');
+      say("");
+      csay("");
     }
-    feedEl.innerHTML = "";
-  }
+    function closeAuthModal(){
+      authModal.classList.remove('open');
+      authModal.setAttribute('aria-hidden','true');
+    }
 
-  // ✅ Use our wrapper from auth.js
-  onAuthChanged(async (user)=>{
-    currentUser = user || null;
-    const verified = !!user?.emailVerified;
+    signinBtn?.addEventListener('click', openAuth);
+    closeAuth?.addEventListener('click', closeAuthModal);
+    authModal?.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
 
-    if (user) {
-      const shortEmail = user.email && user.email.length > 25
-        ? user.email.slice(0, 25) + "…"
-        : (user?.email || "");
-      document.getElementById('signinBtn').textContent = verified
-        ? `Account – ${shortEmail}`
-        : `Unverified – ${shortEmail}`;
-
-      await reloadRole();
-
-      // Only admins can post; members can read
-      if (verified && isAdmin) {
-        newPostBtn.style.display = "inline-block";
-        hintEl.textContent = "Admins can post official messages. All signed-in members can read them here.";
+    function activate(view){
+      [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
+      [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
+      if (view === 'in'){
+        tabSignIn.classList.add('active');
+        viewSignIn.classList.add('active');
       } else {
-        newPostBtn.style.display = "none";
-        hintEl.textContent = verified
-          ? "Board announcements are posted by club admins. All signed-in members can read them here."
-          : "Sign in to read member announcements. Only board admins can post.";
+        tabSignUp.classList.add('active');
+        viewSignUp.classList.add('active');
+      }
+    }
+    tabSignIn.addEventListener('click', ()=>activate('in'));
+    tabSignUp.addEventListener('click', ()=>activate('up'));
+
+    // Deep link #signin
+    if (location.hash === '#signin') openAuth();
+    window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
+
+    /* ---------- Role + options helpers ---------- */
+    async function loadRole(user){
+      isAdmin = false;
+      if (!user) { updatePurposeOptions(); return; }
+      try{
+        const snap = await getDoc(doc(db,'profiles', user.uid));
+        const role = (snap.exists() ? (snap.data().role || '') : '').toLowerCase();
+        if (role === 'admin') isAdmin = true;
+      }catch(err){
+        console.error('loadRole error', err);
+      }
+      updatePurposeOptions();
+    }
+
+    function updatePurposeOptions(){
+      if (!purposeSel) return;
+      const prev = purposeSel.value;
+      const base = ['Training','Rental','Checkride','Checkride Prep'];
+      purposeSel.innerHTML = '';
+      base.forEach(label=>{
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        purposeSel.appendChild(opt);
+      });
+      if (isAdmin){
+        const opt = document.createElement('option');
+        opt.value = 'Maintenance';
+        opt.textContent = 'Maintenance';
+        purposeSel.appendChild(opt);
+      }
+      // restore previous if still valid, otherwise default to Training
+      const ok = [...purposeSel.options].some(o=>o.value===prev);
+      purposeSel.value = ok ? prev : 'Training';
+    }
+
+    async function loadInstructors(){
+      if (!instructorSel) return;
+      instructorSel.innerHTML = '';
+      const naOpt = document.createElement('option');
+      naOpt.value = '';
+      naOpt.textContent = 'N/A';
+      instructorSel.appendChild(naOpt);
+
+      try{
+        const snap = await getDocs(collection(db,'instructors'));
+        snap.forEach(docu=>{
+          const data = docu.data() || {};
+          Object.entries(data).forEach(([name,email])=>{
+            const opt = document.createElement('option');
+            opt.value = String(email || '').trim();
+            opt.textContent = name;
+            instructorSel.appendChild(opt);
+          });
+        });
+      }catch(err){
+        console.error('loadInstructors error', err);
+      }
+    }
+    loadInstructors();
+
+    /* ---------- Auth state handling (hooked into booking UI) ---------- */
+    onAuthChanged(async (user)=>{
+      currentUser = user || null;
+      const verified = !!user?.emailVerified;
+
+      if (user){
+        const shortEmail = user.email && user.email.length>28
+          ? user.email.slice(0,28)+'…'
+          : (user.email || '');
+        signinBtn.textContent = verified
+          ? `Account – ${shortEmail}`
+          : `Unverified – ${shortEmail}`;
+
+        if (emailField) emailField.value = user.email || "";
+        if (saveBtn)   saveBtn.disabled = false;
+        if (authHint)  authHint.style.display = "none";
+
+        await loadRole(user);
+      } else {
+        signinBtn.textContent = "Sign In";
+        if (emailField) emailField.value = "";
+        if (saveBtn)   saveBtn.disabled = true;
+        if (authHint)  authHint.style.display = "block";
+        isAdmin = false;
+        updatePurposeOptions();
       }
 
-      attachBoardListener();
-    } else {
-      document.getElementById('signinBtn').textContent = "Sign In";
-      newPostBtn.style.display = "none";
-      hintEl.textContent = "Sign in to read member announcements. Only board admins can post.";
-      detachBoardListener();
-    }
-  });
-
-  // Sign in / up / reset / out
-  doSignIn.addEventListener('click', async ()=>{
-    const email = emailEl.value.trim();
-    const pass  = passEl.value;
-    if (!email || !pass) return say("Enter email and password.", true);
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      say("Signed in.");
-      closeAuth();
-    } catch(err){
-      say(err.message, true);
-    }
-  });
-
-  doSignUp.addEventListener('click', async ()=>{
-    const email = emailEl.value.trim();
-    const pass  = passEl.value;
-    const code  = (inviteEl.value || "").trim();
-    const first = firstEl.value.trim();
-    const last  = lastEl.value.trim();
-
-    if (!email || !pass || !code || !first || !last)
-      return say("First and last name, email, password, and invite code are required.", true);
-
-    try {
-      // Validate invite
-      const inviteRef  = doc(db, "invites", code);
-      const inviteSnap = await getDoc(inviteRef);
-      if (!inviteSnap.exists()) return say("Invalid invite code.", true);
-      const d = inviteSnap.data();
-      if (d.disabled === true) return say("This invite code is disabled.", true);
-      if (d.used === true && d.multi !== true) return say("This invite code has already been used.", true);
-
-      // Create auth user
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await sendEmailVerification(cred.user);
-
-      // Create profile + member docs immediately
-      const baseData = {
-        uid: cred.user.uid,
-        email,
-        firstName: first,
-        lastName : last,
-        emailVerified: false,
-        active: true,
-        role: "user",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-      await Promise.all([
-        setDoc(doc(db, "profiles", cred.user.uid), baseData, { merge: true }),
-        setDoc(doc(db, "members",  cred.user.uid), baseData, { merge: true })
-      ]);
-
-      // Mark invite touched
-      await updateDoc(inviteRef, {
-        used: true,
-        usedByLast: cred.user.uid,
-        usedAtLast: serverTimestamp()
-      });
-
-      say("Account created! Check your inbox to verify your email.");
-    } catch(err){
-      say(err.message, true);
-    }
-  });
-
-  doReset.addEventListener('click', async ()=>{
-    const email = emailEl.value.trim();
-    if (!email) return say("Enter your email first.", true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      say("Password reset email sent.");
-    } catch(err){
-      say(err.message, true);
-    }
-  });
-
-  signOutBtn.addEventListener('click', async ()=>{
-    try{
-      await signOut();
-      say("Signed out.");
-    }catch(err){
-      say(err.message || String(err), true);
-    }
-  });
-
-  // Post creation (admins only)
-  async function createPost(){
-    if (!currentUser){ psay("Please sign in.", true); return null; }
-    if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
-    if (!isAdmin){ psay("Only board admins can post to the board.", true); return null; }
-
-    const displayName = (postNameEl.value || "").trim();
-    const text        = (postTextEl.value || "").trim();
-    if (!displayName){ psay("Display name is required.", true); return null; }
-    if (!text)       { psay("Message cannot be empty.", true); return null; }
-
-    let whenTs = Timestamp.fromDate(new Date());
-    const raw = (postWhenEl.value || "").trim();
-    if (raw){
-      const dt = new Date(raw);
-      if (!isNaN(dt.getTime())) whenTs = Timestamp.fromDate(dt);
-    }
-
-    const ref = await addDoc(collection(db,"board"), {
-      text,
-      authorEmail: currentUser.email || "",
-      authorName: displayName,
-      authorUid: currentUser.uid,
-      createdAt: whenTs,
-      updatedAt: serverTimestamp()
+      renderMonth(); // re-color bookings for my/others
     });
-    return { id: ref.id, text, displayName, when: whenTs.toDate() };
-  }
 
-  // Fetch active member emails (admin only)
-  async function getActiveEmails(){
-    if (isAdmin){
+    /* ---------- Sign in / up / reset / out ---------- */
+    doSignInBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      const pass  = si_password.value;
+      if (!email || !pass) return say("Enter email and password.", true);
       try{
-        const emails = [];
-        const qProfiles = query(collection(db,"profiles"), where("active","==", true));
-        const snap = await getDocs(qProfiles);
-        snap.forEach(docu=>{
-          const d = docu.data();
-          const e = (d.email || "").trim();
-          if (e) emails.push(e);
+        await signInEmailPassword(email, pass);
+        say("Signed in.");
+        closeAuthModal();
+      }catch(err){ say(err.message || String(err), true); }
+    });
+
+    doSignUpBtn.addEventListener('click', async ()=>{
+      const first = su_first.value.trim();
+      const last  = su_last.value.trim();
+      const email = su_email.value.trim();
+      const pass  = su_password.value;
+      const code  = su_invite.value.trim();
+      if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
+      try{
+        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
+        csay("Account created! Check your inbox to verify your email.");
+        activate('in');
+      }catch(err){ csay(err.message || String(err), true); }
+    });
+
+    doResetBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      if (!email) return say("Enter your email first.", true);
+      try{
+        await resetPassword(email);
+        say("Password reset email sent.");
+      }catch(err){ say(err.message || String(err), true); }
+    });
+
+    signOutBtn.addEventListener('click', async ()=>{
+      try{
+        await signOut();
+        say("Signed out.");
+      }catch(err){ say(err.message || String(err), true); }
+    });
+
+    // Enter key behavior
+    function handleEnter(e){
+      if (e.key !== 'Enter') return;
+      if (viewSignIn.classList.contains('active')) doSignInBtn.click();
+      else doSignUpBtn.click();
+    }
+    [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
+      .forEach(el => el.addEventListener('keydown', handleEnter));
+
+    /* ===== Calendar logic (month grid) ===== */
+    const grid    = document.getElementById('grid');
+    const titleEl = document.getElementById('rangeTitle');
+    let today     = new Date();
+    let viewDate  = new Date(today.getFullYear(), today.getMonth(), 1);
+    let currentFilter = 'ALL';
+
+    function fmtMonthYear(d){
+      return d.toLocaleString(undefined,{month:'long',year:'numeric'});
+    }
+    function daysInMonth(y,m){
+      return new Date(y, m+1, 0).getDate();
+    }
+
+    function sameDay(a,b){
+      return a.getFullYear()===b.getFullYear() &&
+             a.getMonth()===b.getMonth() &&
+             a.getDate()===b.getDate();
+    }
+
+    function bookingCoversDate(bookingDateStart, bookingDateEnd, cellDate){
+      const start = bookingDateStart;
+      const end   = bookingDateEnd;
+      return cellDate >= start && cellDate <= end;
+    }
+
+    function renderMonth(){
+      if (!grid) return;
+      grid.innerHTML='';
+      const y = viewDate.getFullYear();
+      const m = viewDate.getMonth();
+      titleEl.textContent = fmtMonthYear(viewDate);
+
+      const firstDow  = new Date(y,m,1).getDay();
+      const totalDays = daysInMonth(y,m);
+      const prevDays  = daysInMonth(y,m-1);
+
+      const cells=[];
+      for(let i=firstDow-1;i>=0;i--) cells.push({y,m:m-1,d:prevDays-i,other:true});
+      for(let d=1; d<=totalDays; d++) cells.push({y,m,d,other:false});
+      while(cells.length%7!==0){
+        cells.push({y,m:m+1,d:cells.length-(firstDow+totalDays)+1,other:true});
+      }
+      while(cells.length<42){
+        const last=cells[cells.length-1];
+        cells.push({y:last.y,m:last.m,d:last.d+1,other:true});
+      }
+
+      const tY=today.getFullYear(), tM=today.getMonth(), tD=today.getDate();
+
+      cells.forEach(c=>{
+        const cell=document.createElement('div');
+        cell.className='cell'+(c.other?' other-month':'');
+        const dateBox=document.createElement('div');
+        dateBox.className='date';
+        dateBox.textContent=c.d;
+        cell.appendChild(dateBox);
+        if(c.y===tY && c.m===tM && c.d===tD && !c.other) cell.classList.add('today');
+
+        const eventsWrap=document.createElement('div');
+        eventsWrap.className='events';
+        cell.appendChild(eventsWrap);
+
+        const cellDate = new Date(c.y, c.m, c.d);
+
+        // Attach click: open booking modal prefilled with this date
+        cell.addEventListener('click', ()=>{
+          openModal(cellDate);
         });
-        if (emails.length) return emails;
-      }catch{/* fallback */}
+
+        // Add bookings
+        bookings.forEach(b=>{
+          if (currentFilter !== 'ALL' && b.aircraft !== currentFilter) return;
+          if (!b.start || !b.end) return;
+          if (!bookingCoversDate(b.start, b.end, cellDate)) return;
+
+          const evt = document.createElement('div');
+          evt.classList.add('evt');
+
+          if (b.maintenance){
+            evt.classList.add('maint');
+          } else if (currentUser && b.createdByUid === currentUser.uid){
+            evt.classList.add('mine');
+          } else {
+            evt.classList.add('other');
+          }
+
+          const purpose = b.purpose || 'Booking';
+          evt.textContent = `${b.aircraft || ''} – ${purpose}`;
+          eventsWrap.appendChild(evt);
+        });
+
+        grid.appendChild(cell);
+      });
     }
-    return FALLBACK_EMAILS;
-  }
 
-  function openMailto(allBcc, subject, body){
-    const mailto = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-  }
+    document.getElementById('prevBtn').onclick = ()=>{
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
+      renderMonth();
+    };
+    document.getElementById('nextBtn').onclick = ()=>{
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
+      renderMonth();
+    };
+    document.getElementById('todayBtn').onclick = ()=>{
+      today    = new Date();
+      viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      renderMonth();
+    };
+    renderMonth();
 
-  // Submit listeners (guard optional elements)
-  if (postSubmitOnly) {
-    postSubmitOnly.addEventListener('click', async ()=>{
-      try{
-        const created = await createPost();
-        if (created){ closePostModal(); }
-      }catch(err){ psay(err.message, true); }
+    // ===== Filter pills =====
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        currentFilter = p.dataset.filter || 'ALL';
+        renderMonth();
+      });
     });
-  }
 
-  postSubmitNotify?.addEventListener('click', async ()=>{
-    try{
-      if (!isAdmin){ psay("Only admins can notify all members.", true); return; }
-      const created = await createPost();
-      if (!created) return;
+    // ===== Listen to bookings from Firestore =====
+    onSnapshot(collection(db,'bookings'), snap=>{
+      bookings = [];
+      snap.forEach(docu=>{
+        const d = docu.data() || {};
+        const start = d.start?.toDate ? d.start.toDate() : null;
+        const end   = d.end?.toDate ? d.end.toDate() : null;
+        if (!start || !end) return;
+        bookings.push({
+          id: docu.id,
+          ...d,
+          start,
+          end,
+          maintenance: !!d.maintenance
+        });
+      });
+      renderMonth();
+    });
 
-      const all = await getActiveEmails();
-      if (!all.length){ closePostModal(); alert("Post created, but no member emails found to notify."); return; }
+    // ===== Booking modal behavior =====
+    const bookingModal = document.getElementById('bookingModal');
+    const openBtn      = document.getElementById('newBooking');
+    const closeBtn     = document.getElementById('closeModal');
+    const cancelBtn    = document.getElementById('cancelModal');
 
-      const whenStr = created.when.toLocaleString();
-      const subject = "New Message on The Flying 64th Website";
-      const body =
-`From: ${created.displayName}
-When: ${whenStr}
+    function pad(n){ return String(n).padStart(2,'0'); }
 
-${created.text}
+    function setDateInputs(date){
+      const yyyy = date.getFullYear();
+      const mm   = pad(date.getMonth()+1);
+      const dd   = pad(date.getDate());
+      const iso  = `${yyyy}-${mm}-${dd}`;
+      startDateEl.value = iso;
+      // Sync end date if empty or before start
+      if (!endDateEl.value || new Date(endDateEl.value) < new Date(iso)){
+        endDateEl.value = iso;
+      }
+    }
 
-— This message was posted on the Member Message Board (The Flying 64th).`;
+    function openModal(prefillDate){
+      bookingModal.classList.add('open');
+      bookingModal.setAttribute('aria-hidden','false');
 
-      openMailto(all, subject, body);
-      closePostModal();
-    }catch(err){ psay(err.message, true); }
-  });
+      const now = prefillDate ? new Date(prefillDate) : new Date();
+      setDateInputs(now);
 
-  notifyBtn && notifyBtn.addEventListener('click', ()=>{
-    if (!currentUser){ openAuth(); return; }
-    if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
-    if (!isAdmin){ alert("Only admins can notify all members."); return; }
-    openPost();
-  });
-</script>
+      const minutes = now.getMinutes();
+      const rounded = Math.ceil(minutes/30)*30;
+      let hour = now.getHours();
+      let min  = rounded;
+      if (rounded===60){
+        hour += 1;
+        min = 0;
+      }
+      startTimeEl.value = `${pad(hour)}:${pad(min)}`;
+      endTimeEl.value   = `${pad(hour)}:${pad((min+30)%60)}`;
+
+      if (currentUser){
+        if (!firstNameEl.value) firstNameEl.value = (currentUser.displayName || '').split(' ')[0] || '';
+        if (!lastNameEl.value && currentUser.displayName){
+          const parts = currentUser.displayName.split(' ');
+          if (parts.length>1) lastNameEl.value = parts.slice(1).join(' ');
+        }
+      }
+    }
+    function closeBookingModal(){
+      bookingModal.classList.remove('open');
+      bookingModal.setAttribute('aria-hidden','true');
+    }
+
+    openBtn.addEventListener('click', ()=>openModal(null));
+    closeBtn.addEventListener('click', closeBookingModal);
+    cancelBtn.addEventListener('click', closeBookingModal);
+    bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
+
+    // Keep end date >= start date
+    startDateEl.addEventListener('change', ()=>{
+      if (!startDateEl.value) return;
+      const s = new Date(startDateEl.value);
+      const e = endDateEl.value ? new Date(endDateEl.value) : null;
+      if (!e || e < s){
+        endDateEl.value = startDateEl.value;
+      }
+    });
+
+    // Meter deltas
+    const tachStart  = document.getElementById('tachStart');
+    const tachEnd    = document.getElementById('tachEnd');
+    const tachDelta  = document.getElementById('tachDelta');
+    const hobbsStart = document.getElementById('hobbsStart');
+    const hobbsEnd   = document.getElementById('hobbsEnd');
+    const hobbsDelta = document.getElementById('hobbsDelta');
+
+    function calcDelta(start,end,out){
+      const s=parseFloat(start.value), e=parseFloat(end.value);
+      out.value = (isFinite(s)&&isFinite(e)) ? (e-s).toFixed(1) : '';
+    }
+    [tachStart,tachEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(tachStart,tachEnd,tachDelta)));
+    [hobbsStart,hobbsEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta)));
+
+    function combineDateTime(dateStr, timeStr, endOfDay=false){
+      if (!dateStr){
+        return null;
+      }
+      if (!timeStr){
+        if (endOfDay){
+          return new Date(dateStr + 'T23:59:59');
+        }
+        return new Date(dateStr + 'T00:00:00');
+      }
+      return new Date(`${dateStr}T${timeStr}`);
+    }
+
+    // Save booking -> Firestore
+    document.getElementById('saveBooking').addEventListener('click', async ()=>{
+      const user = auth.currentUser;
+      if(!user){
+        alert('Please sign in first.');
+        return;
+      }
+      const fn = firstNameEl.value.trim();
+      const ln = lastNameEl.value.trim();
+      if(!fn || !ln){
+        alert('Please enter your first and last name.');
+        return;
+      }
+
+      const startDateStr = startDateEl.value;
+      const endDateStr   = endDateEl.value || startDateStr;
+
+      if (!startDateStr){
+        alert('Select a start date.');
+        return;
+      }
+
+      const start = combineDateTime(startDateStr, startTimeEl.value, !startTimeEl.value);
+      const end   = combineDateTime(endDateStr,   endTimeEl.value,   !endTimeEl.value);
+
+      if (!start || !end || !(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())){
+        alert('Invalid start or end date/time.');
+        return;
+      }
+      if (end <= start){
+        alert('End must be after start.');
+        return;
+      }
+
+      const purpose = purposeSel.value || 'Training';
+      const isMaintenance = purpose === 'Maintenance';
+
+      const instructorEmail = instructorSel.value || '';
+      const instructorName  = instructorSel.options[instructorSel.selectedIndex]?.text || '';
+
+      const data = {
+        aircraft       : aircraftSel.value,
+        purpose        : purpose,
+        maintenance    : isMaintenance,
+        firstName      : fn,
+        lastName       : ln,
+        member_email   : user.email || "",
+        start          : start,
+        end            : end,
+        startDateStr   : startDateStr,
+        endDateStr     : endDateStr,
+        startTimeStr   : startTimeEl.value || null,
+        endTimeStr     : endTimeEl.value || null,
+        tach_start     : tachStart.value || null,
+        tach_end       : tachEnd.value || null,
+        hobbs_start    : hobbsStart.value || null,
+        hobbs_end      : hobbsEnd.value || null,
+        comments       : commentsEl.value.trim(),
+        instructorEmail: instructorEmail || null,
+        instructorName : instructorName || null,
+        createdByUid   : user.uid,
+        createdAt      : serverTimestamp()
+      };
+
+      try{
+        await addDoc(collection(db, "bookings"), data);
+        console.log('Booking saved:', data);
+
+        // If an instructor is selected, open email to them
+        if (instructorEmail){
+          const subject = `New booking – ${data.aircraft} (${purpose})`;
+          const bodyLines = [
+            `Hello ${instructorName || ''},`,
+            '',
+            `A member has booked ${data.aircraft}.`,
+            '',
+            `Member: ${fn} ${ln}`,
+            `Email: ${user.email || ''}`,
+            `Purpose: ${purpose}${isMaintenance ? ' (maintenance)' : ''}`,
+            '',
+            `Start: ${start.toLocaleString()}`,
+            `End:   ${end.toLocaleString()}`,
+            '',
+            data.comments ? `Comments:\n${data.comments}\n` : '',
+            '— Sent automatically from The Flying 64th calendar.'
+          ];
+          const mailto = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+          window.location.href = mailto;
+        }
+
+        closeBookingModal();
+      }catch(err){
+        console.error(err);
+        alert('Could not save booking: ' + (err.message || String(err)));
+      }
+    });
+  </script>
 </body>
 </html>
