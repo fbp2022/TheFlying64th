@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Flying 64th – Home</title>
-  <meta name="color-scheme" content="dark light" />
+  <title>Calendar - The Flying 64th</title>
 
   <style>
     :root{
@@ -17,10 +16,13 @@
       --rule:rgba(255,255,255,.10);
       --border:rgba(255,255,255,.12);
       --radius:12px;
+
+      --blue:#4da3ff;   /* N78710 C172 */
+      --green:#58d68d;  /* N10921 C150 */
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
 
     body{
       margin:0;
@@ -58,7 +60,7 @@
       text-decoration:none;
       font-size:22px;
     }
-    .brand img{ height:34px; }
+    .brand img{ height:34px }
     nav.links{
       display:flex;
       gap:18px;
@@ -97,171 +99,220 @@
     }
     #signinBtn{ margin-right:8px; cursor:pointer; }
 
-    /* ===== LAYOUT ===== */
-    main{
+    /* ===== BANNER ===== */
+    .banner{
+      max-width:1400px;
+      margin:12px auto 0;
+      padding:0 18px;
+    }
+    .banner-inner{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-left:4px solid var(--accent);
+      border-radius:12px;
+      padding:12px 14px;
+    }
+    .banner .icon{ font-size:22px }
+    .banner strong{ color:#cfe1ff }
+
+    /* ===== WRAP / TOOLBAR ===== */
+    .wrap{
       max-width:1400px;
       margin:16px auto 80px;
-      padding:0 18px 32px;
+      padding:0 18px;
     }
-
-    .hero{
-      display:grid;
-      grid-template-columns:2fr 1.3fr;
-      gap:18px;
-      margin-top:16px;
-    }
-    .hero-left{
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:18px 18px 16px;
-    }
-    .hero-left h1{
-      margin:0 0 8px;
-      font-size:26px;
-      letter-spacing:.2px;
-    }
-    .hero-left p{
-      margin:0;
-      color:var(--muted);
-      font-size:14.5px;
-      line-height:1.5;
-    }
-    .hero-tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:12px;
-      font-size:12px;
-    }
-    .tag{
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:#0d1120;
-      color:#cfe1ff;
-    }
-
-    .hero-right{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .card{
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px 14px;
-      font-size:13.5px;
-      color:var(--muted);
-    }
-    .card h3{
-      margin:0 0 4px;
-      font-size:15px;
-      color:var(--ink);
-    }
-    .card strong{ color:#cfe1ff; }
-
-    /* ===== MESSAGE BOARD ===== */
-    .board-section{
-      margin-top:24px;
-      display:grid;
-      grid-template-columns:2fr 1.3fr;
-      gap:18px;
-    }
-    .board{
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px 14px 10px;
-    }
-    .board-header{
+    .toolbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:8px;
-    }
-    .board-header h2{
-      margin:0;
-      font-size:18px;
-    }
-    .board-header small{
-      color:var(--muted);
-      font-size:12px;
-    }
-    #msgHint{
-      color:var(--muted);
-      font-size:12.5px;
-      margin:4px 0 8px;
-      min-height:18px;
-    }
-    #messages{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:420px;
-      overflow-y:auto;
-      padding-right:4px;
-    }
-    .msg{
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.08);
-      background:#101420;
-      padding:8px 10px;
-      font-size:13px;
-    }
-    .msg-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .msg-meta strong{
-      font-size:13px;
-      color:#e9f3ff;
-    }
-    .msg-meta span{
-      font-size:12px;
-      color:#9fb1c3;
-    }
-
-    .side-info{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .side-card{
+      flex-wrap:wrap;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px 14px;
-      font-size:13px;
-      color:var(--muted);
+      border-radius:12px;
+      padding:10px;
     }
-    .side-card h3{
-      margin:0 0 4px;
-      font-size:15px;
-      color:var(--ink);
+    .pills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--border);
+      background:#0c0f18;
+      color:#eaf2ff;
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+    }
+    .pill.active{
+      background:#0e1630;
+      border-color:rgba(77,163,255,.45);
     }
 
-    /* ===== FOOTER ===== */
-    footer{
-      max-width:1400px;
-      margin:0 auto 22px;
-      padding:0 18px;
-      color:#6f7a90;
+    /* ===== STATUS CARDS ===== */
+    .status-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 14px;
+    }
+    .card h3{
+      margin:0 0 6px;
+      font-size:16px;
+    }
+    .chip{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
       font-size:12px;
+      font-weight:700;
+    }
+    .chip.blue{
+      background:#1a2d46;
+      color:#cfe1ff;
+      border:1px solid rgba(77,163,255,.35);
+    }
+    .chip.green{
+      background:#123326;
+      color:#d7ffea;
+      border:1px solid rgba(88,214,141,.35);
+    }
+    .meter{
       display:flex;
+      gap:16px;
+      color:#cfe1ff;
+    }
+    .meter b{ color:#fff }
+    .sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    /* ===== CALENDAR BAR ===== */
+    .calbar{
+      display:flex;
+      align-items:center;
       justify-content:space-between;
       gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      padding:10px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    .navbtns,
+    .viewbtns{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .sbtn{
+      border:1px solid var(--border);
+      background:#0c0f18;
+      color:#eaf2ff;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .title{
+      font-weight:800;
+      letter-spacing:.2px;
     }
 
-    /* ===== AUTH MODAL (same pattern as calendar/members) ===== */
+    /* ===== MONTH GRID ===== */
+    .calendar{
+      margin-top:12px;
+      width:100%;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .dow{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      background:#0c0f18;
+      border-bottom:1px solid var(--border);
+    }
+    .dow div{
+      padding:10px;
+      text-align:center;
+      color:#cfe1ff;
+      font-weight:700;
+      font-size:13px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+    }
+    .cell{
+      min-height:120px;
+      border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      padding:8px;
+      position:relative;
+    }
+    .cell:nth-child(7n){ border-right:none; }
+    .date{
+      position:absolute;
+      top:6px;
+      right:8px;
+      font-size:12px;
+      color:#cfe1ff;
+      padding:2px 6px;
+      border-radius:6px;
+      background:rgba(255,255,255,.05);
+    }
+    .other-month .date{ opacity:.35; }
+    .today .date{
+      background:#2b6bb1;
+      color:#001a33;
+      font-weight:800;
+    }
+    .events{
+      margin-top:22px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .evt{
+      font-size:12px;
+      padding:4px 6px;
+      border-radius:6px;
+      border:1px solid transparent;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .evt.c172{
+      background:#0e1d31;
+      border-color:#2b6bb1;
+    }
+    .evt.c150{
+      background:#0f261c;
+      border-color:#2b7a55;
+    }
+
+    /* ===== AUTH MODAL (same pattern as home.html) ===== */
     .auth-modal{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.55);
+      background:rgba(0,0,0,.5);
       display:none;
       place-items:center;
       z-index:1000;
@@ -333,7 +384,6 @@
       border:0;
       color:#9fb1c3;
       cursor:pointer;
-      padding:0;
     }
     .auth-msg{
       min-height:18px;
@@ -363,58 +413,125 @@
       border-color:transparent;
     }
 
-    /* ===== POST MODAL (board) ===== */
-    #postModal{
+    /* ===== BOOKING MODAL ===== */
+    .modal-backdrop{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.55);
+      background:rgba(0,0,0,.5);
       display:none;
       place-items:center;
-      z-index:950;
+      z-index:900;
     }
-    #postModal.open{ display:grid; }
-    .post-card{
-      width:min(520px,92vw);
-      background:#0f1722;
+    .modal-backdrop.open{ display:grid; }
+
+    .modal{
+      width:min(820px,92vw);
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);
       color:#e6edf3;
-      border:1px solid #1f2a38;
-      border-radius:14px;
-      padding:16px 16px 12px;
-      position:relative;
     }
-    .post-card h3{
-      margin:0 0 8px;
-      font-size:18px;
-      font-weight:800;
+    .modal-header{
+      padding:12px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      gap:10px;
+      align-items:center;
     }
-    .post-card .auth-label{ margin-top:8px; }
-    .post-card textarea{
-      width:100%;
-      min-height:110px;
-      resize:vertical;
+    .modal-title{
+      flex:1;
+      font-size:20px;
+      font-weight:700;
+      color:#e5f0ff;
+    }
+    .modal-body{
+      padding:16px;
+      display:grid;
+      gap:14px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .row-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field span{
+      font-size:13px;
+      color:#cfe1ff;
+    }
+    input,select,textarea{
+      background:#0b0e15;
+      color:var(--ink);
+      border:1px solid var(--border);
       border-radius:10px;
-      border:1px solid #1f2a38;
-      background:#0b1117;
-      color:#e6edf3;
       padding:10px 12px;
+      outline:none;
+      width:100%;
     }
-    .post-footer{
-      margin-top:12px;
+    textarea{
+      min-height:84px;
+      resize:vertical;
+    }
+    .inline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .switch input{
+      appearance:none;
+      width:36px;
+      height:22px;
+      border-radius:999px;
+      background:#444;
+      position:relative;
+      transition:.2s;
+    }
+    .switch input:checked{ background:#2b6bb1; }
+    .switch input::after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#fff;
+      transition:.2s;
+    }
+    .switch input:checked::after{ transform:translateX(14px); }
+    .modal-footer{
+      padding:12px 16px;
+      border-top:1px solid var(--border);
       display:flex;
       justify-content:flex-end;
       gap:8px;
     }
-    #postMsg{
-      min-height:18px;
-      color:#9fb1c3;
+    .hint{
+      color:#b9c2d0;
       font-size:12.5px;
-      margin-top:6px;
     }
 
     @media (max-width:900px){
-      .hero{ grid-template-columns:1fr; }
-      .board-section{ grid-template-columns:1fr; }
-      footer{ flex-direction:column; align-items:flex-start; }
+      .status-row{ grid-template-columns:1fr; }
+      .row,
+      .row-3{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -429,8 +546,8 @@
       </a>
       <nav class="links">
         <a id="signinBtn" class="btn">Sign In</a>
-        <a class="active" href="home.html">Home</a>
-        <a href="calendar.html">Calendar</a>
+        <a href="home.html">Home</a>
+        <a class="active" href="calendar.html">Calendar</a>
         <a href="becomeamember.html">Become a Member</a>
         <a href="photos.html">Photos</a>
         <a href="members.html">Members</a>
@@ -439,10 +556,10 @@
     </div>
   </header>
 
-  <!-- ===== AUTH MODAL (sign in / create account) ===== -->
+  <!-- ===== AUTH MODAL (copied pattern from home.html) ===== -->
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
+      <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
 
       <div class="tabs">
         <button id="tabSignIn" class="tab active">Sign In</button>
@@ -489,145 +606,233 @@
     </div>
   </div>
 
-  <main>
-    <!-- ===== HERO ===== -->
-    <section class="hero">
-      <div class="hero-left">
-        <h1>Welcome to The Flying 64th</h1>
-        <p>
-          Member-run flying club based at Oliver Springs Airport. Book aircraft,
-          track Hobbs/Tach, and keep up with club updates all from one place.
-        </p>
-        <div class="hero-tags">
-          <span class="tag">N78710 – C172</span>
-          <span class="tag">N10921 – C150</span>
-          <span class="tag">Member message board</span>
-          <span class="tag">Online scheduling</span>
-        </div>
-      </div>
-      <div class="hero-right">
-        <div class="card">
-          <h3>New here?</h3>
-          <p>
-            Prospective members can review our <strong>POH &amp; Manuals</strong> and
-            visit <strong>Become a Member</strong> for details on joining the club.
-          </p>
-        </div>
-        <div class="card">
-          <h3>Existing members</h3>
-          <p>
-            Sign in with your club account to access the <strong>calendar</strong>,
-            manage your bookings, and view the <strong>member message board</strong>.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== MESSAGE BOARD + SIDE INFO ===== -->
-    <section class="board-section">
-      <!-- Board -->
-      <div class="board">
-        <div class="board-header">
-          <div>
-            <h2>Member Message Board</h2>
-            <small>Admins post updates here. Members can read and stay in the loop.</small>
-          </div>
-          <button id="newPostBtn" class="btn primary" style="display:none;">＋ Post &amp; notify</button>
-        </div>
-        <p id="msgHint"></p>
-        <div id="messages"></div>
-      </div>
-
-      <!-- Side info -->
-      <div class="side-info">
-        <div class="side-card">
-          <h3>How the board works</h3>
-          <p>
-            All signed-in club members can <strong>see</strong> posts on this board.
-            Only <strong>admins</strong> can create or edit posts.
-          </p>
-          <p>
-            When an admin clicks <em>Post &amp; notify</em>, their email client opens
-            with all active members in BCC for quick announcements.
-          </p>
-        </div>
-        <div class="side-card">
-          <h3>Need help?</h3>
-          <p>
-            If you have trouble signing in, use <strong>Forgot password</strong>.
-            For account or invite-code issues, contact a board member.
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <span>&copy; <span id="y"></span> The Flying 64th. All rights reserved.</span>
-    <span>Based at Oliver Springs Airport (TN08).</span>
-  </footer>
-
-  <!-- ===== POST MODAL (Board) ===== -->
-  <div id="postModal" aria-hidden="true">
-    <div class="post-card" role="dialog" aria-modal="true" aria-labelledby="postTitle">
-      <button id="closePost" class="auth-x" aria-label="Close">✕</button>
-      <h3 id="postTitle">New board post</h3>
-
-      <label class="auth-label" for="postName">Display name</label>
-      <input id="postName" class="auth-input" type="text" placeholder="How this should appear on the board">
-
-      <label class="auth-label" for="postEmail">From (your email)</label>
-      <input id="postEmail" class="auth-input" type="email" readonly>
-
-      <label class="auth-label" for="postWhen">Time of this message</label>
-      <input id="postWhen" class="auth-input" type="datetime-local">
-
-      <label class="auth-label" for="postText">Message</label>
-      <textarea id="postText" placeholder="Club update, maintenance note, scheduling change, etc."></textarea>
-
-      <p id="postMsg"></p>
-
-      <div class="post-footer">
-        <button id="postCancel" class="auth-btn">Cancel</button>
-        <button id="postSubmitNotify" class="auth-btn primary">Post &amp; notify members</button>
+  <!-- ===== BANNER ===== -->
+  <div class="banner">
+    <div class="banner-inner">
+      <div class="icon">⏱️</div>
+      <div>
+        <strong>Reminder:</strong>
+        Enter <strong>Tach</strong> &amp; <strong>Hobbs</strong> start/end after every flight.
+        If the prior end is missing, you’ll be prompted to resolve it before <strong>closing your flight</strong>.
       </div>
     </div>
   </div>
 
-  <!-- ===== YEAR ===== -->
+  <main class="wrap">
+    <!-- ===== FILTER / NEW BOOKING ===== -->
+    <div class="toolbar">
+      <div class="pills" role="tablist">
+        <button class="pill active" data-filter="ALL">All</button>
+        <button class="pill" data-filter="N78710">N78710 — C172</button>
+        <button class="pill" data-filter="N10921">N10921 — C150</button>
+      </div>
+      <div>
+        <button id="newBooking" class="btn primary">＋ New booking</button>
+        <button class="btn" title="Export coming soon" disabled>Export</button>
+      </div>
+    </div>
+
+    <!-- ===== AIRCRAFT STATUS ===== -->
+    <div class="status-row">
+      <div class="card" id="card-78710">
+        <h3><span class="chip blue">N78710 — C172</span></h3>
+        <div class="meter">
+          <div>Tach: <b id="tach-78710">—</b></div>
+          <div>Hobbs: <b id="hobbs-78710">—</b></div>
+        </div>
+        <div class="sub" id="sub-78710">Last updated: —</div>
+      </div>
+      <div class="card" id="card-10921">
+        <h3><span class="chip green">N10921 — C150</span></h3>
+        <div class="meter">
+          <div>Tach: <b id="tach-10921">—</b></div>
+          <div>Hobbs: <b id="hobbs-10921">—</b></div>
+        </div>
+        <div class="sub" id="sub-10921">Last updated: —</div>
+      </div>
+    </div>
+
+    <!-- ===== CALENDAR BAR ===== -->
+    <div class="calbar">
+      <div class="navbtns">
+        <button class="sbtn" id="prevBtn">◀</button>
+        <button class="sbtn" id="todayBtn">Today</button>
+        <button class="sbtn" id="nextBtn">▶</button>
+      </div>
+      <div class="title" id="rangeTitle">Month</div>
+      <div class="viewbtns">
+        <span style="font-size:12px;color:#9fb1c3;">(Month view only for now)</span>
+      </div>
+    </div>
+
+    <!-- ===== CALENDAR GRID ===== -->
+    <section class="calendar" aria-label="Club bookings calendar">
+      <div class="dow">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+
+  <!-- ===== BOOKING MODAL ===== -->
+  <div id="bookingModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+      <div class="modal-header">
+        <h3 id="bookingTitle" class="modal-title">New Booking</h3>
+        <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <label class="field">
+            <span>Aircraft</span>
+            <select id="aircraft">
+              <option value="N78710">N78710 — C172</option>
+              <option value="N10921">N10921 — C150</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Title / purpose</span>
+            <input id="titleInput" type="text" placeholder="Training, rental, checkride prep, etc.">
+          </label>
+        </div>
+
+        <!-- Dates / Times -->
+        <div class="row">
+          <label class="field">
+            <span>Start date</span>
+            <input id="startDate" type="date">
+          </label>
+          <label class="field">
+            <span>End date</span>
+            <input id="endDate" type="date">
+          </label>
+        </div>
+        <div class="row">
+          <div class="field">
+            <span>Time window</span>
+            <div class="inline">
+              <input id="startTime" type="time">
+              <span>to</span>
+              <input id="endTime" type="time">
+              <label class="switch">
+                <input id="allDay" type="checkbox">
+                <span>All day</span>
+              </label>
+            </div>
+          </div>
+          <label class="field">
+            <span>With instructor?</span>
+            <label class="switch">
+              <input id="withInstructor" type="checkbox">
+              <span>Yes, this is an instructional flight</span>
+            </label>
+          </label>
+        </div>
+
+        <!-- Instructor selection -->
+        <div class="row" id="instructorWrap" hidden>
+          <label class="field">
+            <span>Instructor</span>
+            <select id="instructorSelect">
+              <option value="" selected disabled>Choose flight instructor</option>
+              <option value="BW">Brian Westfall (BW)</option>
+              <option value="JC">Justin Cox (JC)</option>
+              <option value="JM">Jeff Moersch (JM)</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Member info -->
+        <div class="row">
+          <label class="field">
+            <span>First name</span>
+            <input id="firstName" type="text" placeholder="Your first name">
+          </label>
+          <label class="field">
+            <span>Last name</span>
+            <input id="lastName" type="text" placeholder="Your last name">
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>Email (from your account)</span>
+            <input id="emailField" type="email" readonly>
+          </label>
+          <div class="field">
+            <span>&nbsp;</span>
+            <div class="inline">
+              <small style="color:#9fb1c3;">Linked to your Flying 64th login.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meter Readings -->
+        <div class="row-3">
+          <label class="field"><span>Tach start</span><input id="tachStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach end</span><input id="tachEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Tach delta</span><input id="tachDelta" type="number" step="0.1" readonly /></label>
+        </div>
+        <div class="row-3">
+          <label class="field"><span>Hobbs start</span><input id="hobbsStart" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs end</span><input id="hobbsEnd" type="number" step="0.1" /></label>
+          <label class="field"><span>Hobbs delta</span><input id="hobbsDelta" type="number" step="0.1" readonly /></label>
+        </div>
+
+        <!-- Comments -->
+        <label class="field">
+          <span>Comments</span>
+          <textarea id="comments"></textarea>
+        </label>
+
+        <div id="authHint" class="hint" style="display:none">
+          Sign in to book. Your email is shared with members for coordination.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="cancelModal" class="btn">Cancel</button>
+        <button id="saveBooking" class="btn primary" disabled>Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Highlight active nav ===== -->
   <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
+    (function(){
+      const current = location.pathname.split('/').pop().toLowerCase();
+      document.querySelectorAll('nav.links a').forEach(a=>{
+        let href=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+        href=href.replace(/&amp;/g,'&');
+        if(href && href===current) a.classList.add('active');
+      });
+    })();
   </script>
 
-  <!-- ===== Firebase + Auth + Board Logic ===== -->
+  <!-- ===== Firebase auth + calendar wiring via auth.js ===== -->
   <script type="module">
     import {
       auth,
       db,
       onAuthChanged,
-      signOut,
       signInEmailPassword,
       signUpWithInvite,
       resetPassword,
-      getMyRole
-    } from './auth.js';
+      signOut
+    } from "./auth.js";
 
     import {
-      doc, getDoc, setDoc, serverTimestamp,
-      collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
+      collection,
+      addDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    /* ---------- BroadcastChannel to nudge other tabs to reload ---------- */
-    const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('f64-global') : null;
-    bc?.addEventListener?.('message', (e)=>{ if (e?.data === 'reload') location.reload(); });
-    const broadcastReload = ()=> bc?.postMessage?.('reload');
+    /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
+    const signinBtn  = document.getElementById('signinBtn');
 
-    /* ---------- UI refs ---------- */
-    const signinBtn = document.getElementById('signinBtn');
-
-    // Auth modal
-    const modal      = document.getElementById('authModal');
-    const closeModal = document.getElementById('closeModal');
+    // Auth modal + tabs
+    const authModal  = document.getElementById('authModal');
+    const closeAuth  = document.getElementById('closeAuth');
     const tabSignIn  = document.getElementById('tabSignIn');
     const tabSignUp  = document.getElementById('tabSignUp');
     const viewSignIn = document.getElementById('viewSignIn');
@@ -650,46 +855,29 @@
     const doSignUpBtn = document.getElementById('doSignUp');
     const createMsg   = document.getElementById('createMsg');
 
-    // Board
-    const hintEl     = document.getElementById('msgHint');
-    const feedEl     = document.getElementById('messages');
-    const newPostBtn = document.getElementById('newPostBtn');
-
-    // Post modal
-    const postModal        = document.getElementById('postModal');
-    const closePost        = document.getElementById('closePost');
-    const postCancel       = document.getElementById('postCancel');
-    const postSubmitNotify = document.getElementById('postSubmitNotify');
-    const postNameEl       = document.getElementById('postName');
-    const postEmailEl      = document.getElementById('postEmail');
-    const postWhenEl       = document.getElementById('postWhen');
-    const postTextEl       = document.getElementById('postText');
-    const postMsgEl        = document.getElementById('postMsg');
+    // Calendar-specific auth deps
+    const emailField  = document.getElementById('emailField');
+    const authHint    = document.getElementById('authHint');
+    const saveBtn     = document.getElementById('saveBooking');
 
     const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
     const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
-    const psay = (t, err=false)=>{ postMsgEl.textContent=t||""; postMsgEl.style.color=err?'#ffb4b4':'#9fb1c3'; };
-    const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
-                                     .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
-                                     .replace(/'/g,"&#039;");
-    const toLocalDatetimeValue = (d=new Date())=>{
-      const pad = (n)=> String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
 
     /* ---------- Auth modal open/close & tabs ---------- */
     function openAuth(){
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      say(""); csay("");
+      authModal.classList.add('open');
+      authModal.setAttribute('aria-hidden','false');
+      say("");
+      csay("");
     }
-    function closeAuth(){
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
+    function closeAuthModal(){
+      authModal.classList.remove('open');
+      authModal.setAttribute('aria-hidden','true');
     }
+
     signinBtn?.addEventListener('click', openAuth);
-    closeModal?.addEventListener('click', closeAuth);
-    modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
+    closeAuth?.addEventListener('click', closeAuthModal);
+    authModal?.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
 
     function activate(view){
       [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
@@ -705,94 +893,30 @@
     tabSignIn.addEventListener('click', ()=>activate('in'));
     tabSignUp.addEventListener('click', ()=>activate('up'));
 
-    // deep link
+    // Deep link #signin
     if (location.hash === '#signin') openAuth();
     window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
 
-    /* ---------- Auth state & board gating ---------- */
-    let currentUser = null;
-    let unsubscribeBoard = null;
-    let iAmAdmin = false;
-    let canSeeBoard = false;
-
-    function startBoardListener(){
-      if (unsubscribeBoard) unsubscribeBoard();
-      const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
-      unsubscribeBoard = onSnapshot(qBoard, (snap)=>{
-        feedEl.innerHTML = "";
-        snap.forEach(d=>{
-          const m = d.data();
-          const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-          const when = ts ? ts.toLocaleString() : "…";
-          const div = document.createElement("div");
-          div.className = "msg";
-          div.innerHTML = `
-            <div class="msg-top">
-              <div class="msg-meta">
-                <strong>${escapeHtml(m.authorName || "Member")}</strong>
-                <span> • ${when}</span>
-                <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
-              </div>
-            </div>
-            <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
-          `;
-          feedEl.appendChild(div);
-        });
-      }, (err)=>{
-        feedEl.innerHTML = "";
-        hintEl.textContent = "Could not load board: " + (err.message || String(err));
-      });
-    }
-
-    onAuthChanged(async (user)=>{
-      currentUser = user || null;
-      iAmAdmin    = false;
-      canSeeBoard = false;
-
+    /* ---------- Auth state handling (hooked into booking UI) ---------- */
+    onAuthChanged((user)=>{
+      const verified = !!user?.emailVerified;
       if (user){
-        // figure out role
-        try{
-          const info = await getMyRole();
-          iAmAdmin    = !!info.isAdmin;
-          const role  = (info.role || "").toLowerCase();
-          canSeeBoard = iAmAdmin || role === "member";
-        }catch(_){
-          iAmAdmin    = false;
-          canSeeBoard = false;
-        }
-
-        const verified = !!user.emailVerified;
-        const shortEmail = user.email && user.email.length > 28
-          ? user.email.slice(0,28) + "…"
-          : (user.email || "");
+        const shortEmail = user.email && user.email.length>28
+          ? user.email.slice(0,28)+'…'
+          : (user.email || '');
 
         signinBtn.textContent = verified
           ? `Account – ${shortEmail}`
           : `Unverified – ${shortEmail}`;
 
-        // Board visibility rules
-        if (canSeeBoard){
-          hintEl.textContent = iAmAdmin
-            ? (verified
-                ? "Share updates with the club."
-                : "Please verify your email to post.")
-            : "Only admins can post to the board. Check here for club updates.";
-
-          if (!unsubscribeBoard) startBoardListener();
-          // Post button: only admins AND verified
-          newPostBtn.style.display = (iAmAdmin && verified) ? "inline-block" : "none";
-        } else {
-          hintEl.textContent = "You don’t have access to the member board.";
-          newPostBtn.style.display = "none";
-          feedEl.innerHTML = "";
-          if (unsubscribeBoard){ unsubscribeBoard(); unsubscribeBoard = null; }
-        }
+        if (emailField) emailField.value = user.email || "";
+        if (saveBtn)   saveBtn.disabled = false;
+        if (authHint)  authHint.style.display = "none";
       } else {
         signinBtn.textContent = "Sign In";
-        newPostBtn.style.display = "none";
-        hintEl.textContent = "Sign in to view and post messages.";
-        feedEl.innerHTML = "";
-        if (unsubscribeBoard){ unsubscribeBoard(); unsubscribeBoard = null; }
+        if (emailField) emailField.value = "";
+        if (saveBtn)   saveBtn.disabled = true;
+        if (authHint)  authHint.style.display = "block";
       }
     });
 
@@ -804,8 +928,8 @@
       try{
         await signInEmailPassword(email, pass);
         say("Signed in.");
-        closeAuth();
-      }catch(err){ say(err.message, true); }
+        closeAuthModal();
+      }catch(err){ say(err.message || String(err), true); }
     });
 
     doSignUpBtn.addEventListener('click', async ()=>{
@@ -816,22 +940,26 @@
       const code  = su_invite.value.trim();
       if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
       try{
-        await signUpWithInvite({ email, password: pass, firstName:first, lastName:last, code });
+        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
         csay("Account created! Check your inbox to verify your email.");
         activate('in');
-      }catch(err){ csay(err.message, true); }
+      }catch(err){ csay(err.message || String(err), true); }
     });
 
     doResetBtn.addEventListener('click', async ()=>{
       const email = si_email.value.trim();
       if (!email) return say("Enter your email first.", true);
-      try{ await resetPassword(email); say("Password reset email sent."); }
-      catch(err){ say(err.message, true); }
+      try{
+        await resetPassword(email);
+        say("Password reset email sent.");
+      }catch(err){ say(err.message || String(err), true); }
     });
 
     signOutBtn.addEventListener('click', async ()=>{
-      await signOut();
-      say("Signed out.");
+      try{
+        await signOut();
+        say("Signed out.");
+      }catch(err){ say(err.message || String(err), true); }
     });
 
     // Enter key behavior
@@ -841,108 +969,192 @@
       else doSignUpBtn.click();
     }
     [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
-      .forEach(el=> el.addEventListener('keydown', handleEnter));
+      .forEach(el => el.addEventListener('keydown', handleEnter));
 
-    /* ---------- Post modal ---------- */
-    function openPost(){
-      if (!currentUser){ openAuth(); return; }
-      if (!iAmAdmin){
-        alert("Only admins can post to the board.");
+    /* ===== Calendar logic (month grid) ===== */
+    const grid    = document.getElementById('grid');
+    const titleEl = document.getElementById('rangeTitle');
+    let today     = new Date();
+    let viewDate  = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    function fmtMonthYear(d){
+      return d.toLocaleString(undefined,{month:'long',year:'numeric'});
+    }
+    function daysInMonth(y,m){
+      return new Date(y, m+1, 0).getDate();
+    }
+
+    function renderMonth(){
+      grid.innerHTML='';
+      const y = viewDate.getFullYear();
+      const m = viewDate.getMonth();
+      titleEl.textContent = fmtMonthYear(viewDate);
+
+      const firstDow  = new Date(y,m,1).getDay();
+      const totalDays = daysInMonth(y,m);
+      const prevDays  = daysInMonth(y,m-1);
+
+      const cells=[];
+      for(let i=firstDow-1;i>=0;i--) cells.push({y,m:m-1,d:prevDays-i,other:true});
+      for(let d=1; d<=totalDays; d++) cells.push({y,m,d,other:false});
+      while(cells.length%7!==0){
+        cells.push({y,m:m+1,d:cells.length-(firstDow+totalDays)+1,other:true});
+      }
+      while(cells.length<42){
+        const last=cells[cells.length-1];
+        cells.push({y:last.y,m:last.m,d:last.d+1,other:true});
+      }
+
+      const tY=today.getFullYear(), tM=today.getMonth(), tD=today.getDate();
+      cells.forEach(c=>{
+        const cell=document.createElement('div');
+        cell.className='cell'+(c.other?' other-month':'');
+        const dateBox=document.createElement('div');
+        dateBox.className='date';
+        dateBox.textContent=c.d;
+        cell.appendChild(dateBox);
+        if(c.y===tY && c.m===tM && c.d===tD && !c.other) cell.classList.add('today');
+        const eventsWrap=document.createElement('div');
+        eventsWrap.className='events';
+        cell.appendChild(eventsWrap);
+        grid.appendChild(cell);
+      });
+    }
+
+    document.getElementById('prevBtn').onclick = ()=>{
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
+      renderMonth();
+    };
+    document.getElementById('nextBtn').onclick = ()=>{
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
+      renderMonth();
+    };
+    document.getElementById('todayBtn').onclick = ()=>{
+      today    = new Date();
+      viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      renderMonth();
+    };
+    renderMonth();
+
+    // ===== Filter pills (visual only for now) =====
+    let currentFilter = 'ALL';
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        currentFilter = p.dataset.filter;
+      });
+    });
+
+    // ===== Booking modal behavior =====
+    const bookingModal = document.getElementById('bookingModal');
+    const openBtn      = document.getElementById('newBooking');
+    const closeBtn     = document.getElementById('closeModal');
+    const cancelBtn    = document.getElementById('cancelModal');
+    const withInst     = document.getElementById('withInstructor');
+    const instWrap     = document.getElementById('instructorWrap');
+    const allDay       = document.getElementById('allDay');
+    const startTime    = document.getElementById('startTime');
+    const endTime      = document.getElementById('endTime');
+
+    function openModal(){
+      bookingModal.classList.add('open');
+      bookingModal.setAttribute('aria-hidden','false');
+      const now=new Date();
+      const pad=n=>String(n).padStart(2,'0');
+      const yyyy=now.getFullYear(), mm=pad(now.getMonth()+1), dd=pad(now.getDate());
+      document.getElementById('startDate').value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('endDate').value   = `${yyyy}-${mm}-${dd}`;
+      const minutes=now.getMinutes();
+      const rounded=Math.ceil(minutes/30)*30;
+      if(rounded===60){ now.setHours(now.getHours()+1); }
+      const hh=pad(now.getHours());
+      const min=pad(rounded===60?0:rounded);
+      startTime.value = `${hh}:${min}`;
+      endTime.value   = `${hh}:${pad((parseInt(min,10)+30)%60)}`;
+    }
+    function closeBookingModal(){
+      bookingModal.classList.remove('open');
+      bookingModal.setAttribute('aria-hidden','true');
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeBookingModal);
+    cancelBtn.addEventListener('click', closeBookingModal);
+    bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
+
+    withInst.onchange = ()=>{ instWrap.hidden = !withInst.checked; };
+    allDay.onchange   = ()=>{
+      const dis = allDay.checked;
+      startTime.disabled = dis;
+      endTime.disabled   = dis;
+      if(dis){
+        startTime.value='';
+        endTime.value='';
+      }
+    };
+
+    // Meter deltas
+    function calcDelta(start,end,out){
+      const s=parseFloat(start.value), e=parseFloat(end.value);
+      out.value = (isFinite(s)&&isFinite(e)) ? (e-s).toFixed(1) : '';
+    }
+    const tachStart  = document.getElementById('tachStart');
+    const tachEnd    = document.getElementById('tachEnd');
+    const tachDelta  = document.getElementById('tachDelta');
+    const hobbsStart = document.getElementById('hobbsStart');
+    const hobbsEnd   = document.getElementById('hobbsEnd');
+    const hobbsDelta = document.getElementById('hobbsDelta');
+
+    [tachStart,tachEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(tachStart,tachEnd,tachDelta)));
+    [hobbsStart,hobbsEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta)));
+
+    // Save booking -> Firestore
+    document.getElementById('saveBooking').addEventListener('click', async ()=>{
+      const user = auth.currentUser;
+      if(!user){
+        alert('Please sign in first.');
         return;
       }
-      if (!currentUser.emailVerified){
-        alert("Verify your email first.");
+      const fn = document.getElementById('firstName').value.trim();
+      const ln = document.getElementById('lastName').value.trim();
+      if(!fn || !ln){
+        alert('Please enter your first and last name.');
         return;
       }
-      postEmailEl.value = currentUser.email || "";
-      postNameEl.value  = (currentUser.email || "").split("@")[0];
-      postTextEl.value  = "";
-      postWhenEl.value  = toLocalDatetimeValue(new Date());
-      psay("");
-      postModal.classList.add('open');
-      postModal.setAttribute('aria-hidden','false');
-      postNameEl.focus();
-    }
-    function closePostModal(){
-      postModal.classList.remove('open');
-      postModal.setAttribute('aria-hidden','true');
-    }
-    newPostBtn?.addEventListener('click', openPost);
-    closePost?.addEventListener('click', closePostModal);
-    postCancel?.addEventListener('click', closePostModal);
-    postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
-    async function getActiveMemberEmails(){
-      // Uses /members collection with active==true for BCC notifications
-      const q = query(collection(db,"members"), where("active","==", true));
-      const snap = await getDocs(q);
-      const emails = [];
-      snap.forEach(d=>{
-        const e = (d.data().email || "").trim();
-        if (e) emails.push(e);
-      });
-      return emails;
-    }
+      const data = {
+        member_first : fn,
+        member_last  : ln,
+        member_email : user.email || "",
+        aircraft     : document.getElementById('aircraft').value,
+        title        : document.getElementById('titleInput').value.trim(),
+        startDate    : document.getElementById('startDate').value,
+        endDate      : document.getElementById('endDate').value,
+        startTime    : document.getElementById('startTime').value,
+        endTime      : document.getElementById('endTime').value,
+        allDay       : allDay.checked,
+        withInstructor : withInst.checked,
+        instructorId   : document.getElementById('instructorSelect').value || null,
+        tach_start   : tachStart.value || null,
+        tach_end     : tachEnd.value || null,
+        hobbs_start  : hobbsStart.value || null,
+        hobbs_end    : hobbsEnd.value || null,
+        comments     : document.getElementById('comments').value.trim()
+      };
 
-    async function createPost(){
-      if (!currentUser){ psay("Please sign in.", true); return null; }
-      if (!iAmAdmin){ psay("Only admins can post to the board.", true); return null; }
-      if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
-
-      const displayName = (postNameEl.value || "").trim();
-      const text        = (postTextEl.value || "").trim();
-      if (!displayName) return psay("Display name is required.", true), null;
-      if (!text)        return psay("Message cannot be empty.", true), null;
-
-      let whenTs = Timestamp.fromDate(new Date());
-      const raw = (postWhenEl.value || "").trim();
-      if (raw){
-        const dt = new Date(raw);
-        if (!isNaN(dt.getTime())) whenTs = Timestamp.fromDate(dt);
-      }
-
-      const ref = await addDoc(collection(db,"board"), {
-        text,
-        authorEmail: currentUser.email || "",
-        authorName: displayName,
-        createdByUid: currentUser.uid,
-        createdAt: whenTs,
-        updatedAt: serverTimestamp()
-      });
-      return { id: ref.id, text, displayName, when: whenTs.toDate() };
-    }
-
-    function openMailto(allBcc, subject, body){
-      const link = `mailto:?bcc=${encodeURIComponent(allBcc.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = link;
-    }
-
-    postSubmitNotify?.addEventListener('click', async ()=>{
       try{
-        const created = await createPost();
-        if (!created) return;
-
-        const all = await getActiveMemberEmails();
-        if (!all.length){
-          closePostModal();
-          alert("Post created, but no active member emails found.");
-          return;
-        }
-
-        const whenStr = created.when.toLocaleString();
-        const subject = "New Message on The Flying 64th Website";
-        const body =
-`From: ${created.displayName}
-When: ${whenStr}
-
-${created.text}
-
-— This message was posted on the Member Message Board (The Flying 64th).`;
-
-        openMailto(all, subject, body);
-        closePostModal();
-        broadcastReload();
-      }catch(err){ psay(err.message, true); }
+        await addDoc(collection(db, "bookings"), {
+          ...data,
+          uid: user.uid,
+          createdAt: serverTimestamp()
+        });
+        console.log('Booking saved:', data);
+        closeBookingModal();
+      }catch(err){
+        console.error(err);
+        alert('Could not save booking: ' + (err.message || String(err)));
+      }
     });
   </script>
 </body>
