@@ -428,31 +428,35 @@
     }
 
     /* ===== Live list (show everyone from /members) ===== */
-    function startLiveList(){
-      if (unsubscribeMembers){
-        unsubscribeMembers();
-        unsubscribeMembers = null;
-      }
-      // Single orderBy so no composite index is required
-      const qy = query(collection(db,'members'), orderBy('lastName'));
+function startLiveList(){
+  if (unsubscribeMembers){
+    unsubscribeMembers();
+    unsubscribeMembers = null;
+  }
 
-      unsubscribeMembers = onSnapshot(qy, (snap)=>{
-        const docs=[]; snap.forEach(d=>docs.push(d));
+  // ✅ Single orderBy so no composite index is required
+  const qy = query(collection(db, 'members'), orderBy('lastName'));
 
-        // Secondary sort by lastName + firstName on client
-        docs.sort((a,b)=>{
-          const da = a.data(), dbd = b.data();
-          const lnA = (da.lastName || '').toLowerCase();
-          const lnB = (dbd.lastName || '').toLowerCase();
-          if (lnA !== lnB) return lnA.localeCompare(lnB);
-          const fnA = (da.firstName || '').toLowerCase();
-          const fnB = (dbd.firstName || '').toLowerCase();
-          return fnA.localeCompare(fnB);
-        });
+  unsubscribeMembers = onSnapshot(qy, (snap)=>{
+    const docs = [];
+    snap.forEach(d => docs.push(d));
 
-        renderMembers(docs);
-      }, (err)=> sayList(err.message,true));
-    }
+    // ✅ Secondary sort: lastName, then firstName in JS
+    docs.sort((a, b) => {
+      const da = a.data();
+      const dbd = b.data();
+      const lnA = (da.lastName  || '').toLowerCase();
+      const lnB = (dbd.lastName || '').toLowerCase();
+      if (lnA !== lnB) return lnA.localeCompare(lnB);
+      const fnA = (da.firstName  || '').toLowerCase();
+      const fnB = (dbd.firstName || '').toLowerCase();
+      return fnA.localeCompare(fnB);
+    });
+
+    renderMembers(docs);
+  }, (err)=> sayList(err.message, true));
+}
+
 
     /* ===== Copy invite code ===== */
     copyInvite.addEventListener('click', async ()=>{
