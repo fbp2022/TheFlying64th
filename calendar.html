@@ -17,8 +17,9 @@
       --border:rgba(255,255,255,.12);
       --radius:12px;
 
-      --blue:#4da3ff;   /* N78710 C172 */
-      --green:#58d68d;  /* N10921 C150 */
+      --blue:#4da3ff;   /* N78710 C172 / default bookings */
+      --green:#58d68d;  /* N10921 C150 / my bookings */
+      --red:#ff5c5c;    /* Maintenance */
     }
 
     *{ box-sizing:border-box }
@@ -59,8 +60,10 @@
       color:var(--ink);
       text-decoration:none;
       font-size:22px;
+      white-space:nowrap;
     }
-    .brand img{ height:34px }
+    .brand img{ height:34px; width:auto; }
+
     nav.links{
       display:flex;
       gap:18px;
@@ -98,6 +101,48 @@
       border:1px solid #2b6bb1;
     }
     #signinBtn{ margin-right:8px; cursor:pointer; }
+
+    .hamburger{
+      display:none;
+      background:none;
+      border:1px solid var(--border);
+      color:var(--ink);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    @media (max-width:900px){
+      .nav{
+        position:relative;
+      }
+      nav.links{
+        display:none;
+        position:absolute;
+        top:100%;
+        left:8px;
+        right:8px;
+        margin-top:8px;
+        flex-direction:column;
+        gap:8px;
+        padding:10px;
+        background:linear-gradient(180deg,var(--panel),var(--panel2));
+        border-radius:12px;
+        border:1px solid var(--border);
+      }
+      nav.links.open{
+        display:flex;
+      }
+      .hamburger{
+        display:inline-flex;
+        margin-left:auto;
+      }
+      #signinBtn{
+        width:100%;
+        text-align:center;
+      }
+    }
 
     /* ===== BANNER ===== */
     .banner{
@@ -300,13 +345,17 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .evt.c172{
+    .evt.other{
       background:#0e1d31;
       border-color:#2b6bb1;
     }
-    .evt.c150{
+    .evt.mine{
       background:#0f261c;
       border-color:#2b7a55;
+    }
+    .evt.maint{
+      background:#311010;
+      border-color:#b12b2b;
     }
 
     /* ===== AUTH MODAL (same pattern as home.html) ===== */
@@ -427,6 +476,8 @@
 
     .modal{
       width:min(820px,92vw);
+      max-height:90vh;
+      overflow-y:auto;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border);
       border-radius:16px;
@@ -489,71 +540,29 @@
       gap:10px;
       flex-wrap:wrap;
     }
-    .switch{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .switch input{
-      appearance:none;
-      width:36px;
-      height:22px;
-      border-radius:999px;
-      background:#444;
-      position:relative;
-      transition:.2s;
-    }
-    .switch input:checked{ background:#2b6bb1; }
-    .switch input::after{
-      content:"";
-      position:absolute;
-      top:3px;
-      left:3px;
-      width:16px;
-      height:16px;
-      border-radius:50%;
-      background:#fff;
-      transition:.2s;
-    }
-    .switch input:checked::after{ transform:translateX(14px); }
     .modal-footer{
       padding:12px 16px;
       border-top:1px solid var(--border);
       display:flex;
       justify-content:flex-end;
       gap:8px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
     }
     .hint{
       color:#b9c2d0;
       font-size:12.5px;
     }
 
-    /* Time presets */
-    .time-presets{
-      margin-top:6px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      font-size:12px;
-    }
-    .time-chip{
-      border:1px solid var(--border);
-      border-radius:999px;
-      padding:3px 8px;
-      background:#0c1020;
-      color:#eaf2ff;
-      cursor:pointer;
-    }
-    .time-chip:hover{
-      background:#131a2a;
-    }
-
     @media (max-width:900px){
       .status-row{ grid-template-columns:1fr; }
       .row,
       .row-3{ grid-template-columns:1fr; }
+    }
+
+    /* ===== Make date/time picker icons white (better on dark) ===== */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator{
+      filter: invert(1);
     }
   </style>
 </head>
@@ -566,7 +575,10 @@
         <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
         <span>The Flying 64th</span>
       </a>
-      <nav class="links">
+
+      <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
+
+      <nav class="links" id="mainNav">
         <a id="signinBtn" class="btn">Sign In</a>
         <a href="home.html">Home</a>
         <a class="active" href="calendar.html">Calendar</a>
@@ -578,7 +590,7 @@
     </div>
   </header>
 
-  <!-- ===== AUTH MODAL (copied pattern from home.html) ===== -->
+  <!-- ===== AUTH MODAL (same pattern as home.html) ===== -->
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
@@ -715,12 +727,8 @@
           </label>
           <label class="field">
             <span>Title / purpose</span>
-            <select id="titleSelect">
-              <option value="Training">Training</option>
-              <option value="Rental">Rental</option>
-              <option value="Checkride">Checkride</option>
-              <option value="Checkride Prep">Checkride Prep</option>
-              <option value="Maintenance" data-admin-only="true">Maintenance</option>
+            <select id="purpose">
+              <!-- Options populated via JS so we can hide Maintenance for non-admins -->
             </select>
           </label>
         </div>
@@ -743,36 +751,13 @@
               <input id="startTime" type="time">
               <span>to</span>
               <input id="endTime" type="time">
-              <label class="switch">
-                <input id="allDay" type="checkbox">
-                <span>All day</span>
-              </label>
-            </div>
-            <div class="time-presets">
-              <span style="font-size:11px;color:#9fb1c3;">Quick times:</span>
-              <button type="button" class="time-chip" data-start="08:00" data-end="10:00">08:00–10:00</button>
-              <button type="button" class="time-chip" data-start="10:00" data-end="12:00">10:00–12:00</button>
-              <button type="button" class="time-chip" data-start="12:00" data-end="14:00">12:00–14:00</button>
-              <button type="button" class="time-chip" data-start="14:00" data-end="16:00">14:00–16:00</button>
-              <button type="button" class="time-chip" data-start="16:00" data-end="18:00">16:00–18:00</button>
+              <label style="font-size:12px;color:#9fb1c3;">(leave blank for all-day)</label>
             </div>
           </div>
           <label class="field">
-            <span>With instructor?</span>
-            <label class="switch">
-              <input id="withInstructor" type="checkbox">
-              <span>Yes, this is an instructional flight</span>
-            </label>
-          </label>
-        </div>
-
-        <!-- Instructor selection -->
-        <div class="row" id="instructorWrap" hidden>
-          <label class="field">
             <span>Instructor</span>
             <select id="instructorSelect">
-              <option value="">N/A</option>
-              <!-- Firestore-loaded instructors injected here -->
+              <!-- N/A + instructors loaded from Firestore -->
             </select>
           </label>
         </div>
@@ -831,7 +816,7 @@
     </div>
   </div>
 
-  <!-- ===== Highlight active nav ===== -->
+  <!-- ===== Highlight active nav & hamburger ===== -->
   <script>
     (function(){
       const current = location.pathname.split('/').pop().toLowerCase();
@@ -839,6 +824,15 @@
         let href=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
         href=href.replace(/&amp;/g,'&');
         if(href && href===current) a.classList.add('active');
+      });
+
+      const navToggle = document.getElementById('navToggle');
+      const mainNav  = document.getElementById('mainNav');
+      navToggle?.addEventListener('click', ()=>{
+        mainNav.classList.toggle('open');
+      });
+      mainNav?.querySelectorAll('a').forEach(link=>{
+        link.addEventListener('click', ()=> mainNav.classList.remove('open'));
       });
     })();
   </script>
@@ -859,9 +853,10 @@
       collection,
       addDoc,
       serverTimestamp,
+      onSnapshot,
+      getDocs,
       doc,
-      getDoc,
-      getDocs
+      getDoc
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
     /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
@@ -897,15 +892,24 @@
     const authHint    = document.getElementById('authHint');
     const saveBtn     = document.getElementById('saveBooking');
 
-    const purposeSelect   = document.getElementById('titleSelect');
-    const instructorWrap  = document.getElementById('instructorWrap');
-    const instructorSelect= document.getElementById('instructorSelect');
-
-    let currentUser = null;
-    let isAdmin     = false;
+    // Booking form fields
+    const aircraftSel   = document.getElementById('aircraft');
+    const purposeSel    = document.getElementById('purpose');
+    const instructorSel = document.getElementById('instructorSelect');
+    const startDateEl   = document.getElementById('startDate');
+    const endDateEl     = document.getElementById('endDate');
+    const startTimeEl   = document.getElementById('startTime');
+    const endTimeEl     = document.getElementById('endTime');
+    const firstNameEl   = document.getElementById('firstName');
+    const lastNameEl    = document.getElementById('lastName');
+    const commentsEl    = document.getElementById('comments');
 
     const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
     const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
+
+    let currentUser = null;
+    let isAdmin = false;
+    let bookings = [];
 
     /* ---------- Auth modal open/close & tabs ---------- */
     function openAuth(){
@@ -941,43 +945,72 @@
     if (location.hash === '#signin') openAuth();
     window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
 
-    // ----- Role handling (profiles.role) -----
-    async function reloadRole(){
+    /* ---------- Role + options helpers ---------- */
+    async function loadRole(user){
       isAdmin = false;
-      if (!currentUser) {
-        updatePurposeAdminState();
-        return;
-      }
+      if (!user) { updatePurposeOptions(); return; }
       try{
-        const pref = doc(db, "profiles", currentUser.uid);
-        const snap = await getDoc(pref);
-        if (snap.exists()) {
-          const role = (snap.data().role || "").toLowerCase();
-          if (role === "admin" || role === "superadmin") isAdmin = true;
-        }
-      }catch(e){
-        console.error("role load error", e);
+        const snap = await getDoc(doc(db,'profiles', user.uid));
+        const role = (snap.exists() ? (snap.data().role || '') : '').toLowerCase();
+        if (role === 'admin') isAdmin = true;
+      }catch(err){
+        console.error('loadRole error', err);
       }
-      updatePurposeAdminState();
+      updatePurposeOptions();
     }
 
-    function updatePurposeAdminState(){
-      if (!purposeSelect) return;
-      const adminOpts = purposeSelect.querySelectorAll('[data-admin-only="true"]');
-      adminOpts.forEach(opt=>{
-        const hide = !isAdmin;
-        opt.disabled = hide;
-        opt.hidden = hide;
-        if (hide && opt.selected) {
-          purposeSelect.value = "Training";
-        }
+    function updatePurposeOptions(){
+      if (!purposeSel) return;
+      const prev = purposeSel.value;
+      const base = ['Training','Rental','Checkride','Checkride Prep'];
+      purposeSel.innerHTML = '';
+      base.forEach(label=>{
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        purposeSel.appendChild(opt);
       });
+      if (isAdmin){
+        const opt = document.createElement('option');
+        opt.value = 'Maintenance';
+        opt.textContent = 'Maintenance';
+        purposeSel.appendChild(opt);
+      }
+      // restore previous if still valid, otherwise default to Training
+      const ok = [...purposeSel.options].some(o=>o.value===prev);
+      purposeSel.value = ok ? prev : 'Training';
     }
+
+    async function loadInstructors(){
+      if (!instructorSel) return;
+      instructorSel.innerHTML = '';
+      const naOpt = document.createElement('option');
+      naOpt.value = '';
+      naOpt.textContent = 'N/A';
+      instructorSel.appendChild(naOpt);
+
+      try{
+        const snap = await getDocs(collection(db,'instructors'));
+        snap.forEach(docu=>{
+          const data = docu.data() || {};
+          Object.entries(data).forEach(([name,email])=>{
+            const opt = document.createElement('option');
+            opt.value = String(email || '').trim();
+            opt.textContent = name;
+            instructorSel.appendChild(opt);
+          });
+        });
+      }catch(err){
+        console.error('loadInstructors error', err);
+      }
+    }
+    loadInstructors();
 
     /* ---------- Auth state handling (hooked into booking UI) ---------- */
     onAuthChanged(async (user)=>{
       currentUser = user || null;
       const verified = !!user?.emailVerified;
+
       if (user){
         const shortEmail = user.email && user.email.length>28
           ? user.email.slice(0,28)+'…'
@@ -989,14 +1022,18 @@
         if (emailField) emailField.value = user.email || "";
         if (saveBtn)   saveBtn.disabled = false;
         if (authHint)  authHint.style.display = "none";
+
+        await loadRole(user);
       } else {
         signinBtn.textContent = "Sign In";
         if (emailField) emailField.value = "";
         if (saveBtn)   saveBtn.disabled = true;
         if (authHint)  authHint.style.display = "block";
+        isAdmin = false;
+        updatePurposeOptions();
       }
 
-      await reloadRole();
+      renderMonth(); // re-color bookings for my/others
     });
 
     /* ---------- Sign in / up / reset / out ---------- */
@@ -1055,6 +1092,7 @@
     const titleEl = document.getElementById('rangeTitle');
     let today     = new Date();
     let viewDate  = new Date(today.getFullYear(), today.getMonth(), 1);
+    let currentFilter = 'ALL';
 
     function fmtMonthYear(d){
       return d.toLocaleString(undefined,{month:'long',year:'numeric'});
@@ -1062,9 +1100,21 @@
     function daysInMonth(y,m){
       return new Date(y, m+1, 0).getDate();
     }
-    const pad2 = (n)=>String(n).padStart(2,'0');
+
+    function sameDay(a,b){
+      return a.getFullYear()===b.getFullYear() &&
+             a.getMonth()===b.getMonth() &&
+             a.getDate()===b.getDate();
+    }
+
+    function bookingCoversDate(bookingDateStart, bookingDateEnd, cellDate){
+      const start = bookingDateStart;
+      const end   = bookingDateEnd;
+      return cellDate >= start && cellDate <= end;
+    }
 
     function renderMonth(){
+      if (!grid) return;
       grid.innerHTML='';
       const y = viewDate.getFullYear();
       const m = viewDate.getMonth();
@@ -1086,28 +1136,47 @@
       }
 
       const tY=today.getFullYear(), tM=today.getMonth(), tD=today.getDate();
+
       cells.forEach(c=>{
         const cell=document.createElement('div');
         cell.className='cell'+(c.other?' other-month':'');
-        const dObj = new Date(c.y, c.m, c.d);
-        const yyyy = dObj.getFullYear();
-        const mm   = pad2(dObj.getMonth()+1);
-        const dd   = pad2(dObj.getDate());
-        const dateStr = `${yyyy}-${mm}-${dd}`;
-        cell.dataset.date = dateStr;
-
         const dateBox=document.createElement('div');
         dateBox.className='date';
         dateBox.textContent=c.d;
         cell.appendChild(dateBox);
         if(c.y===tY && c.m===tM && c.d===tD && !c.other) cell.classList.add('today');
+
         const eventsWrap=document.createElement('div');
         eventsWrap.className='events';
         cell.appendChild(eventsWrap);
 
-        // Clicking a day opens New Booking prefilled to that date
+        const cellDate = new Date(c.y, c.m, c.d);
+
+        // Attach click: open booking modal prefilled with this date
         cell.addEventListener('click', ()=>{
-          openModal(dateStr);
+          openModal(cellDate);
+        });
+
+        // Add bookings
+        bookings.forEach(b=>{
+          if (currentFilter !== 'ALL' && b.aircraft !== currentFilter) return;
+          if (!b.start || !b.end) return;
+          if (!bookingCoversDate(b.start, b.end, cellDate)) return;
+
+          const evt = document.createElement('div');
+          evt.classList.add('evt');
+
+          if (b.maintenance){
+            evt.classList.add('maint');
+          } else if (currentUser && b.createdByUid === currentUser.uid){
+            evt.classList.add('mine');
+          } else {
+            evt.classList.add('other');
+          }
+
+          const purpose = b.purpose || 'Booking';
+          evt.textContent = `${b.aircraft || ''} – ${purpose}`;
+          eventsWrap.appendChild(evt);
         });
 
         grid.appendChild(cell);
@@ -1129,14 +1198,33 @@
     };
     renderMonth();
 
-    // ===== Filter pills (visual only for now) =====
-    let currentFilter = 'ALL';
+    // ===== Filter pills =====
     document.querySelectorAll('.pill').forEach(p=>{
       p.addEventListener('click',()=>{
         document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
         p.classList.add('active');
-        currentFilter = p.dataset.filter;
+        currentFilter = p.dataset.filter || 'ALL';
+        renderMonth();
       });
+    });
+
+    // ===== Listen to bookings from Firestore =====
+    onSnapshot(collection(db,'bookings'), snap=>{
+      bookings = [];
+      snap.forEach(docu=>{
+        const d = docu.data() || {};
+        const start = d.start?.toDate ? d.start.toDate() : null;
+        const end   = d.end?.toDate ? d.end.toDate() : null;
+        if (!start || !end) return;
+        bookings.push({
+          id: docu.id,
+          ...d,
+          start,
+          end,
+          maintenance: !!d.maintenance
+        });
+      });
+      renderMonth();
     });
 
     // ===== Booking modal behavior =====
@@ -1144,73 +1232,68 @@
     const openBtn      = document.getElementById('newBooking');
     const closeBtn     = document.getElementById('closeModal');
     const cancelBtn    = document.getElementById('cancelModal');
-    const withInst     = document.getElementById('withInstructor');
-    const allDay       = document.getElementById('allDay');
-    const startTime    = document.getElementById('startTime');
-    const endTime      = document.getElementById('endTime');
 
-    const startDateEl  = document.getElementById('startDate');
-    const endDateEl    = document.getElementById('endDate');
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function setDateInputs(date){
+      const yyyy = date.getFullYear();
+      const mm   = pad(date.getMonth()+1);
+      const dd   = pad(date.getDate());
+      const iso  = `${yyyy}-${mm}-${dd}`;
+      startDateEl.value = iso;
+      // Sync end date if empty or before start
+      if (!endDateEl.value || new Date(endDateEl.value) < new Date(iso)){
+        endDateEl.value = iso;
+      }
+    }
 
     function openModal(prefillDate){
       bookingModal.classList.add('open');
       bookingModal.setAttribute('aria-hidden','false');
-      const now=new Date();
-      const yyyyNow=now.getFullYear();
-      const mmNow=pad2(now.getMonth()+1);
-      const ddNow=pad2(now.getDate());
 
-      const dateStr = prefillDate || `${yyyyNow}-${mmNow}-${ddNow}`;
-      startDateEl.value = dateStr;
-      endDateEl.value   = dateStr;
+      const now = prefillDate ? new Date(prefillDate) : new Date();
+      setDateInputs(now);
 
-      const minutes=now.getMinutes();
-      const rounded=Math.ceil(minutes/30)*30;
-      if(rounded===60){ now.setHours(now.getHours()+1); }
-      const hh=pad2(now.getHours());
-      const min=pad2(rounded===60?0:rounded);
-      startTime.value=`${hh}:${min}`;
-      endTime.value  =`${hh}:${pad2((parseInt(min,10)+30)%60)}`;
+      const minutes = now.getMinutes();
+      const rounded = Math.ceil(minutes/30)*30;
+      let hour = now.getHours();
+      let min  = rounded;
+      if (rounded===60){
+        hour += 1;
+        min = 0;
+      }
+      startTimeEl.value = `${pad(hour)}:${pad(min)}`;
+      endTimeEl.value   = `${pad(hour)}:${pad((min+30)%60)}`;
+
+      if (currentUser){
+        if (!firstNameEl.value) firstNameEl.value = (currentUser.displayName || '').split(' ')[0] || '';
+        if (!lastNameEl.value && currentUser.displayName){
+          const parts = currentUser.displayName.split(' ');
+          if (parts.length>1) lastNameEl.value = parts.slice(1).join(' ');
+        }
+      }
     }
     function closeBookingModal(){
       bookingModal.classList.remove('open');
       bookingModal.setAttribute('aria-hidden','true');
     }
 
-    openBtn.addEventListener('click', ()=>openModal());
+    openBtn.addEventListener('click', ()=>openModal(null));
     closeBtn.addEventListener('click', closeBookingModal);
     cancelBtn.addEventListener('click', closeBookingModal);
     bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
 
-    withInst.onchange = ()=>{ instructorWrap.hidden = !withInst.checked; };
-    allDay.onchange   = ()=>{
-      const dis = allDay.checked;
-      startTime.disabled = dis;
-      endTime.disabled   = dis;
-      if(dis){
-        startTime.value='';
-        endTime.value='';
+    // Keep end date >= start date
+    startDateEl.addEventListener('change', ()=>{
+      if (!startDateEl.value) return;
+      const s = new Date(startDateEl.value);
+      const e = endDateEl.value ? new Date(endDateEl.value) : null;
+      if (!e || e < s){
+        endDateEl.value = startDateEl.value;
       }
-    };
-
-    // Time presets
-    document.querySelectorAll('.time-chip').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const s = btn.dataset.start;
-        const e = btn.dataset.end;
-        if (s) startTime.value = s;
-        if (e) endTime.value   = e;
-        allDay.checked = false;
-        startTime.disabled = false;
-        endTime.disabled   = false;
-      });
     });
 
     // Meter deltas
-    function calcDelta(start,end,out){
-      const s=parseFloat(start.value), e=parseFloat(end.value);
-      out.value = (isFinite(s)&&isFinite(e)) ? (e-s).toFixed(1) : '';
-    }
     const tachStart  = document.getElementById('tachStart');
     const tachEnd    = document.getElementById('tachEnd');
     const tachDelta  = document.getElementById('tachDelta');
@@ -1218,32 +1301,25 @@
     const hobbsEnd   = document.getElementById('hobbsEnd');
     const hobbsDelta = document.getElementById('hobbsDelta');
 
+    function calcDelta(start,end,out){
+      const s=parseFloat(start.value), e=parseFloat(end.value);
+      out.value = (isFinite(s)&&isFinite(e)) ? (e-s).toFixed(1) : '';
+    }
     [tachStart,tachEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(tachStart,tachEnd,tachDelta)));
     [hobbsStart,hobbsEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta)));
 
-    // ===== Load instructors from Firestore =====
-    async function loadInstructors(){
-      if (!instructorSelect) return;
-      // Reset to N/A
-      instructorSelect.innerHTML = '<option value="">N/A</option>';
-      try{
-        const snap = await getDocs(collection(db, "instructors"));
-        snap.forEach(docSnap=>{
-          const data = docSnap.data() || {};
-          Object.entries(data).forEach(([name,email])=>{
-            if (!name || !email) return;
-            const opt = document.createElement('option');
-            opt.value = String(email);
-            opt.textContent = name;
-            opt.dataset.name = name;
-            instructorSelect.appendChild(opt);
-          });
-        });
-      }catch(e){
-        console.error("Error loading instructors", e);
+    function combineDateTime(dateStr, timeStr, endOfDay=false){
+      if (!dateStr){
+        return null;
       }
+      if (!timeStr){
+        if (endOfDay){
+          return new Date(dateStr + 'T23:59:59');
+        }
+        return new Date(dateStr + 'T00:00:00');
+      }
+      return new Date(`${dateStr}T${timeStr}`);
     }
-    loadInstructors();
 
     // Save booking -> Firestore
     document.getElementById('saveBooking').addEventListener('click', async ()=>{
@@ -1252,70 +1328,87 @@
         alert('Please sign in first.');
         return;
       }
-      const fn = document.getElementById('firstName').value.trim();
-      const ln = document.getElementById('lastName').value.trim();
+      const fn = firstNameEl.value.trim();
+      const ln = lastNameEl.value.trim();
       if(!fn || !ln){
         alert('Please enter your first and last name.');
         return;
       }
 
-      const instructorOption = instructorSelect.selectedOptions[0] || null;
-      const instructorEmail  = instructorOption && instructorOption.value ? instructorOption.value : null;
-      const instructorName   = instructorOption && instructorOption.dataset.name ? instructorOption.dataset.name : null;
+      const startDateStr = startDateEl.value;
+      const endDateStr   = endDateEl.value || startDateStr;
+
+      if (!startDateStr){
+        alert('Select a start date.');
+        return;
+      }
+
+      const start = combineDateTime(startDateStr, startTimeEl.value, !startTimeEl.value);
+      const end   = combineDateTime(endDateStr,   endTimeEl.value,   !endTimeEl.value);
+
+      if (!start || !end || !(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())){
+        alert('Invalid start or end date/time.');
+        return;
+      }
+      if (end <= start){
+        alert('End must be after start.');
+        return;
+      }
+
+      const purpose = purposeSel.value || 'Training';
+      const isMaintenance = purpose === 'Maintenance';
+
+      const instructorEmail = instructorSel.value || '';
+      const instructorName  = instructorSel.options[instructorSel.selectedIndex]?.text || '';
 
       const data = {
-        member_first : fn,
-        member_last  : ln,
-        member_email : user.email || "",
-        aircraft     : document.getElementById('aircraft').value,
-        title        : purposeSelect.value,
-        startDate    : startDateEl.value,
-        endDate      : endDateEl.value,
-        startTime    : startTime.value,
-        endTime      : endTime.value,
-        allDay       : allDay.checked,
-        withInstructor : withInst.checked,
-        instructorName  : instructorName,
-        instructorEmail : instructorEmail,
-        tach_start   : tachStart.value || null,
-        tach_end     : tachEnd.value || null,
-        hobbs_start  : hobbsStart.value || null,
-        hobbs_end    : hobbsEnd.value || null,
-        comments     : document.getElementById('comments').value.trim()
+        aircraft       : aircraftSel.value,
+        purpose        : purpose,
+        maintenance    : isMaintenance,
+        firstName      : fn,
+        lastName       : ln,
+        member_email   : user.email || "",
+        start          : start,
+        end            : end,
+        startDateStr   : startDateStr,
+        endDateStr     : endDateStr,
+        startTimeStr   : startTimeEl.value || null,
+        endTimeStr     : endTimeEl.value || null,
+        tach_start     : tachStart.value || null,
+        tach_end       : tachEnd.value || null,
+        hobbs_start    : hobbsStart.value || null,
+        hobbs_end      : hobbsEnd.value || null,
+        comments       : commentsEl.value.trim(),
+        instructorEmail: instructorEmail || null,
+        instructorName : instructorName || null,
+        createdByUid   : user.uid,
+        createdAt      : serverTimestamp()
       };
 
       try{
-        await addDoc(collection(db, "bookings"), {
-          ...data,
-          uid: user.uid,
-          createdAt: serverTimestamp()
-        });
+        await addDoc(collection(db, "bookings"), data);
         console.log('Booking saved:', data);
 
-        // If instructor selected, open mailto with details
+        // If an instructor is selected, open email to them
         if (instructorEmail){
-          const whenRange = data.allDay
-            ? `${data.startDate} (all day)`
-            : `${data.startDate} ${data.startTime || ''} – ${data.endDate} ${data.endTime || ''}`;
-          const subject = `New ${data.title} booking – ${data.aircraft}`;
-          const body =
-`Hi ${instructorName || ''},
-
-A member just booked an instructional flight.
-
-Member: ${fn} ${ln}
-Email: ${data.member_email}
-Aircraft: ${data.aircraft}
-Purpose: ${data.title}
-When: ${whenRange}
-
-Comments:
-${data.comments || '(none)'}
-
-— The Flying 64th booking system`;
-
-          const href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-          window.location.href = href;
+          const subject = `New booking – ${data.aircraft} (${purpose})`;
+          const bodyLines = [
+            `Hello ${instructorName || ''},`,
+            '',
+            `A member has booked ${data.aircraft}.`,
+            '',
+            `Member: ${fn} ${ln}`,
+            `Email: ${user.email || ''}`,
+            `Purpose: ${purpose}${isMaintenance ? ' (maintenance)' : ''}`,
+            '',
+            `Start: ${start.toLocaleString()}`,
+            `End:   ${end.toLocaleString()}`,
+            '',
+            data.comments ? `Comments:\n${data.comments}\n` : '',
+            '— Sent automatically from The Flying 64th calendar.'
+          ];
+          const mailto = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+          window.location.href = mailto;
         }
 
         closeBookingModal();
