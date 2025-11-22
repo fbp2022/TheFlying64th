@@ -370,7 +370,7 @@
         unsubscribeMembers();
         unsubscribeMembers = null;
       }
-      const qy = query(collection(db,'profiles'), orderBy('firstName'), orderBy('lastName'));
+      const qy = query(collection(db,'members'), orderBy('firstName'), orderBy('lastName'));
       unsubscribeMembers = onSnapshot(qy, (snap)=>{
         const docs=[]; snap.forEach(d=>docs.push(d));
         renderMembers(docs);
