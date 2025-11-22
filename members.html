@@ -64,10 +64,10 @@
       background:#121b29;border:1px solid var(--rule);padding:8px 10px;border-radius:8px}
     .hint{min-height:18px;color:#9fb1c3;margin-top:6px}
 
-    /* AUTH MODAL (local) */
-    .auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
+    /* AUTH MODAL – same pattern as home.html */
+    .auth-modal,.post-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:1000}
     .auth-modal.open{display:grid}
-    .auth-card{width:min(460px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
+    .auth-card{width:min(480px,92vw);background:#0f1722;color:#e6edf3;border:1px solid #1f2a38;border-radius:14px;padding:18px 18px 12px;position:relative}
     .auth-x{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb1c3;font-size:18px;cursor:pointer}
     .auth-title{margin:0 0 10px 0;font-size:20px;font-weight:800}
     .auth-label{display:block;margin-top:10px;margin-bottom:4px;color:#9fb1c3;font-size:13px}
@@ -77,6 +77,13 @@
     .auth-btn.primary{background:#58a6ff;color:#001a33;border-color:transparent;font-weight:700}
     .auth-link{background:none;border:0;color:#9fb1c3;cursor:pointer}
     .auth-msg{min-height:18px;color:#9fb1c3;margin:8px 0 4px}
+
+    /* Auth views toggle (tabs) */
+    .view{display:none}
+    .view.active{display:block}
+    .tabs{display:flex;gap:8px;margin-bottom:8px}
+    .tab{flex:1;padding:8px 10px;border:1px solid var(--rule);border-radius:10px;background:#141b26;color:#e6edf3;cursor:pointer}
+    .tab.active{background:#58a6ff;color:#001a33;font-weight:700;border-color:transparent}
   </style>
 </head>
 <body>
@@ -129,39 +136,50 @@
 
   </main>
 
-  <!-- LOCAL AUTH MODAL -->
+  <!-- AUTH MODAL – copied pattern from home.html -->
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
-      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
-
-      <!-- First/Last name only used for sign-up -->
-      <label class="auth-label" for="firstName">First name (sign up)</label>
-      <input id="firstName" class="auth-input" type="text" placeholder="First name">
-
-      <label class="auth-label" for="lastName">Last name (sign up)</label>
-      <input id="lastName" class="auth-input" type="text" placeholder="Last name">
-
-      <label class="auth-label" for="email">Email</label>
-      <input id="email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
-
-      <label class="auth-label" for="password">Password</label>
-      <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
-
-      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code">
-
-      <div class="auth-row">
-        <button id="doReset" class="auth-btn" type="button">Forgot password?</button>
-        <button id="doSignUp" class="auth-btn" type="button">Create Account</button>
-        <button id="doSignIn" class="auth-btn primary" type="button">Sign In</button>
+      <div class="tabs">
+        <button id="tabSignIn"  class="tab active">Sign In</button>
+        <button id="tabSignUp"  class="tab">Create Account</button>
       </div>
 
-      <div class="auth-row">
-        <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
-      </div>
+      <!-- Sign In view -->
+      <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+        <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+        <label class="auth-label" for="si_email">Email</label>
+        <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="auth-label" for="si_password">Password</label>
+        <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
+        <div class="auth-row">
+          <button id="doSignIn" class="auth-btn primary">Sign In</button>
+        </div>
+        <div class="auth-row">
+          <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+          <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+        </div>
+        <p id="authMsg" class="auth-msg"></p>
+      </section>
 
-      <p id="authMsg" class="auth-msg"></p>
+      <!-- Create Account view -->
+      <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+        <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+        <label class="auth-label" for="su_first">First Name</label>
+        <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
+        <label class="auth-label" for="su_last">Last Name</label>
+        <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
+        <label class="auth-label" for="su_email">Email</label>
+        <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="auth-label" for="su_password">Password</label>
+        <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
+        <label class="auth-label" for="su_invite">Invite Code</label>
+        <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
+        <div class="auth-row">
+          <button id="doSignUp" class="auth-btn primary">Create Account</button>
+        </div>
+        <p id="createMsg" class="auth-msg"></p>
+      </section>
     </div>
   </div>
 
@@ -188,7 +206,7 @@
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // UI refs
+    // ---------- UI refs ----------
     const signinBtn   = document.getElementById('signinBtn');
     const meNote      = document.getElementById('meNote');
     const grid        = document.getElementById('membersGrid');
@@ -197,81 +215,126 @@
     const copyInvite  = document.getElementById('copyInvite');
     const adminMsg    = document.getElementById('adminMsg');
 
-    // Auth modal refs
-    const modal     = document.getElementById('authModal');
-    const closeBtn  = document.getElementById('closeModal');
-    const firstEl   = document.getElementById('firstName');
-    const lastEl    = document.getElementById('lastName');
-    const emailEl   = document.getElementById('email');
-    const passEl    = document.getElementById('password');
-    const inviteEl  = document.getElementById('invite');
-    const doSignIn  = document.getElementById('doSignIn');
-    const doSignUp  = document.getElementById('doSignUp');
-    const doReset   = document.getElementById('doReset');
-    const signOutBtn= document.getElementById('signOutBtn');
-    const authMsg   = document.getElementById('authMsg');
+    // Auth modal refs (same IDs as home.html)
+    const modal      = document.getElementById('authModal');
+    const closeModal = document.getElementById('closeModal');
+    const tabSignIn  = document.getElementById('tabSignIn');
+    const tabSignUp  = document.getElementById('tabSignUp');
+    const viewSignIn = document.getElementById('viewSignIn');
+    const viewSignUp = document.getElementById('viewSignUp');
+
+    // Sign-in inputs
+    const si_email    = document.getElementById('si_email');
+    const si_password = document.getElementById('si_password');
+    const doSignInBtn = document.getElementById('doSignIn');
+    const doResetBtn  = document.getElementById('doReset');
+    const signOutBtn  = document.getElementById('signOutBtn');
+    const authMsg     = document.getElementById('authMsg');
+
+    // Sign-up inputs
+    const su_first    = document.getElementById('su_first');
+    const su_last     = document.getElementById('su_last');
+    const su_email    = document.getElementById('su_email');
+    const su_password = document.getElementById('su_password');
+    const su_invite   = document.getElementById('su_invite');
+    const doSignUpBtn = document.getElementById('doSignUp');
+    const createMsg   = document.getElementById('createMsg');
 
     // Helpers
-    const sayList = (t,isErr=false)=>{ listMsg.textContent=t||""; listMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
-    const sayAdmin= (t,isErr=false)=>{ adminMsg.textContent=t||""; adminMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
-    const sayAuth = (t,isErr=false)=>{ authMsg.textContent=t||""; authMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
-    const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    const sayList  = (t,isErr=false)=>{ listMsg.textContent=t||""; listMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const sayAdmin = (t,isErr=false)=>{ adminMsg.textContent=t||""; adminMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const say      = (t,isErr=false)=>{ authMsg.textContent=t||""; authMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const csay     = (t,isErr=false)=>{ createMsg.textContent=t||""; createMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+    const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
+                                     .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+                                     .replace(/'/g,"&#039;");
 
     let currentUser = null;
     let iAmAdmin = false;
     let unsubscribeMembers = null;
 
-    /* ===== Auth modal open/close (local) ===== */
-    function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); sayAuth(''); }
-    function closeAuth(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
-    signinBtn.addEventListener('click', openAuth);
-    closeBtn.addEventListener('click', closeAuth);
-    modal.addEventListener('click', e=>{ if(e.target===modal) closeAuth(); });
+    /* ===== Auth modal open/close & tabs (same behavior as home.html) ===== */
+    function openAuth(){
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      say(""); csay("");
+    }
+    function closeAuth(){
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+    }
+    signinBtn?.addEventListener('click', openAuth);
+    closeModal?.addEventListener('click', closeAuth);
+    modal?.addEventListener('click', e => { if (e.target === modal) closeAuth(); });
 
-    // deep link support: members.html#signin
+    function activate(view){
+      [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
+      [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
+      if (view === 'in'){
+        tabSignIn.classList.add('active');
+        viewSignIn.classList.add('active');
+      } else {
+        tabSignUp.classList.add('active');
+        viewSignUp.classList.add('active');
+      }
+    }
+    tabSignIn.addEventListener('click', ()=>activate('in'));
+    tabSignUp.addEventListener('click', ()=>activate('up'));
+
+    // deep link: members.html#signin
     if (location.hash === '#signin') openAuth();
-    window.addEventListener('hashchange', ()=>{ if(location.hash==='#signin') openAuth(); });
+    window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
 
-    /* ===== Auth actions - use auth.js helpers ===== */
-    doSignIn.addEventListener('click', async ()=>{
-      const email=(emailEl.value||'').trim();
-      const pass =passEl.value;
-      if(!email||!pass) return sayAuth('Enter email and password.', true);
+    /* ===== Auth actions – shared helpers from auth.js ===== */
+    doSignInBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      const pass  = si_password.value;
+      if (!email || !pass) return say("Enter email and password.", true);
       try{
-        await signInEmailPassword(email,pass);
-        sayAuth('Signed in.');
+        await signInEmailPassword(email, pass);
+        say("Signed in.");
         closeAuth();
-      }catch(e){ sayAuth(e.message,true); }
+      }catch(err){ say(err.message, true); }
     });
 
-    doSignUp.addEventListener('click', async ()=>{
-      const email=(emailEl.value||'').trim();
-      const pass =passEl.value;
-      const first=(firstEl.value||'').trim();
-      const last =(lastEl.value||'').trim();
-      const code =(inviteEl.value||'').trim();
-      if(!first||!last||!email||!pass||!code) {
-        return sayAuth('First name, last name, email, password, and invite code are required.', true);
+    doSignUpBtn.addEventListener('click', async ()=>{
+      const first = su_first.value.trim();
+      const last  = su_last.value.trim();
+      const email = su_email.value.trim();
+      const pass  = su_password.value;
+      const code  = su_invite.value.trim();
+      if (!first || !last || !email || !pass || !code) {
+        return csay("All fields are required.", true);
       }
       try{
-        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
-        sayAuth('Account created! Check your email to verify.');
-      }catch(e){ sayAuth(e.message,true); }
+        await signUpWithInvite({ email, password: pass, firstName:first, lastName:last, code });
+        csay("Account created! Check your inbox to verify your email.");
+        activate('in');
+      }catch(err){ csay(err.message, true); }
     });
 
-    doReset.addEventListener('click', async ()=>{
-      const email=(emailEl.value||'').trim();
-      if(!email) return sayAuth('Enter your email first.', true);
+    doResetBtn.addEventListener('click', async ()=>{
+      const email = si_email.value.trim();
+      if (!email) return say("Enter your email first.", true);
       try{
         await resetPassword(email);
-        sayAuth('Password reset email sent.');
-      }catch(e){ sayAuth(e.message,true); }
+        say("Password reset email sent.");
+      }catch(err){ say(err.message, true); }
     });
 
     signOutBtn.addEventListener('click', async ()=>{
       await signOut();
-      sayAuth('Signed out.');
+      say("Signed out.");
     });
+
+    // Enter key behavior: sign-in view triggers sign-in; sign-up view triggers sign-up
+    function handleEnter(e){
+      if (e.key !== 'Enter') return;
+      if (viewSignIn.classList.contains('active')) doSignInBtn.click();
+      else doSignUpBtn.click();
+    }
+    [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
+      .forEach(el => el.addEventListener('keydown', handleEnter));
 
     /* ===== Role and admin panel (uses getMyRole) ===== */
     async function loadMyRole(){
@@ -333,7 +396,7 @@
         grid.appendChild(card);
       });
 
-      // wire admin buttons
+      // Wire admin buttons
       if (iAmAdmin){
         grid.querySelectorAll('[data-act="toggle-admin"]').forEach(btn=>{
           btn.addEventListener('click', async ()=>{
@@ -341,10 +404,11 @@
             const cur = (btn.getAttribute('data-current')||'member').toLowerCase();
             const toAdmin = cur !== 'admin';
             try{
-              await updateDoc(doc(db,'profiles',uid), {
-                role: toAdmin ? 'admin' : 'member',
-                updatedAt: serverTimestamp()
-              });
+              // keep role in sync in both collections
+              await Promise.all([
+                updateDoc(doc(db,'profiles',uid), { role: toAdmin ? 'admin' : 'member', updatedAt: serverTimestamp() }),
+                updateDoc(doc(db,'members' ,uid), { role: toAdmin ? 'admin' : 'member', updatedAt: serverTimestamp() })
+              ]);
               sayList(toAdmin?'Made admin.':'Removed admin.');
             }catch(e){ sayList(e.message,true); }
           });
@@ -356,7 +420,7 @@
             const curIsActive = (btn.getAttribute('data-current')||'active').toLowerCase()==='active';
             const newVal = !curIsActive;
             try{
-              await toggleMemberActive(uid, newVal);
+              await toggleMemberActive(uid, newVal);  // updates /members + timestamp
               sayList(newVal?'Activated.':'Deactivated.');
             }catch(e){ sayList(e.message,true); }
           });
@@ -364,13 +428,13 @@
       }
     }
 
-    /* ===== Live list (show everyone) ===== */
+    /* ===== Live list (show everyone from /members) ===== */
     function startLiveList(){
       if (unsubscribeMembers){
         unsubscribeMembers();
         unsubscribeMembers = null;
       }
-      const qy = query(collection(db,'profiles'), orderBy('firstName'), orderBy('lastName'));
+      const qy = query(collection(db,'members'), orderBy('firstName'), orderBy('lastName'));
       unsubscribeMembers = onSnapshot(qy, (snap)=>{
         const docs=[]; snap.forEach(d=>docs.push(d));
         renderMembers(docs);
