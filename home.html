@@ -440,8 +440,9 @@
   postCancel?.addEventListener('click', closePostModal);
   postModal?.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
 
+  // 🔴 UPDATED: use /profiles instead of /members for active member emails
   async function getActiveMemberEmails(){
-    const q = query(collection(db,"members"), where("active","==", true));
+    const q = query(collection(db,"profiles"), where("active","==", true));
     const snap = await getDocs(q);
     const emails = [];
     snap.forEach(d=>{
