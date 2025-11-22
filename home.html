@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
- <style>
+  <style>
     :root{
       --bg:#0b1117; --ink:#e6edf3; --muted:#9fb1c3; --panel:#0f1722; --rule:#1f2a38; --accent:#58a6ff;
       --card:#0f1722cc;
@@ -20,7 +20,7 @@
     html,body{margin:0;height:100%}
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 
-   /* ===== NAV (matches home.html) ===== */
+    /* ===== NAV (matches home.html) ===== */
     .site-header{
       position:sticky; top:0; z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
@@ -51,7 +51,7 @@
       header nav::-webkit-scrollbar{ display:none }
       header nav a{ padding:8px 10px; font-size:15px }
     }
-   
+
     /* ===== HERO ===== */
     .hero{
       position:relative;min-height:56vh;display:grid;place-items:end;
@@ -183,9 +183,12 @@
     <section class="card" id="board">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <h2 style="margin:0;">Member Message Board</h2>
+        <!-- Only admins will see this button -->
         <button id="newPostBtn" class="btn primary" style="display:none;">Post</button>
       </div>
-      <p id="msgHint" class="muted" style="margin-top:8px;">Board notices and member updates appear here.</p>
+      <p id="msgHint" class="muted" style="margin-top:8px;">
+        Sign in to read member announcements. Only board admins can post.
+      </p>
 
       <!-- Scrollable feed -->
       <div id="messages"></div>
@@ -205,14 +208,14 @@
   <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
     <h3 id="authTitle" class="auth-title">Member Sign In</h3>
-    
-  <!-- NEW: First/Last Name (required for new accounts) -->
+
+    <!-- NEW: First/Last Name (required for new accounts) -->
     <label class="auth-label" for="firstName">First Name (Not required for existing accounts)</label>
     <input id="firstName" class="auth-input" type="text" placeholder="Your first name" required>
 
     <label class="auth-label" for="lastName">Last Name (Not required for existing accounts)</label>
     <input id="lastName" class="auth-input" type="text" placeholder="Your last name" required>
-    
+
     <label class="auth-label" for="email">Email</label>
     <input id="email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
 
@@ -223,8 +226,6 @@
       <label class="auth-label" for="invite">Invite Code (new accounts)</label>
       <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
     </div>
-
-  
 
     <div class="auth-row">
       <button id="doSignIn" class="auth-btn primary">Sign In</button>
@@ -342,7 +343,7 @@
   function toLocalDatetimeValue(d=new Date()){
     const pad = (n)=> String(n).padStart(2,'0');
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
+  }
 
   // Auth modal open/close
   function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); say(""); }
@@ -355,6 +356,8 @@
   function openPost(){
     if (!currentUser){ openAuth(); return; }
     if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
+    if (!isAdmin){ alert("Only board admins can post to the message board."); return; }
+
     postEmailEl.value = currentUser.email || "";
     postNameEl.value = (currentUser.email || "").split("@")[0];
     postTextEl.value = "";
@@ -378,7 +381,8 @@
     isAdmin = false;
     if (!currentUser) return;
     if (currentUser.email && BOARD_EMAILS.includes(currentUser.email)) {
-      isAdmin = true; return;
+      isAdmin = true;
+      return;
     }
     try{
       const pref = doc(db, "profiles", currentUser.uid);
@@ -388,27 +392,92 @@
     }catch{/* ignore */}
   }
 
-  // ✅ Use our wrapper from auth.js (not onAuthStateChanged)
+  // ===== Board listener (only when signed in) =====
+  const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
+  let boardUnsub = null;
+
+  function attachBoardListener(){
+    if (boardUnsub) return;
+    boardUnsub = onSnapshot(qBoard, (snap)=>{
+      const verified = !!currentUser?.emailVerified;
+      feedEl.innerHTML = "";
+      snap.forEach(d=>{
+        const m = d.data();
+        const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+        const when = ts ? ts.toLocaleString() : "…";
+        const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
+
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.innerHTML = `
+          <div class="msg-top">
+            <div class="msg-meta">
+              <strong>${escapeHtml(m.authorName || "Member")}</strong>
+              <span> • ${when}</span>
+              <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
+            </div>
+            ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
+          </div>
+          <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
+        `;
+        feedEl.appendChild(div);
+      });
+
+      // Wire delete buttons
+      [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const id = btn.getAttribute("data-del");
+          if (!id) return;
+          if (!confirm("Delete this message?")) return;
+          try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
+        });
+      });
+    }, err=>{
+      console.error("Board listener error:", err);
+      feedEl.innerHTML = "<p class='muted'>Unable to load board messages (permissions or network).</p>";
+    });
+  }
+
+  function detachBoardListener(){
+    if (boardUnsub){
+      boardUnsub();
+      boardUnsub = null;
+    }
+    feedEl.innerHTML = "";
+  }
+
+  // ✅ Use our wrapper from auth.js
   onAuthChanged(async (user)=>{
     currentUser = user || null;
     const verified = !!user?.emailVerified;
 
     if (user) {
-      const shortEmail = user.email && user.email.length > 25 ? user.email.slice(0, 25) + "…" : (user?.email || "");
+      const shortEmail = user.email && user.email.length > 25
+        ? user.email.slice(0, 25) + "…"
+        : (user?.email || "");
       document.getElementById('signinBtn').textContent = verified
         ? `Account – ${shortEmail}`
         : `Unverified – ${shortEmail}`;
 
       await reloadRole();
 
-      newPostBtn.style.display = verified ? "inline-block" : "none";
-      hintEl.textContent = verified
-        ? "Share updates with the club."
-        : "Please verify your email to post.";
+      // Only admins can post; members can read
+      if (verified && isAdmin) {
+        newPostBtn.style.display = "inline-block";
+        hintEl.textContent = "Admins can post official messages. All signed-in members can read them here.";
+      } else {
+        newPostBtn.style.display = "none";
+        hintEl.textContent = verified
+          ? "Board announcements are posted by club admins. All signed-in members can read them here."
+          : "Sign in to read member announcements. Only board admins can post.";
+      }
+
+      attachBoardListener();
     } else {
       document.getElementById('signinBtn').textContent = "Sign In";
       newPostBtn.style.display = "none";
-      hintEl.textContent = "Board notices and member updates appear here.";
+      hintEl.textContent = "Sign in to read member announcements. Only board admins can post.";
+      detachBoardListener();
     }
   });
 
@@ -417,8 +486,13 @@
     const email = emailEl.value.trim();
     const pass  = passEl.value;
     if (!email || !pass) return say("Enter email and password.", true);
-    try { await signInWithEmailAndPassword(auth, email, pass); say("Signed in."); closeAuth(); }
-    catch(err){ say(err.message, true); }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      say("Signed in.");
+      closeAuth();
+    } catch(err){
+      say(err.message, true);
+    }
   });
 
   doSignUp.addEventListener('click', async ()=>{
@@ -469,22 +543,36 @@
       });
 
       say("Account created! Check your inbox to verify your email.");
-    } catch(err){ say(err.message, true); }
+    } catch(err){
+      say(err.message, true);
+    }
   });
 
   doReset.addEventListener('click', async ()=>{
     const email = emailEl.value.trim();
     if (!email) return say("Enter your email first.", true);
-    try { await sendPasswordResetEmail(auth, email); say("Password reset email sent."); }
-    catch(err){ say(err.message, true); }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      say("Password reset email sent.");
+    } catch(err){
+      say(err.message, true);
+    }
   });
 
-  signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); say("Signed out."); });
+  signOutBtn.addEventListener('click', async ()=>{
+    try{
+      await signOut();
+      say("Signed out.");
+    }catch(err){
+      say(err.message || String(err), true);
+    }
+  });
 
-  // Post creation
+  // Post creation (admins only)
   async function createPost(){
     if (!currentUser){ psay("Please sign in.", true); return null; }
     if (!currentUser.emailVerified){ psay("Verify your email first.", true); return null; }
+    if (!isAdmin){ psay("Only board admins can post to the board.", true); return null; }
 
     const displayName = (postNameEl.value || "").trim();
     const text        = (postTextEl.value || "").trim();
@@ -571,44 +659,6 @@ ${created.text}
     if (!currentUser.emailVerified){ alert("Verify your email first."); return; }
     if (!isAdmin){ alert("Only admins can notify all members."); return; }
     openPost();
-  });
-
-  // Live feed
-  const qBoard = query(collection(db,"board"), orderBy("createdAt","desc"));
-  onSnapshot(qBoard, (snap)=>{
-    const verified = !!currentUser?.emailVerified;
-    feedEl.innerHTML = "";
-    snap.forEach(d=>{
-      const m = d.data();
-      const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-      const when = ts ? ts.toLocaleString() : "…";
-      const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
-
-      const div = document.createElement("div");
-      div.className = "msg";
-      div.innerHTML = `
-        <div class="msg-top">
-          <div class="msg-meta">
-            <strong>${escapeHtml(m.authorName || "Member")}</strong>
-            <span> • ${when}</span>
-            <div style="color:#9fb1c3;font-size:12px">${escapeHtml(m.authorEmail || "")}</div>
-          </div>
-          ${ canDelete ? `<button class="iconbtn" data-del="${d.id}">🗑 Delete</button>` : "" }
-        </div>
-        <div style="margin-top:6px;">${escapeHtml(m.text || "")}</div>
-      `;
-      feedEl.appendChild(div);
-    });
-
-    // Wire delete buttons
-    [...feedEl.querySelectorAll("[data-del]")].forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const id = btn.getAttribute("data-del");
-        if (!id) return;
-        if (!confirm("Delete this message?")) return;
-        try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
-      });
-    });
   });
 </script>
 </body>
