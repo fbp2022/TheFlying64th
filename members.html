@@ -148,13 +148,13 @@
       <label class="auth-label" for="password">Password</label>
       <input id="password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
 
+      <label class="auth-label" for="invite">Invite Code (new accounts)</label>
+      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code">
+
       <div class="auth-row">
         <button id="doReset" class="auth-btn" type="button">Forgot password?</button>
         <button id="doSignUp" class="auth-btn" type="button">Create Account</button>
         <button id="doSignIn" class="auth-btn primary" type="button">Sign In</button>
-       <label class="auth-label" for="invite" required>Invite Code (new accounts)</label>
-      <input id="invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
-    </div>
       </div>
 
       <div class="auth-row">
@@ -166,15 +166,27 @@
   </div>
 
   <script type="module">
-    import { auth, db, onAuthChanged, signOut } from './auth.js';
     import {
-      doc, getDoc, setDoc, updateDoc, serverTimestamp,
-      collection, query, orderBy, onSnapshot
+      auth,
+      db,
+      onAuthChanged,
+      signOut,
+      signInEmailPassword,
+      signUpWithInvite,
+      resetPassword,
+      getMyRole,
+      toggleMemberActive
+    } from './auth.js';
+
+    import {
+      doc,
+      updateDoc,
+      serverTimestamp,
+      collection,
+      query,
+      orderBy,
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-    import {
-      signInWithEmailAndPassword, createUserWithEmailAndPassword,
-      sendPasswordResetEmail, sendEmailVerification
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
     // UI refs
     const signinBtn   = document.getElementById('signinBtn');
@@ -192,6 +204,7 @@
     const lastEl    = document.getElementById('lastName');
     const emailEl   = document.getElementById('email');
     const passEl    = document.getElementById('password');
+    const inviteEl  = document.getElementById('invite');
     const doSignIn  = document.getElementById('doSignIn');
     const doSignUp  = document.getElementById('doSignUp');
     const doReset   = document.getElementById('doReset');
@@ -206,6 +219,7 @@
 
     let currentUser = null;
     let iAmAdmin = false;
+    let unsubscribeMembers = null;
 
     /* ===== Auth modal open/close (local) ===== */
     function openAuth(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); sayAuth(''); }
@@ -213,39 +227,34 @@
     signinBtn.addEventListener('click', openAuth);
     closeBtn.addEventListener('click', closeAuth);
     modal.addEventListener('click', e=>{ if(e.target===modal) closeAuth(); });
+
     // deep link support: members.html#signin
     if (location.hash === '#signin') openAuth();
     window.addEventListener('hashchange', ()=>{ if(location.hash==='#signin') openAuth(); });
 
-    /* ===== Auth actions ===== */
+    /* ===== Auth actions - use auth.js helpers ===== */
     doSignIn.addEventListener('click', async ()=>{
-      const email=(emailEl.value||'').trim(); const pass=passEl.value;
+      const email=(emailEl.value||'').trim();
+      const pass =passEl.value;
       if(!email||!pass) return sayAuth('Enter email and password.', true);
-      try{ await signInWithEmailAndPassword(auth,email,pass); sayAuth('Signed in.'); closeAuth(); }
-      catch(e){ sayAuth(e.message,true); }
+      try{
+        await signInEmailPassword(email,pass);
+        sayAuth('Signed in.');
+        closeAuth();
+      }catch(e){ sayAuth(e.message,true); }
     });
 
     doSignUp.addEventListener('click', async ()=>{
-      const email=(emailEl.value||'').trim(); const pass=passEl.value;
-      const first=(firstEl.value||'').trim(); const last=(lastEl.value||'').trim();
-      if(!first||!last||!email||!pass) return sayAuth('First, last, email, password are required.', true);
+      const email=(emailEl.value||'').trim();
+      const pass =passEl.value;
+      const first=(firstEl.value||'').trim();
+      const last =(lastEl.value||'').trim();
+      const code =(inviteEl.value||'').trim();
+      if(!first||!last||!email||!pass||!code) {
+        return sayAuth('First name, last name, email, password, and invite code are required.', true);
+      }
       try{
-        const cred = await createUserWithEmailAndPassword(auth,email,pass);
-        await sendEmailVerification(cred.user);
-
-        const base = {
-          uid: cred.user.uid,
-          email, firstName:first, lastName:last,
-          role:'user', active:true,
-          emailVerified:false,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-        await Promise.all([
-          setDoc(doc(db,'profiles', cred.user.uid), base, {merge:true}),
-          setDoc(doc(db,'members',  cred.user.uid), base, {merge:true})
-        ]);
-
+        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
         sayAuth('Account created! Check your email to verify.');
       }catch(e){ sayAuth(e.message,true); }
     });
@@ -253,21 +262,30 @@
     doReset.addEventListener('click', async ()=>{
       const email=(emailEl.value||'').trim();
       if(!email) return sayAuth('Enter your email first.', true);
-      try{ await sendPasswordResetEmail(auth,email); sayAuth('Password reset email sent.'); }
-      catch(e){ sayAuth(e.message,true); }
+      try{
+        await resetPassword(email);
+        sayAuth('Password reset email sent.');
+      }catch(e){ sayAuth(e.message,true); }
     });
 
-    signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); sayAuth('Signed out.'); });
+    signOutBtn.addEventListener('click', async ()=>{
+      await signOut();
+      sayAuth('Signed out.');
+    });
 
-    /* ===== Role and admin panel ===== */
+    /* ===== Role and admin panel (uses getMyRole) ===== */
     async function loadMyRole(){
       iAmAdmin = false;
-      if (!currentUser) return;
+      if (!currentUser){
+        adminPanel.style.display = 'none';
+        return;
+      }
       try{
-        const p = await getDoc(doc(db,'profiles', currentUser.uid));
-        const role = (p.exists() ? (p.data().role||'') : '').toLowerCase();
-        if (role === 'admin' || role === 'superadmin') iAmAdmin = true;
-      }catch(e){ /* ignore */ }
+        const info = await getMyRole();
+        iAmAdmin = !!info.isAdmin;
+      }catch(e){
+        iAmAdmin = false;
+      }
       adminPanel.style.display = iAmAdmin ? 'block' : 'none';
     }
 
@@ -285,7 +303,7 @@
         const name  = (first || last) ? `${first} ${last}`.trim() : (d.displayName || 'Member');
         const email = d.email || '';
         const active = d.active !== false;
-        const role = (d.role||'user').toLowerCase();
+        const role = (d.role||'member').toLowerCase();
 
         const card = document.createElement('div');
         card.className = 'member';
@@ -302,9 +320,9 @@
 
           ${ iAmAdmin ? `
           <div class="actions">
-            <button class="btn ${role==='admin' || role==='superadmin' ? 'ghost' : 'ok'}"
+            <button class="btn ${role==='admin' ? 'ghost' : 'ok'}"
                     data-act="toggle-admin" data-uid="${uid}" data-current="${role}">
-              ${ role==='admin' || role==='superadmin' ? 'Remove Admin' : 'Make Admin' }
+              ${ role==='admin' ? 'Remove Admin' : 'Make Admin' }
             </button>
             <button class="btn ${active?'warn':'ok'}"
                     data-act="toggle-active" data-uid="${uid}" data-current="${active?'active':'inactive'}">
@@ -320,13 +338,13 @@
         grid.querySelectorAll('[data-act="toggle-admin"]').forEach(btn=>{
           btn.addEventListener('click', async ()=>{
             const uid = btn.getAttribute('data-uid');
-            const cur = (btn.getAttribute('data-current')||'user').toLowerCase();
-            const toAdmin = !(cur==='admin' || cur==='superadmin');
+            const cur = (btn.getAttribute('data-current')||'member').toLowerCase();
+            const toAdmin = cur !== 'admin';
             try{
-              await Promise.all([
-                updateDoc(doc(db,'profiles',uid), { role: toAdmin ? 'admin' : 'user', updatedAt: serverTimestamp() }),
-                updateDoc(doc(db,'members' ,uid), { role: toAdmin ? 'admin' : 'user', updatedAt: serverTimestamp() })
-              ]);
+              await updateDoc(doc(db,'profiles',uid), {
+                role: toAdmin ? 'admin' : 'member',
+                updatedAt: serverTimestamp()
+              });
               sayList(toAdmin?'Made admin.':'Removed admin.');
             }catch(e){ sayList(e.message,true); }
           });
@@ -338,10 +356,7 @@
             const curIsActive = (btn.getAttribute('data-current')||'active').toLowerCase()==='active';
             const newVal = !curIsActive;
             try{
-              await Promise.all([
-                updateDoc(doc(db,'profiles',uid), { active: newVal, updatedAt: serverTimestamp() }),
-                updateDoc(doc(db,'members' ,uid), { active: newVal, updatedAt: serverTimestamp() })
-              ]);
+              await toggleMemberActive(uid, newVal);
               sayList(newVal?'Activated.':'Deactivated.');
             }catch(e){ sayList(e.message,true); }
           });
@@ -351,8 +366,12 @@
 
     /* ===== Live list (show everyone) ===== */
     function startLiveList(){
+      if (unsubscribeMembers){
+        unsubscribeMembers();
+        unsubscribeMembers = null;
+      }
       const qy = query(collection(db,'profiles'), orderBy('firstName'), orderBy('lastName'));
-      onSnapshot(qy, (snap)=>{
+      unsubscribeMembers = onSnapshot(qy, (snap)=>{
         const docs=[]; snap.forEach(d=>docs.push(d));
         renderMembers(docs);
       }, (err)=> sayList(err.message,true));
@@ -374,17 +393,21 @@
       if (currentUser){
         const shortEmail = currentUser.email && currentUser.email.length>25
           ? currentUser.email.slice(0,25)+'…' : (currentUser.email||'');
-        document.getElementById('signinBtn').textContent = `Account – ${shortEmail}`;
+        signinBtn.textContent = `Account – ${shortEmail}`;
         meNote.textContent = currentUser.emailVerified ? 'Signed in (verified).' : 'Signed in (verify your email).';
 
         await loadMyRole();
         startLiveList();
       }else{
-        document.getElementById('signinBtn').textContent = 'Sign In';
+        signinBtn.textContent = 'Sign In';
         meNote.textContent = 'Sign in to view member details.';
         adminPanel.style.display = 'none';
         grid.innerHTML = '';
         sayList('Please sign in to view members.');
+        if (unsubscribeMembers){
+          unsubscribeMembers();
+          unsubscribeMembers = null;
+        }
       }
     });
   </script>
