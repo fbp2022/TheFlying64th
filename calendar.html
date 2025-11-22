@@ -266,6 +266,7 @@
       border-bottom:1px solid var(--border);
       padding:8px;
       position:relative;
+      cursor:pointer;
     }
     .cell:nth-child(7n){ border-right:none; }
     .date{
@@ -486,6 +487,7 @@
       display:flex;
       align-items:center;
       gap:10px;
+      flex-wrap:wrap;
     }
     .switch{
       display:inline-flex;
@@ -526,6 +528,26 @@
     .hint{
       color:#b9c2d0;
       font-size:12.5px;
+    }
+
+    /* Time presets */
+    .time-presets{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      font-size:12px;
+    }
+    .time-chip{
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:3px 8px;
+      background:#0c1020;
+      color:#eaf2ff;
+      cursor:pointer;
+    }
+    .time-chip:hover{
+      background:#131a2a;
     }
 
     @media (max-width:900px){
@@ -693,7 +715,13 @@
           </label>
           <label class="field">
             <span>Title / purpose</span>
-            <input id="titleInput" type="text" placeholder="Training, rental, checkride prep, etc.">
+            <select id="titleSelect">
+              <option value="Training">Training</option>
+              <option value="Rental">Rental</option>
+              <option value="Checkride">Checkride</option>
+              <option value="Checkride Prep">Checkride Prep</option>
+              <option value="Maintenance" data-admin-only="true">Maintenance</option>
+            </select>
           </label>
         </div>
 
@@ -720,6 +748,14 @@
                 <span>All day</span>
               </label>
             </div>
+            <div class="time-presets">
+              <span style="font-size:11px;color:#9fb1c3;">Quick times:</span>
+              <button type="button" class="time-chip" data-start="08:00" data-end="10:00">08:00–10:00</button>
+              <button type="button" class="time-chip" data-start="10:00" data-end="12:00">10:00–12:00</button>
+              <button type="button" class="time-chip" data-start="12:00" data-end="14:00">12:00–14:00</button>
+              <button type="button" class="time-chip" data-start="14:00" data-end="16:00">14:00–16:00</button>
+              <button type="button" class="time-chip" data-start="16:00" data-end="18:00">16:00–18:00</button>
+            </div>
           </div>
           <label class="field">
             <span>With instructor?</span>
@@ -735,10 +771,8 @@
           <label class="field">
             <span>Instructor</span>
             <select id="instructorSelect">
-              <option value="" selected disabled>Choose flight instructor</option>
-              <option value="BW">Brian Westfall (BW)</option>
-              <option value="JC">Justin Cox (JC)</option>
-              <option value="JM">Jeff Moersch (JM)</option>
+              <option value="">N/A</option>
+              <!-- Firestore-loaded instructors injected here -->
             </select>
           </label>
         </div>
@@ -824,7 +858,10 @@
     import {
       collection,
       addDoc,
-      serverTimestamp
+      serverTimestamp,
+      doc,
+      getDoc,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
     /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
@@ -859,6 +896,13 @@
     const emailField  = document.getElementById('emailField');
     const authHint    = document.getElementById('authHint');
     const saveBtn     = document.getElementById('saveBooking');
+
+    const purposeSelect   = document.getElementById('titleSelect');
+    const instructorWrap  = document.getElementById('instructorWrap');
+    const instructorSelect= document.getElementById('instructorSelect');
+
+    let currentUser = null;
+    let isAdmin     = false;
 
     const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
     const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
@@ -897,8 +941,42 @@
     if (location.hash === '#signin') openAuth();
     window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
 
+    // ----- Role handling (profiles.role) -----
+    async function reloadRole(){
+      isAdmin = false;
+      if (!currentUser) {
+        updatePurposeAdminState();
+        return;
+      }
+      try{
+        const pref = doc(db, "profiles", currentUser.uid);
+        const snap = await getDoc(pref);
+        if (snap.exists()) {
+          const role = (snap.data().role || "").toLowerCase();
+          if (role === "admin" || role === "superadmin") isAdmin = true;
+        }
+      }catch(e){
+        console.error("role load error", e);
+      }
+      updatePurposeAdminState();
+    }
+
+    function updatePurposeAdminState(){
+      if (!purposeSelect) return;
+      const adminOpts = purposeSelect.querySelectorAll('[data-admin-only="true"]');
+      adminOpts.forEach(opt=>{
+        const hide = !isAdmin;
+        opt.disabled = hide;
+        opt.hidden = hide;
+        if (hide && opt.selected) {
+          purposeSelect.value = "Training";
+        }
+      });
+    }
+
     /* ---------- Auth state handling (hooked into booking UI) ---------- */
-    onAuthChanged((user)=>{
+    onAuthChanged(async (user)=>{
+      currentUser = user || null;
       const verified = !!user?.emailVerified;
       if (user){
         const shortEmail = user.email && user.email.length>28
@@ -917,6 +995,8 @@
         if (saveBtn)   saveBtn.disabled = true;
         if (authHint)  authHint.style.display = "block";
       }
+
+      await reloadRole();
     });
 
     /* ---------- Sign in / up / reset / out ---------- */
@@ -982,6 +1062,7 @@
     function daysInMonth(y,m){
       return new Date(y, m+1, 0).getDate();
     }
+    const pad2 = (n)=>String(n).padStart(2,'0');
 
     function renderMonth(){
       grid.innerHTML='';
@@ -1008,6 +1089,13 @@
       cells.forEach(c=>{
         const cell=document.createElement('div');
         cell.className='cell'+(c.other?' other-month':'');
+        const dObj = new Date(c.y, c.m, c.d);
+        const yyyy = dObj.getFullYear();
+        const mm   = pad2(dObj.getMonth()+1);
+        const dd   = pad2(dObj.getDate());
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        cell.dataset.date = dateStr;
+
         const dateBox=document.createElement('div');
         dateBox.className='date';
         dateBox.textContent=c.d;
@@ -1016,6 +1104,12 @@
         const eventsWrap=document.createElement('div');
         eventsWrap.className='events';
         cell.appendChild(eventsWrap);
+
+        // Clicking a day opens New Booking prefilled to that date
+        cell.addEventListener('click', ()=>{
+          openModal(dateStr);
+        });
+
         grid.appendChild(cell);
       });
     }
@@ -1051,38 +1145,44 @@
     const closeBtn     = document.getElementById('closeModal');
     const cancelBtn    = document.getElementById('cancelModal');
     const withInst     = document.getElementById('withInstructor');
-    const instWrap     = document.getElementById('instructorWrap');
     const allDay       = document.getElementById('allDay');
     const startTime    = document.getElementById('startTime');
     const endTime      = document.getElementById('endTime');
 
-    function openModal(){
+    const startDateEl  = document.getElementById('startDate');
+    const endDateEl    = document.getElementById('endDate');
+
+    function openModal(prefillDate){
       bookingModal.classList.add('open');
       bookingModal.setAttribute('aria-hidden','false');
       const now=new Date();
-      const pad=n=>String(n).padStart(2,'0');
-      const yyyy=now.getFullYear(), mm=pad(now.getMonth()+1), dd=pad(now.getDate());
-      document.getElementById('startDate').value=`${yyyy}-${mm}-${dd}`;
-      document.getElementById('endDate').value  =`${yyyy}-${mm}-${dd}`;
+      const yyyyNow=now.getFullYear();
+      const mmNow=pad2(now.getMonth()+1);
+      const ddNow=pad2(now.getDate());
+
+      const dateStr = prefillDate || `${yyyyNow}-${mmNow}-${ddNow}`;
+      startDateEl.value = dateStr;
+      endDateEl.value   = dateStr;
+
       const minutes=now.getMinutes();
       const rounded=Math.ceil(minutes/30)*30;
       if(rounded===60){ now.setHours(now.getHours()+1); }
-      const hh=pad(now.getHours());
-      const min=pad(rounded===60?0:rounded);
+      const hh=pad2(now.getHours());
+      const min=pad2(rounded===60?0:rounded);
       startTime.value=`${hh}:${min}`;
-      endTime.value  =`${hh}:${pad((parseInt(min,10)+30)%60)}`;
+      endTime.value  =`${hh}:${pad2((parseInt(min,10)+30)%60)}`;
     }
     function closeBookingModal(){
       bookingModal.classList.remove('open');
       bookingModal.setAttribute('aria-hidden','true');
     }
 
-    openBtn.addEventListener('click', openModal);
+    openBtn.addEventListener('click', ()=>openModal());
     closeBtn.addEventListener('click', closeBookingModal);
     cancelBtn.addEventListener('click', closeBookingModal);
     bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
 
-    withInst.onchange = ()=>{ instWrap.hidden = !withInst.checked; };
+    withInst.onchange = ()=>{ instructorWrap.hidden = !withInst.checked; };
     allDay.onchange   = ()=>{
       const dis = allDay.checked;
       startTime.disabled = dis;
@@ -1092,6 +1192,19 @@
         endTime.value='';
       }
     };
+
+    // Time presets
+    document.querySelectorAll('.time-chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const s = btn.dataset.start;
+        const e = btn.dataset.end;
+        if (s) startTime.value = s;
+        if (e) endTime.value   = e;
+        allDay.checked = false;
+        startTime.disabled = false;
+        endTime.disabled   = false;
+      });
+    });
 
     // Meter deltas
     function calcDelta(start,end,out){
@@ -1108,6 +1221,30 @@
     [tachStart,tachEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(tachStart,tachEnd,tachDelta)));
     [hobbsStart,hobbsEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta)));
 
+    // ===== Load instructors from Firestore =====
+    async function loadInstructors(){
+      if (!instructorSelect) return;
+      // Reset to N/A
+      instructorSelect.innerHTML = '<option value="">N/A</option>';
+      try{
+        const snap = await getDocs(collection(db, "instructors"));
+        snap.forEach(docSnap=>{
+          const data = docSnap.data() || {};
+          Object.entries(data).forEach(([name,email])=>{
+            if (!name || !email) return;
+            const opt = document.createElement('option');
+            opt.value = String(email);
+            opt.textContent = name;
+            opt.dataset.name = name;
+            instructorSelect.appendChild(opt);
+          });
+        });
+      }catch(e){
+        console.error("Error loading instructors", e);
+      }
+    }
+    loadInstructors();
+
     // Save booking -> Firestore
     document.getElementById('saveBooking').addEventListener('click', async ()=>{
       const user = auth.currentUser;
@@ -1122,19 +1259,24 @@
         return;
       }
 
+      const instructorOption = instructorSelect.selectedOptions[0] || null;
+      const instructorEmail  = instructorOption && instructorOption.value ? instructorOption.value : null;
+      const instructorName   = instructorOption && instructorOption.dataset.name ? instructorOption.dataset.name : null;
+
       const data = {
         member_first : fn,
         member_last  : ln,
         member_email : user.email || "",
         aircraft     : document.getElementById('aircraft').value,
-        title        : document.getElementById('titleInput').value.trim(),
-        startDate    : document.getElementById('startDate').value,
-        endDate      : document.getElementById('endDate').value,
-        startTime    : document.getElementById('startTime').value,
-        endTime      : document.getElementById('endTime').value,
+        title        : purposeSelect.value,
+        startDate    : startDateEl.value,
+        endDate      : endDateEl.value,
+        startTime    : startTime.value,
+        endTime      : endTime.value,
         allDay       : allDay.checked,
         withInstructor : withInst.checked,
-        instructorId   : document.getElementById('instructorSelect').value || null,
+        instructorName  : instructorName,
+        instructorEmail : instructorEmail,
         tach_start   : tachStart.value || null,
         tach_end     : tachEnd.value || null,
         hobbs_start  : hobbsStart.value || null,
@@ -1149,6 +1291,33 @@
           createdAt: serverTimestamp()
         });
         console.log('Booking saved:', data);
+
+        // If instructor selected, open mailto with details
+        if (instructorEmail){
+          const whenRange = data.allDay
+            ? `${data.startDate} (all day)`
+            : `${data.startDate} ${data.startTime || ''} – ${data.endDate} ${data.endTime || ''}`;
+          const subject = `New ${data.title} booking – ${data.aircraft}`;
+          const body =
+`Hi ${instructorName || ''},
+
+A member just booked an instructional flight.
+
+Member: ${fn} ${ln}
+Email: ${data.member_email}
+Aircraft: ${data.aircraft}
+Purpose: ${data.title}
+When: ${whenRange}
+
+Comments:
+${data.comments || '(none)'}
+
+— The Flying 64th booking system`;
+
+          const href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          window.location.href = href;
+        }
+
         closeBookingModal();
       }catch(err){
         console.error(err);
