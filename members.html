@@ -435,7 +435,7 @@ function startLiveList(){
   }
 
   // ✅ Single orderBy so no composite index is required
-  const qy = query(collection(db, 'members'), orderBy('lastName'));
+  const qy = query(collection(db, 'profiles'), orderBy('lastName'));
 
   unsubscribeMembers = onSnapshot(qy, (snap)=>{
     const docs = [];
