@@ -1,146 +1,274 @@
-// auth.js (Firebase v12.5.0) — unified auth helpers with reusable invite code
+// auth.js (Firebase v12.5.0) — simplified for admin/member + /profiles only
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut as fbSignOut,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  sendEmailVerification, sendPasswordResetEmail
+  getAuth,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
+  signOut as fbSignOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs,
-  updateDoc, serverTimestamp
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  updateDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-// === Firebase config (public client keys) ===
+/* ================== FIREBASE SETUP ================== */
+
 const firebaseConfig = {
   apiKey: "AIzaSyAI5lb0nXxAiBQThX6Y4tEQuqQ1cY6bn74",
   authDomain: "flying64th-b7813.firebaseapp.com",
   projectId: "flying64th-b7813",
   storageBucket: "flying64th-b7813.firebasestorage.app",
   messagingSenderId: "244940935157",
-  appId: "1:244940935157:web:58e7305541377ba743dabc"
+  appId: "1:244940935157:web:58e7305541377ba743dabc",
 };
 
-const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db   = getFirestore(app);
+const db = getFirestore(app);
 
 // Persist session across page loads/tabs for same origin
 await setPersistence(auth, browserLocalPersistence);
 
-// Owner emails (mirrors your rules’ “owner” concept)
-const OWNER_EMAILS = new Set(['theflying64@gmail.com','tristanstuff@denjess.com']);
+/* ================== ROLE / PROFILE HELPERS ================== */
 
-// ------------------------
-// Utilities & role helpers
-// ------------------------
-function escapeHtml(s){
+// Hard-coded admin UIDs (permanent full admins)
+// TODO: replace these with your real admin UIDs
+const ADMIN_UIDS = new Set([
+  "ADMIN_UID_1",
+  "ADMIN_UID_2",
+  "ADMIN_UID_3",
+  // "ADMIN_UID_4",
+  // "ADMIN_UID_5",
+]);
+
+// Backwards-compat alias for any old code that imported OWNER_EMAILS
+// (not actually used for logic anymore)
+const OWNER_EMAILS = new Set();
+
+/** Simple HTML escaper for safe rendering */
+function escapeHtml(s) {
   return String(s ?? "")
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-async function getProfile(uid){
+/** Load a profile doc from /profiles/{uid} */
+async function getProfile(uid) {
+  if (!uid) return null;
   try {
     const snap = await getDoc(doc(db, "profiles", uid));
     return snap.exists() ? snap.data() : null;
-  } catch {
+  } catch (err) {
+    console.error("getProfile error:", err);
     return null;
   }
 }
 
-async function getMyRole(){
-  const u = auth.currentUser;
-  if (!u) return { role:null, email:null, isSuper:false, isAdmin:false, isOwner:false };
-  const p = await getProfile(u.uid);
-  const role  = (p?.role || "").toLowerCase();
-  const email = p?.email || u.email || null;
-  const isOwner = email ? OWNER_EMAILS.has(email) : false;
-  const isSuper = isOwner || role === "superadmin";
-  const isAdmin = isSuper || role === "admin";
-  return { role, email, isSuper, isAdmin, isOwner };
+/**
+ * Get the current user's role info.
+ * Returns:
+ *   { uid, email, role, isAdmin, isMember, profile }
+ */
+async function getMyRole() {
+  const user = auth.currentUser;
+  if (!user) {
+    return {
+      uid: null,
+      email: null,
+      role: null,
+      isAdmin: false,
+      isMember: false,
+      profile: null,
+    };
+  }
+
+  const profile = await getProfile(user.uid);
+  let role = (profile?.role || "").toLowerCase();
+
+  // Default to "member" if role is missing or junk
+  if (role !== "admin" && role !== "member") {
+    role = "member";
+  }
+
+  const email = profile?.email || user.email || null;
+
+  // Admin if either explicitly admin in profile OR UID is in the hard-coded set
+  const isAdminUID = ADMIN_UIDS.has(user.uid);
+  const isAdminRole = role === "admin";
+  const isAdmin = isAdminUID || isAdminRole;
+
+  const isMember = !isAdmin && role === "member";
+
+  return {
+    uid: user.uid,
+    email,
+    role,
+    isAdmin,
+    isMember,
+    profile: profile || {},
+  };
 }
 
-// Gate = verified + active member in /members
-async function requireActiveMember(user){
-  if (!user?.emailVerified) return { ok:false, reason:"verify" };
-  const msnap = await getDoc(doc(db, "members", user.uid));
-  if (!msnap.exists() || msnap.data()?.active !== true) return { ok:false, reason:"inactive" };
-  return { ok:true };
+/**
+ * Require an active, verified member.
+ * Uses:
+ *  - user.emailVerified
+ *  - /profiles/{uid}.active === true
+ *
+ * Returns:
+ *   { ok:true, profile } OR { ok:false, reason:"verify"|"inactive" }
+ */
+async function requireActiveMember(user) {
+  const u = user || auth.currentUser;
+  if (!u) return { ok: false, reason: "verify" };
+  if (!u.emailVerified) return { ok: false, reason: "verify" };
+
+  const profile = await getProfile(u.uid);
+  if (!profile || profile.active !== true) {
+    return { ok: false, reason: "inactive" };
+  }
+
+  return { ok: true, profile };
 }
 
-// Roster helpers (directory)
-async function fetchMembers(filter){ // 'active' | 'disabled' | 'all'
-  const col = collection(db, "members");
-  const toList = async (q) => (await getDocs(q)).docs.map(d => ({ uid:d.id, ...d.data() }));
-  try{
-    if (filter === "active"){
-      return await toList(query(col, where("active","==", true), orderBy("lastName"), orderBy("firstName")));
-    } else if (filter === "disabled"){
-      return await toList(query(col, where("active","==", false), orderBy("lastName"), orderBy("firstName")));
+/* ============= MEMBER LISTING (from /profiles) ============= */
+
+/**
+ * Fetch member profiles from /profiles.
+ * filter: "active" | "disabled" | "all"
+ * Returns array [{ uid, ...profileData }]
+ */
+async function fetchMembers(filter) {
+  const colRef = collection(db, "profiles");
+
+  const toList = async (q) =>
+    (await getDocs(q)).docs.map((d) => ({ uid: d.id, ...d.data() }));
+
+  try {
+    if (filter === "active") {
+      return await toList(
+        query(
+          colRef,
+          where("active", "==", true),
+          orderBy("lastName"),
+          orderBy("firstName")
+        )
+      );
+    } else if (filter === "disabled") {
+      return await toList(
+        query(
+          colRef,
+          where("active", "==", false),
+          orderBy("lastName"),
+          orderBy("firstName")
+        )
+      );
     } else {
-      return await toList(query(col, orderBy("lastName"), orderBy("firstName")));
+      return await toList(
+        query(colRef, orderBy("lastName"), orderBy("firstName"))
+      );
     }
-  } catch {
-    // Fallback without composite index (shouldn’t be needed with your indexes)
-    const snap = await getDocs(col);
-    let arr = snap.docs.map(d => ({ uid:d.id, ...d.data() }));
-    if (filter !== "all") arr = arr.filter(x => !!x && (x.active === (filter === "active")));
-    arr.sort((a,b)=>`${a.lastName||''} ${a.firstName||''}`.localeCompare(`${b.lastName||''} ${b.firstName||''}`));
+  } catch (err) {
+    console.warn("fetchMembers fallback:", err);
+    // Fallback without index
+    const snap = await getDocs(colRef);
+    let arr = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+    if (filter === "active") {
+      arr = arr.filter((x) => x.active === true);
+    } else if (filter === "disabled") {
+      arr = arr.filter((x) => x.active === false);
+    }
+    arr.sort((a, b) =>
+      `${a.lastName || ""} ${a.firstName || ""}`.localeCompare(
+        `${b.lastName || ""} ${b.firstName || ""}`
+      )
+    );
     return arr;
   }
 }
 
-async function toggleMemberActive(uid, desired){
-  await updateDoc(doc(db,"members",uid), { active: desired, updatedAt: serverTimestamp() });
+/** Toggle active status on /profiles/{uid} */
+async function toggleMemberActive(uid, desired) {
+  if (!uid) throw new Error("Missing uid.");
+  await updateDoc(doc(db, "profiles", uid), {
+    active: desired,
+    updatedAt: serverTimestamp(),
+  });
 }
 
-function onAuthChanged(cb){ return onAuthStateChanged(auth, cb); }
+/** Wrapper for onAuthStateChanged */
+function onAuthChanged(cb) {
+  return onAuthStateChanged(auth, cb);
+}
 
-// ---------------------------
-// Sign-in / Sign-up utilities
-// ---------------------------
-
-// 1) Validate the permanent invite code in Firestore
-//    Firestore doc: invites/primary  => { enabled:true, code:"F64-CHRIS-2025-9QK7ATJ3" }
-async function validateInvite(inputCode){
+/* ================== INVITE LOGIC ================== */
+/**
+ * Validate the permanent invite code in Firestore.
+ * Firestore doc: invites/primary => { enabled:true, code:"F64-..." }
+ */
+async function validateInvite(inputCode) {
   const code = (inputCode || "").trim();
-  if (!code) return { ok:false, msg:"Invite code required." };
+  if (!code) return { ok: false, msg: "Invite code required." };
 
   const ref = doc(db, "invites", "primary");
   const snap = await getDoc(ref);
-  if (!snap.exists()) return { ok:false, msg:"Invite not found." };
+  if (!snap.exists()) return { ok: false, msg: "Invite not found." };
 
   const d = snap.data();
-  const enabled = d.enabled !== false;     // default true
+  const enabled = d.enabled !== false; // default true
   const serverCode = String(d.code || "").trim();
 
-  if (!enabled)               return { ok:false, msg:"Sign-ups are disabled." };
-  if (code !== serverCode)    return { ok:false, msg:"Invalid invite code." };
+  if (!enabled) return { ok: false, msg: "Sign-ups are disabled." };
+  if (code !== serverCode) return { ok: false, msg: "Invalid invite code." };
 
   // Reusable forever — no 'used' tracking.
-  return { ok:true, ref };
+  return { ok: true, ref };
 }
 
-// 2) Create profile & member docs for a new user
-async function ensureProfileDocs(uid, email, firstName, lastName){
+/* ================== PROFILE CREATION ================== */
+
+/**
+ * Ensure /profiles/{uid} exists for a new user.
+ * New users default to role "member".
+ */
+async function ensureProfileDocs(uid, email, firstName, lastName) {
   const base = {
-    uid, email, firstName, lastName,
+    uid,
+    email,
+    firstName,
+    lastName,
     emailVerified: false,
     active: true,
-    role: "user",
+    role: "member", // only "admin" or "member" now; new signups are members
     createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
+    updatedAt: serverTimestamp(),
   };
-  await Promise.all([
-    setDoc(doc(db, "profiles", uid), base, { merge:true }),
-    setDoc(doc(db, "members",  uid), base, { merge:true }),
-  ]);
+
+  await setDoc(doc(db, "profiles", uid), base, { merge: true });
 }
 
-// 3) Public helpers your pages can call
+/* ================== AUTH HELPERS ================== */
 
-// Sign in (email/password only)
-async function signInEmailPassword(email, password){
+/** Sign in (email/password) */
+async function signInEmailPassword(email, password) {
   const e = (email || "").trim();
   const p = password || "";
   if (!e || !p) throw new Error("Enter email and password.");
@@ -148,70 +276,90 @@ async function signInEmailPassword(email, password){
   return cred.user;
 }
 
-// Sign up with permanent invite (requires first/last names)
-async function signUpWithInvite({ email, password, firstName, lastName, code }){
+/**
+ * Sign up with permanent invite (requires first/last names).
+ * Creates profile doc in /profiles with role "member".
+ */
+async function signUpWithInvite({ email, password, firstName, lastName, code }) {
   const e = (email || "").trim();
   const p = password || "";
   const f = (firstName || "").trim();
-  const l = (lastName  || "").trim();
+  const l = (lastName || "").trim();
   const c = (code || "").trim();
 
   if (!e || !p || !f || !l || !c) {
-    throw new Error("First name, last name, email, password, and invite code are required.");
+    throw new Error(
+      "First name, last name, email, password, and invite code are required."
+    );
   }
 
   const iv = await validateInvite(c);
   if (!iv.ok) throw new Error(iv.msg || "Invalid invite.");
 
   const cred = await createUserWithEmailAndPassword(auth, e, p);
-  // Create Firestore docs immediately
-  await ensureProfileDocs(cred.user.uid, e, f, l);
-  // Send verification (non-blocking)
-  try { await sendEmailVerification(cred.user); } catch(_) {}
 
-  // Optional: you can log the attempt to /audit here if desired
+  // Create Firestore profile
+  await ensureProfileDocs(cred.user.uid, e, f, l);
+
+  // Send verification (non-blocking)
+  try {
+    await sendEmailVerification(cred.user);
+  } catch (err) {
+    console.warn("sendEmailVerification failed:", err);
+  }
+
   return cred.user;
 }
 
-// Reset password
-async function resetPassword(email){
+/** Reset password */
+async function resetPassword(email) {
   const e = (email || "").trim();
   if (!e) throw new Error("Enter your email first.");
   await sendPasswordResetEmail(auth, e);
   return true;
 }
 
-// Re-send verification email (for UX flows)
-async function resendVerification(){
+/** Re-send verification email */
+async function resendVerification() {
   const u = auth.currentUser;
   if (!u) throw new Error("Not signed in.");
   await sendEmailVerification(u);
   return true;
 }
 
-// Sign out
-async function signOut(){
+/** Sign out */
+async function signOut() {
   await fbSignOut(auth);
 }
 
-// -----------------
-// Module exports
-// -----------------
+/* ================== EXPORTS ================== */
+
 export {
-  app, auth, db,
+  app,
+  auth,
+  db,
 
   // State & roles
-  onAuthChanged, getMyRole, requireActiveMember,
+  onAuthChanged,
+  getMyRole,
+  requireActiveMember,
 
-  // Members directory helpers
-  fetchMembers, toggleMemberActive, getProfile,
+  // Members directory helpers (now based on /profiles)
+  fetchMembers,
+  toggleMemberActive,
+  getProfile,
 
   // Auth helpers
-  signInEmailPassword, signUpWithInvite, resetPassword, resendVerification, signOut,
+  signInEmailPassword,
+  signUpWithInvite,
+  resetPassword,
+  resendVerification,
+  signOut,
 
   // Misc
-  escapeHtml, OWNER_EMAILS,
-
-  // Optional: expose validate for custom UIs
-  validateInvite, ensureProfileDocs
+  escapeHtml,
+  ADMIN_UIDS,
+  OWNER_EMAILS, // legacy/no-op but exported in case something still imports it
+  validateInvite,
+  ensureProfileDocs,
 };
