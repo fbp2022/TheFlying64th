@@ -15,6 +15,7 @@ import {
 import {
   getFirestore,
   doc,
+  deleteDoc,
   getDoc,
   setDoc,
   collection,
@@ -49,7 +50,7 @@ await setPersistence(auth, browserLocalPersistence);
 // Hard-coded admin UIDs (permanent full admins)
 // TODO: replace these with your real admin UIDs
 const ADMIN_UIDS = new Set([
-  "ADMIN_UID_1",
+  "dVErHNmaekS7qlBabaRzDzuRxlw2",
   "ADMIN_UID_2",
   "ADMIN_UID_3",
   // "ADMIN_UID_4",
@@ -362,4 +363,8 @@ export {
   OWNER_EMAILS, // legacy/no-op but exported in case something still imports it
   validateInvite,
   ensureProfileDocs,
+
+  // 🔥 Add these so home.html can delete posts
+  doc,
+  deleteDoc
 };
