@@ -37,7 +37,7 @@
       line-height:1.6;
     }
 
-    /* ===== NAV (shared with home) ===== */
+    /* ===== NAV ===== */
     .site-header{
       position:sticky;
       top:0;
@@ -91,6 +91,7 @@
       background:var(--accent);
       font-weight:700;
     }
+
     .btn{
       border:1px solid rgba(255,255,255,.16);
       background:#0c1020;
@@ -138,6 +139,7 @@
       }
       nav.links.open{display:flex;}
       nav.links a{width:100%;text-align:left;}
+      #signinBtn{width:100%;text-align:center;}
       .hamburger{display:inline-flex;}
     }
 
@@ -233,7 +235,7 @@
       background:#0b1120;
     }
 
-    /* ===== CALENDAR (MONTH / WEEK / DAY) ===== */
+    /* ===== CALENDAR ===== */
     .cal-shell{
       background:var(--card);
       border-radius:var(--radius);
@@ -372,7 +374,7 @@
       color:#1f0202;
     }
 
-    /* ===== MODAL ===== */
+    /* ===== BOOKING MODAL ===== */
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -506,6 +508,114 @@
       color:var(--muted);
       margin-top:3px;
     }
+
+    /* ===== AUTH MODAL (same style as home) ===== */
+    .auth-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      display:none;
+      place-items:center;
+      z-index:1000;
+    }
+    .auth-modal.open{display:grid;}
+
+    .auth-card{
+      width:min(460px,92vw);
+      background:#0f1722;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
+      padding:18px 18px 12px;
+      position:relative;
+    }
+    .auth-title{
+      margin:0 0 10px 0;
+      font-size:20px;
+      font-weight:800;
+    }
+    .auth-x{
+      position:absolute;
+      right:14px;
+      top:12px;
+      border:0;
+      background:transparent;
+      color:#9fb1c3;
+      font-size:18px;
+      cursor:pointer;
+    }
+    .auth-label{
+      display:block;
+      margin-top:10px;
+      margin-bottom:4px;
+      color:#9fb1c3;
+      font-size:13px;
+    }
+    .auth-input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#0b1117;
+      color:#e6edf3;
+    }
+    .auth-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+    }
+    .auth-btn{
+      flex:1;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #1f2a38;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+    }
+    .auth-btn.primary{
+      background:#58a6ff;
+      color:#001a33;
+      border-color:transparent;
+      font-weight:700;
+    }
+    .auth-link{
+      background:none;
+      border:0;
+      color:#9fb1c3;
+      cursor:pointer;
+    }
+    .auth-msg{
+      min-height:18px;
+      color:#9fb1c3;
+      margin:8px 0 4px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .tab{
+      flex:1;
+      padding:8px 10px;
+      border:1px solid #1f2a38;
+      border-radius:10px;
+      background:#141b26;
+      color:#e6edf3;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .tab.active{
+      background:#58a6ff;
+      color:#001a33;
+      font-weight:700;
+      border-color:transparent;
+    }
+    .view{display:none;}
+    .view.active{display:block;}
   </style>
 </head>
 <body>
@@ -520,6 +630,7 @@
     <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
 
     <nav class="links" id="mainNav">
+      <a id="signinBtn" class="btn">Sign In</a>
       <a href="home.html">Home</a>
       <a class="active" href="calendar.html">Calendar</a>
       <a href="becomeamember.html">Become a Member</a>
@@ -577,9 +688,9 @@
       </div>
       <div class="cal-nav">
         <button id="exportMonthBtn" class="btn" style="font-size:.75rem;padding:4px 8px;">Export</button>
-        <button id="prevMonthBtn">&lt;</button>
+        <button id="prevPeriodBtn">&lt;</button>
         <button id="todayBtn" class="primary">Today</button>
-        <button id="nextMonthBtn">&gt;</button>
+        <button id="nextPeriodBtn">&gt;</button>
       </div>
     </div>
 
@@ -702,24 +813,98 @@
   </div>
 </div>
 
-<script type="module">
-  /* ========== NAV HAMBURGER ========== */
+<!-- AUTH MODAL (same UX as home.html, but wired into auth.js helpers) -->
+<div id="authModal" class="auth-modal" aria-hidden="true">
+  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
+
+    <div class="tabs">
+      <button id="tabSignIn" class="tab active">Sign In</button>
+      <button id="tabSignUp" class="tab">Create Account</button>
+    </div>
+
+    <!-- Sign In view -->
+    <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+
+      <label class="auth-label" for="si_email">Email</label>
+      <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
+
+      <label class="auth-label" for="si_password">Password</label>
+      <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
+
+      <div class="auth-row">
+        <button id="doSignIn" class="auth-btn primary">Sign In</button>
+      </div>
+
+      <div class="auth-row">
+        <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+        <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+      </div>
+
+      <p id="authMsg" class="auth-msg"></p>
+    </section>
+
+    <!-- Create Account view -->
+    <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+      <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+
+      <label class="auth-label" for="su_first">First Name</label>
+      <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
+
+      <label class="auth-label" for="su_last">Last Name</label>
+      <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
+
+      <label class="auth-label" for="su_email">Email</label>
+      <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
+
+      <label class="auth-label" for="su_password">Password</label>
+      <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
+
+      <label class="auth-label" for="su_invite">Invite Code (new accounts)</label>
+      <input id="su_invite" class="auth-input" type="text" placeholder="Board Admin Will Provide Invite Code" required>
+
+      <div class="auth-row">
+        <button id="doSignUp" class="auth-btn primary">Create Account</button>
+      </div>
+
+      <p id="createMsg" class="auth-msg"></p>
+    </section>
+  </div>
+</div>
+
+<script>
+  // Nav highlight + hamburger (reuse home.html behavior)
   (function(){
+    const mainNav = document.getElementById('mainNav');
+    const current = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('#mainNav a[href]').forEach(a=>{
+      let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+      href = href.replace(/&amp;/g,'&');
+      if(href && href === current) a.classList.add('active');
+    });
+
     const navToggle = document.getElementById('navToggle');
-    const mainNav  = document.getElementById('mainNav');
-    navToggle?.addEventListener('click', ()=> mainNav.classList.toggle('open'));
-    mainNav?.querySelectorAll('a').forEach(a=>{
-      a.addEventListener('click', ()=> mainNav.classList.remove('open'));
+    navToggle?.addEventListener('click', ()=>{
+      mainNav.classList.toggle('open');
+    });
+    mainNav?.querySelectorAll('a').forEach(link=>{
+      link.addEventListener('click', ()=> mainNav.classList.remove('open'));
     });
   })();
+</script>
 
-  /* ========== FIREBASE IMPORTS ========== */
+<script type="module">
+  /* ========== IMPORTS ========== */
   import {
-    app,
     auth,
     db,
     onAuthChanged,
-    getMyRole
+    getMyRole,
+    signInEmailPassword,
+    signUpWithInvite,
+    resetPassword,
+    signOut
   } from './auth.js';
 
   import {
@@ -730,6 +915,7 @@
     doc,
     getDoc,
     setDoc,
+    addDoc,
     updateDoc,
     deleteDoc,
     serverTimestamp
@@ -737,32 +923,35 @@
 
   /* ========== GLOBAL STATE ========== */
   let currentUser = null;
+  let currentRole = null; // { uid, email, isAdmin, profile, ... }
   let isAdmin = false;
 
-  let viewYear, viewMonth;
+  let viewMode = 'month'; // 'month' | 'week' | 'day'
+  let focusDate = new Date();
+
   let bookings = [];
   let aircraftFilter = "all";
   let instructors = [];
   let selectedBookingId = null;
 
-  let currentView = "month";   // "month" | "week" | "day"
-  let focusDate = new Date();  // central date for week/day nav
-
-  const KNOWN_AIRCRAFT = new Set(["N78710","N10921"]);
+  let unsubStatus = null;
+  let unsubBookings = null;
 
   /* DOM refs */
   const statusCardsEl   = document.getElementById('statusCards');
   const monthLabelEl    = document.getElementById('monthLabel');
   const monthGridEl     = document.getElementById('monthGrid');
+
   const filterPills     = [...document.querySelectorAll('.pill[data-aircraft]')];
   const newBookingBtn   = document.getElementById('newBookingBtn');
-  const prevMonthBtn    = document.getElementById('prevMonthBtn');
-  const nextMonthBtn    = document.getElementById('nextMonthBtn');
-  const todayBtn        = document.getElementById('todayBtn');
-  const exportMonthBtn  = document.getElementById('exportMonthBtn');
+
   const viewMonthBtn    = document.getElementById('viewMonthBtn');
   const viewWeekBtn     = document.getElementById('viewWeekBtn');
   const viewDayBtn      = document.getElementById('viewDayBtn');
+  const prevPeriodBtn   = document.getElementById('prevPeriodBtn');
+  const nextPeriodBtn   = document.getElementById('nextPeriodBtn');
+  const todayBtn        = document.getElementById('todayBtn');
+  const exportMonthBtn  = document.getElementById('exportMonthBtn');
 
   const modalBackdrop   = document.getElementById('bookingModalBackdrop');
   const modalTitleEl    = document.getElementById('bookingModalTitle');
@@ -796,6 +985,29 @@
 
   const quickTimesRow   = document.getElementById('quickTimesRow');
 
+  /* AUTH MODAL DOM */
+  const signinBtn    = document.getElementById('signinBtn');
+  const authModal    = document.getElementById('authModal');
+  const closeAuthBtn = document.getElementById('closeAuth');
+  const tabSignIn    = document.getElementById('tabSignIn');
+  const tabSignUp    = document.getElementById('tabSignUp');
+  const viewSignIn   = document.getElementById('viewSignIn');
+  const viewSignUp   = document.getElementById('viewSignUp');
+  const si_email     = document.getElementById('si_email');
+  const si_password  = document.getElementById('si_password');
+  const doSignIn     = document.getElementById('doSignIn');
+  const doReset      = document.getElementById('doReset');
+  const signOutBtn   = document.getElementById('signOutBtn');
+  const authMsg      = document.getElementById('authMsg');
+
+  const su_first     = document.getElementById('su_first');
+  const su_last      = document.getElementById('su_last');
+  const su_email     = document.getElementById('su_email');
+  const su_password  = document.getElementById('su_password');
+  const su_invite    = document.getElementById('su_invite');
+  const doSignUp     = document.getElementById('doSignUp');
+  const createMsg    = document.getElementById('createMsg');
+
   /* ========== UTILITIES ========== */
   const pad = (n)=> String(n).padStart(2,'0');
   const dateKey = (d)=> `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -805,12 +1017,6 @@
     const [y,m,d] = str.split('-').map(Number);
     if(!y || !m || !d) return null;
     return new Date(y,m-1,d);
-  }
-
-  function isSameDay(a,b){
-    return a.getFullYear() === b.getFullYear() &&
-           a.getMonth() === b.getMonth() &&
-           a.getDate() === b.getDate();
   }
 
   function openModal(){
@@ -824,14 +1030,8 @@
     bookingErrorEl.textContent = "";
   }
 
-  function setFocusDate(d){
-    focusDate = new Date(d);
-    viewYear = focusDate.getFullYear();
-    viewMonth = focusDate.getMonth();
-  }
-
-  function setViewToToday(){
-    setFocusDate(new Date());
+  function setFocusToToday(){
+    focusDate = new Date();
     renderCalendar();
   }
 
@@ -842,6 +1042,22 @@
     if(e < s){
       endDateInput.value = startDateInput.value;
     }
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function startOfWeek(d){
+    const res = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = res.getDay();
+    res.setDate(res.getDate() - day);
+    return res;
   }
 
   /* ========== QUICK TIME CHIPS ========== */
@@ -857,18 +1073,105 @@
     });
   })();
 
+  /* ========== AUTH MODAL LOGIC (same UX as home) ========== */
+  const say  = (t, isErr=false)=>{ authMsg.textContent = t; authMsg.style.color  = isErr ? '#ffb4b4' : '#9fb1c3'; };
+  const csay = (t, isErr=false)=>{ createMsg.textContent = t; createMsg.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+
+  function openAuth(){
+    authModal.classList.add('open');
+    authModal.setAttribute('aria-hidden','false');
+    say(""); csay("");
+  }
+  function closeAuthModal(){
+    authModal.classList.remove('open');
+    authModal.setAttribute('aria-hidden','true');
+  }
+
+  signinBtn?.addEventListener('click', openAuth);
+  closeAuthBtn?.addEventListener('click', closeAuthModal);
+  authModal?.addEventListener('click', e => { if(e.target === authModal) closeAuthModal(); });
+
+  function setAuthView(kind){
+    [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
+    [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
+    if (kind === 'in'){
+      tabSignIn.classList.add('active');
+      viewSignIn.classList.add('active');
+    } else {
+      tabSignUp.classList.add('active');
+      viewSignUp.classList.add('active');
+    }
+  }
+  tabSignIn.addEventListener('click', ()=>setAuthView('in'));
+  tabSignUp.addEventListener('click', ()=>setAuthView('up'));
+
+  // Sign in
+  doSignIn.addEventListener('click', async ()=>{
+    const email = si_email.value.trim();
+    const pass  = si_password.value;
+    if (!email || !pass) return say("Enter email and password.", true);
+    try{
+      await signInEmailPassword(email, pass);
+      say("Signed in.");
+      closeAuthModal();
+    }catch(err){ say(err.message, true); }
+  });
+
+  // Sign up (uses auth.js invite logic)
+  doSignUp.addEventListener('click', async ()=>{
+    const email = su_email.value.trim();
+    const pass  = su_password.value;
+    const code  = su_invite.value.trim();
+    const first = su_first.value.trim();
+    const last  = su_last.value.trim();
+
+    if (!email || !pass || !code || !first || !last){
+      return csay("First and last name, email, password, and invite code are required.", true);
+    }
+
+    try{
+      await signUpWithInvite({ email, password: pass, firstName: first, lastName: last, code });
+      csay("Account created! Check your email to verify.");
+      setAuthView('in');
+    }catch(err){ csay(err.message, true); }
+  });
+
+  // Reset password
+  doReset.addEventListener('click', async ()=>{
+    const email = si_email.value.trim();
+    if (!email) return say("Enter your email first.", true);
+    try{
+      await resetPassword(email);
+      say("Password reset email sent.");
+    }catch(err){ say(err.message, true); }
+  });
+
+  // Sign out
+  signOutBtn.addEventListener('click', async ()=>{
+    await signOut();
+    say("Signed out.");
+  });
+
+  // Enter key for auth fields
+  function handleEnter(e){
+    if(e.key !== 'Enter') return;
+    if (viewSignIn.classList.contains('active')) doSignIn.click();
+    else doSignUp.click();
+  }
+  [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
+    .forEach(el => el.addEventListener('keydown', handleEnter));
+
   /* ========== AIRCRAFT STATUS ========== */
   function subscribeAircraftStatus(){
     const qStatus = query(collection(db,"aircraftStatus"));
-    onSnapshot(qStatus, (snap)=>{
+    return onSnapshot(qStatus, (snap)=>{
       statusCardsEl.innerHTML = "";
       snap.forEach(docSnap=>{
-        if(!KNOWN_AIRCRAFT.has(docSnap.id)) return; // ignore random test docs
         const d = docSnap.data();
         const div = document.createElement('div');
         div.className = "tach-card";
         div.innerHTML = `
-          <div class="tach-title">${docSnap.id}</div>
+          <div class="tach-title">${escapeHtml(docSnap.id)}</div>
           <div class="tach-row"><span>Tach:</span><span>${d.currentTach ?? '—'}</span></div>
           <div style="margin-top:4px;font-size:.75rem;color:var(--muted);">
             Last updated: ${d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : '—'}
@@ -903,376 +1206,431 @@
     });
   }
 
+  function buildInstructorEmailBody(inst){
+    const first = firstNameInput.value || (currentRole?.profile?.firstName || "");
+    const last  = lastNameInput.value || (currentRole?.profile?.lastName || "");
+    const memberEmail = emailInput.value || (currentRole?.email || "");
+
+    const aircraft = aircraftSelect.value || "";
+    const title    = titleSelect.value || "";
+    const sDate    = startDateInput.value || "";
+    const eDate    = endDateInput.value || "";
+    const sTime    = startTimeInput.value || "";
+    const eTime    = endTimeInput.value || "";
+    const tachS    = tachStartInput.value || "";
+    const tachE    = tachEndInput.value || "";
+    const comments = commentsInput.value || "";
+
+    const dateRange = sDate && eDate && sDate !== eDate
+      ? `${sDate} to ${eDate}`
+      : (sDate || eDate || "");
+
+    const timeRange = (sTime || eTime)
+      ? `${sTime || 'N/A'} – ${eTime || 'N/A'}`
+      : "All-day / flexible";
+
+    return `Hi ${inst.name || 'Instructor'},
+
+This is ${first} ${last} (${memberEmail}).
+
+I'd like to schedule a ${title || 'flight'} in ${aircraft || 'aircraft'}.
+
+Requested date(s):
+  ${dateRange || 'N/A'}
+
+Requested time window:
+  ${timeRange}
+
+Tach (planned or last known):
+  Start: ${tachS || 'N/A'}
+  End:   ${tachE || 'N/A'}
+
+Additional notes:
+${comments || '(none)'}
+
+Please let me know if this works or what other times are available.
+
+Thank you,
+${first} ${last}`;
+  }
+
   instructorSelect.addEventListener('change', ()=>{
     const email = instructorSelect.value || "";
     const inst = instructors.find(i => i.email === email);
     instructorEmailDisplay.textContent = inst ? inst.email : "";
+
+    // If an instructor is chosen, launch the native email app with prefilled info
+    if(inst && email){
+      const subject = `Flight Reservation Request – ${aircraftSelect.value || ''} ${startDateInput.value || ''}`.trim();
+      const body    = buildInstructorEmailBody(inst);
+      const mailto  = `mailto:${encodeURIComponent(inst.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+    }
   });
 
   /* ========== BOOKINGS LOAD / RENDER ========== */
-
-  function bookingMatchesDateAndFilter(booking, dayDate){
-    if(aircraftFilter !== "all" && booking.aircraft !== aircraftFilter) return false;
-
-    const s = parseDateStr(booking.startDate);
-    const e = parseDateStr(booking.endDate || booking.startDate);
-    if(!s || !e) return false;
-
-    const dayK = dateKey(dayDate);
-    const startK = dateKey(s);
-    const endK = dateKey(e);
-
-    return dayK >= startK && dayK <= endK;
-  }
-
-  function buildDayCell(d){
-    const cell = document.createElement('div');
-    cell.className = "day-cell";
-
-    if(currentView === "month" && d.getMonth() !== viewMonth){
-      cell.classList.add('other-month');
-    }
-
-    const today = new Date();
-    if(isSameDay(d, today)){
-      cell.classList.add('today');
-    }
-
-    const dayNum = document.createElement('div');
-    dayNum.className = "day-num";
-    dayNum.textContent = d.getDate();
-    cell.appendChild(dayNum);
-
-    const dayBookings = bookings.filter(b => bookingMatchesDateAndFilter(b, d));
-
-    dayBookings.forEach(b=>{
-      const pill = document.createElement('div');
-      pill.className = "event-pill";
-
-      if(b.title === "Maintenance"){
-        pill.classList.add('event-maint');
-      }else if(currentUser && b.uid === currentUser.uid){
-        pill.classList.add('event-your');
-      }
-
-      const who = b.firstName || (b.email || "").split("@")[0] || "Member";
-      const labelAircraft = b.aircraft || "";
-      const labelTitle = b.title || "";
-      pill.textContent = `${labelAircraft} – ${labelTitle} (${who})`;
-
-      pill.addEventListener('click',(e)=>{
-        e.stopPropagation();
-        openEditBooking(b);
-        setFocusDate(d);
+  function subscribeBookings(){
+    const qBookings = query(collection(db,"bookings"));
+    return onSnapshot(qBookings, (snap)=>{
+      bookings = [];
+      snap.forEach(d=>{
+        const data = d.data() || {};
+        bookings.push({
+          id: d.id,
+          ...data
+        });
       });
-
-      cell.appendChild(pill);
+      renderCalendar();
+    }, (err)=>{
+      console.warn("bookings snapshot error:", err);
     });
+  }
 
-    cell.dataset.date = dateKey(d);
-    cell.addEventListener('click', ()=>{
-      openNewBookingFromDay(d);
-      setFocusDate(d);
+  function visibleBookingsForDate(d){
+    const key = dateKey(d);
+    return bookings.filter(b=>{
+      if(aircraftFilter !== 'all' && b.aircraft && b.aircraft !== aircraftFilter) return false;
+
+      const s = b.startDate || b.date || "";
+      const e = b.endDate || b.startDate || b.date || "";
+      if(!s && !e) return false;
+      const ok = key >= (s || key) && key <= (e || key);
+      return !!ok;
     });
-
-    return cell;
-  }
-
-  function renderMonthView(){
-    monthGridEl.innerHTML = "";
-    monthGridEl.style.gridTemplateColumns = "repeat(7,1fr)";
-    monthGridEl.style.gridAutoRows = "120px";
-
-    const firstOfMonth = new Date(viewYear, viewMonth, 1);
-    const startWeekday = firstOfMonth.getDay(); // 0=Sun
-    const startDate = new Date(viewYear, viewMonth, 1 - startWeekday);
-
-    for(let i = 0; i < 42; i++){
-      const d = new Date(startDate);
-      d.setDate(startDate.getDate() + i);
-      const cell = buildDayCell(d);
-      monthGridEl.appendChild(cell);
-    }
-  }
-
-  function renderWeekView(){
-    monthGridEl.innerHTML = "";
-    monthGridEl.style.gridTemplateColumns = "repeat(7,1fr)";
-    monthGridEl.style.gridAutoRows = "120px";
-
-    const weekStart = new Date(focusDate);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-
-    for(let i = 0; i < 7; i++){
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      const cell = buildDayCell(d);
-      monthGridEl.appendChild(cell);
-    }
-  }
-
-  function renderDayView(){
-    monthGridEl.innerHTML = "";
-    monthGridEl.style.gridTemplateColumns = "repeat(1,1fr)";
-    monthGridEl.style.gridAutoRows = "160px";
-
-    const d = new Date(focusDate);
-    const cell = buildDayCell(d);
-    monthGridEl.appendChild(cell);
   }
 
   function renderCalendar(){
-    if(!focusDate) setFocusDate(new Date());
+    if(!monthGridEl) return;
 
-    const labelDate = new Date(viewYear, viewMonth, 1);
-    const monthName = labelDate.toLocaleString(undefined, {
-      month:"long",
-      year:"numeric"
-    });
-    monthLabelEl.textContent = monthName;
+    const year  = focusDate.getFullYear();
+    const month = focusDate.getMonth();
 
-    // View pill active state
-    [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn => btn.classList.remove('active'));
-    if(currentView === "month") viewMonthBtn.classList.add('active');
-    else if(currentView === "week") viewWeekBtn.classList.add('active');
-    else viewDayBtn.classList.add('active');
+    const monthNames = ["January","February","March","April","May","June",
+                        "July","August","September","October","November","December"];
 
-    if(currentView === "month") renderMonthView();
-    else if(currentView === "week") renderWeekView();
-    else renderDayView();
-  }
+    // Label depends on view mode
+    if(viewMode === 'month'){
+      monthLabelEl.textContent = `${monthNames[month]} ${year}`;
+    } else if(viewMode === 'week'){
+      const start = startOfWeek(focusDate);
+      const end   = new Date(start);
+      end.setDate(end.getDate() + 6);
+      monthLabelEl.textContent = `Week of ${monthNames[start.getMonth()]} ${start.getDate()}, ${start.getFullYear()}`;
+    } else {
+      monthLabelEl.textContent = `Day – ${monthNames[month]} ${focusDate.getDate()}, ${year}`;
+    }
 
-  function subscribeBookings(){
-    const qBookings = query(collection(db,"bookings"));
-    onSnapshot(qBookings,(snap)=>{
-      bookings = [];
-      snap.forEach(docSnap=>{
-        bookings.push({
-          id: docSnap.id,
-          ...docSnap.data()
+    // Clear grid
+    monthGridEl.innerHTML = "";
+
+    const todayKey = dateKey(new Date());
+
+    if(viewMode === 'month'){
+      // Build standard month grid
+      const firstOfMonth = new Date(year, month, 1);
+      const start = startOfWeek(firstOfMonth);
+      const temp = new Date(start);
+
+      for(let i=0;i<42;i++){
+        const cell = document.createElement('div');
+        cell.className = "day-cell";
+
+        const cellKey = dateKey(temp);
+        if(temp.getMonth() !== month) cell.classList.add('other-month');
+        if(cellKey === todayKey) cell.classList.add('today');
+
+        const num = document.createElement('div');
+        num.className = 'day-num';
+        num.textContent = temp.getDate();
+        cell.appendChild(num);
+
+        const dayBookings = visibleBookingsForDate(temp);
+        dayBookings.forEach(b=>{
+          const pill = document.createElement('div');
+          pill.className = "event-pill";
+          if(b.title === "Maintenance") pill.classList.add('event-maint');
+          else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
+          else pill.classList.add('event-other');
+
+          const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
+          const title = b.title || "Booking";
+          pill.textContent = `${title} – ${who}`;
+          cell.appendChild(pill);
         });
+
+        cell.addEventListener('click', ()=>{
+          if(!currentUser){
+            openAuth();
+            return;
+          }
+          openBookingForDate(temp);
+        });
+
+        monthGridEl.appendChild(cell);
+        temp.setDate(temp.getDate() + 1);
+      }
+    } else if(viewMode === 'week'){
+      const start = startOfWeek(focusDate);
+      const temp = new Date(start);
+      for(let i=0;i<7;i++){
+        const cell = document.createElement('div');
+        cell.className = "day-cell";
+
+        const cellKey = dateKey(temp);
+        if(cellKey === todayKey) cell.classList.add('today');
+
+        const num = document.createElement('div');
+        num.className = 'day-num';
+        num.textContent = `${temp.getMonth()+1}/${temp.getDate()}`;
+        cell.appendChild(num);
+
+        const dayBookings = visibleBookingsForDate(temp);
+        dayBookings.forEach(b=>{
+          const pill = document.createElement('div');
+          pill.className = "event-pill";
+          if(b.title === "Maintenance") pill.classList.add('event-maint');
+          else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
+          else pill.classList.add('event-other');
+
+          const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
+          const title = b.title || "Booking";
+          pill.textContent = `${title} – ${who}`;
+          cell.appendChild(pill);
+        });
+
+        cell.addEventListener('click', ()=>{
+          if(!currentUser){
+            openAuth();
+            return;
+          }
+          openBookingForDate(temp);
+        });
+
+        monthGridEl.appendChild(cell);
+        temp.setDate(temp.getDate() + 1);
+      }
+    } else {
+      // Day view: single full-width cell
+      const cell = document.createElement('div');
+      cell.className = "day-cell";
+      cell.style.gridColumn = "1 / -1";
+
+      const cellKey = dateKey(focusDate);
+      if(cellKey === todayKey) cell.classList.add('today');
+
+      const num = document.createElement('div');
+      num.className = 'day-num';
+      num.textContent = `${focusDate.getMonth()+1}/${focusDate.getDate()}`;
+      cell.appendChild(num);
+
+      const dayBookings = visibleBookingsForDate(focusDate);
+      dayBookings.forEach(b=>{
+        const pill = document.createElement('div');
+        pill.className = "event-pill";
+        if(b.title === "Maintenance") pill.classList.add('event-maint');
+        else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
+        else pill.classList.add('event-other');
+
+        const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
+        const title = b.title || "Booking";
+        const times = (b.startTime || b.endTime)
+          ? ` (${b.startTime || '??'}–${b.endTime || '??'})`
+          : "";
+        pill.textContent = `${title} – ${who}${times}`;
+        cell.appendChild(pill);
       });
-      renderCalendar(); // ensure calendar updates whenever bookings change
-    });
+
+      cell.addEventListener('click', ()=>{
+        if(!currentUser){
+          openAuth();
+          return;
+        }
+        openBookingForDate(focusDate);
+      });
+
+      monthGridEl.appendChild(cell);
+    }
   }
 
-  function openNewBookingFromDay(dateObj){
-    clearBookingForm();
+  /* ========== BOOKING MODAL: OPEN / SAVE / DELETE ========== */
+  function openBookingForDate(d){
+    // New booking prefilled with date
     selectedBookingId = null;
+    bookingErrorEl.textContent = "";
     modalTitleEl.textContent = "New booking";
 
-    const dStr = dateKey(dateObj);
-    startDateInput.value = dStr;
-    endDateInput.value = dStr;
-
-    if(aircraftFilter !== "all"){
-      aircraftSelect.value = aircraftFilter;
-    }else{
-      aircraftSelect.value = "N78710";
-    }
-
-    deleteBookingBtn.style.display = "none";
-    bookingErrorEl.textContent = "";
-    saveBookingBtn.disabled = false;
-    openModal();
-  }
-
-  function clearBookingForm(){
-    aircraftSelect.value = "N78710";
-    titleSelect.value = "Training";
-
-    const todayStr = dateKey(new Date());
-    startDateInput.value = todayStr;
-    endDateInput.value = todayStr;
-
+    startDateInput.value = dateKey(d);
+    endDateInput.value   = dateKey(d);
     startTimeInput.value = "";
-    endTimeInput.value = "";
-
+    endTimeInput.value   = "";
     tachStartInput.value = "";
-    tachEndInput.value = "";
-    commentsInput.value = "";
-
+    tachEndInput.value   = "";
+    commentsInput.value  = "";
     instructorSelect.value = "";
     instructorEmailDisplay.textContent = "";
-    bookingErrorEl.textContent = "";
-  }
 
-  function openEditBooking(booking){
-    clearBookingForm();
-    selectedBookingId = booking.id;
-    modalTitleEl.textContent = "Edit booking";
+    deleteBookingBtn.style.display = "none";
 
-    aircraftSelect.value = booking.aircraft || "N78710";
-    titleSelect.value = booking.title || "Training";
-
-    startDateInput.value = booking.startDate || "";
-    endDateInput.value = booking.endDate || booking.startDate || "";
-
-    startTimeInput.value = booking.startTime || "";
-    endTimeInput.value   = booking.endTime || "";
-
-    firstNameInput.value = booking.firstName || firstNameInput.value;
-    lastNameInput.value  = booking.lastName || lastNameInput.value;
-    emailInput.value     = booking.email || emailInput.value;
-
-    instructorSelect.value = booking.instructorEmail || "";
-    const inst = instructors.find(i => i.email === booking.instructorEmail);
-    instructorEmailDisplay.textContent = inst ? inst.email : "";
-
-    tachStartInput.value  = booking.tachStart || "";
-    tachEndInput.value    = booking.tachEnd || "";
-    commentsInput.value   = booking.comments || "";
-
-    const canDelete = currentUser && (isAdmin || booking.uid === currentUser.uid);
-    deleteBookingBtn.style.display = canDelete ? "inline-flex" : "none";
-
-    bookingErrorEl.textContent = "";
-    saveBookingBtn.disabled = false;
     openModal();
   }
 
-  /* ========== SAVE / DELETE HANDLERS ========== */
+  function openBookingForEdit(b){
+    selectedBookingId = b.id;
+    bookingErrorEl.textContent = "";
+    modalTitleEl.textContent = "Edit booking";
 
-  function collectBookingForm(){
-    const aircraft = aircraftSelect.value || "N78710";
-    const title = titleSelect.value || "Training";
+    aircraftSelect.value = b.aircraft || "N78710";
+    titleSelect.value    = b.title || "Training";
+    startDateInput.value = b.startDate || "";
+    endDateInput.value   = b.endDate || b.startDate || "";
+    startTimeInput.value = b.startTime || "";
+    endTimeInput.value   = b.endTime || "";
+    tachStartInput.value = b.tachStart || "";
+    tachEndInput.value   = b.tachEnd || "";
+    commentsInput.value  = b.comments || "";
 
-    const startDate = startDateInput.value;
-    let endDate = endDateInput.value || startDate;
+    firstNameInput.value = b.firstName || currentRole?.profile?.firstName || "";
+    lastNameInput.value  = b.lastName || currentRole?.profile?.lastName || "";
+    emailInput.value     = b.email || currentRole?.email || "";
 
-    if(!startDate){
-      throw new Error("Start date is required.");
+    if(b.instructorEmail){
+      const inst = instructors.find(i => i.email === b.instructorEmail);
+      instructorSelect.value = b.instructorEmail;
+      instructorEmailDisplay.textContent = inst ? inst.email : b.instructorEmail;
+    } else {
+      instructorSelect.value = "";
+      instructorEmailDisplay.textContent = "";
     }
 
-    const s = parseDateStr(startDate);
-    const e = parseDateStr(endDate);
-    if(!s || !e){
-      throw new Error("Invalid start or end date.");
-    }
-    if(e < s){
-      endDate = startDate;
-    }
+    const isOwner = b.uid && currentRole && b.uid === currentRole.uid;
+    const isMaint = b.title === "Maintenance";
 
-    const startTime = startTimeInput.value || "";
-    const endTime = endTimeInput.value || "";
-
-    if(startTime && endTime && endDate === startDate && endTime < startTime){
-      throw new Error("End time cannot be earlier than start time.");
+    // UI for delete: admin can delete anything; member can delete own non-maintenance
+    if(currentRole?.isAdmin || (isOwner && !isMaint)){
+      deleteBookingBtn.style.display = "inline-block";
+    }else{
+      deleteBookingBtn.style.display = "none";
     }
 
-    const tachStart = tachStartInput.value.trim();
-    const tachEnd   = tachEndInput.value.trim();
+    openModal();
+  }
 
-    if((tachStart && !tachEnd) || (!tachStart && tachEnd)){
-      throw new Error("Please enter both Tach start and Tach end or leave both blank.");
+  async function saveBooking(){
+    if(!currentRole || !currentRole.uid){
+      bookingErrorEl.textContent = "Please sign in first.";
+      return;
     }
 
-    const instructorEmail = instructorSelect.value || "";
+    const aircraft = aircraftSelect.value;
+    const title    = titleSelect.value;
+    const sDate    = startDateInput.value;
+    const eDate    = endDateInput.value || sDate;
+    const sTime    = startTimeInput.value;
+    const eTime    = endTimeInput.value;
+    const tachS    = tachStartInput.value;
+    const tachE    = tachEndInput.value;
+    const comments = commentsInput.value || "";
 
-    return {
+    if(!aircraft || !sDate){
+      bookingErrorEl.textContent = "Aircraft and start date are required.";
+      return;
+    }
+
+    // Enforce dates
+    const sd = parseDateStr(sDate);
+    const ed = parseDateStr(eDate);
+    if(sd && ed && ed < sd){
+      bookingErrorEl.textContent = "End date cannot be before start date.";
+      return;
+    }
+
+    // Maintenance bookings only by admin (UI side; rules also enforce)
+    if(title === "Maintenance" && !currentRole.isAdmin){
+      bookingErrorEl.textContent = "Only admins can create Maintenance bookings.";
+      return;
+    }
+
+    const first = currentRole.profile?.firstName || "";
+    const last  = currentRole.profile?.lastName || "";
+    const email = currentRole.email || "";
+
+    const base = {
       aircraft,
       title,
-      startDate,
-      endDate,
-      startTime,
-      endTime,
-      firstName: firstNameInput.value || "",
-      lastName: lastNameInput.value || "",
-      email: emailInput.value || (currentUser ? currentUser.email : ""),
-      uid: currentUser ? currentUser.uid : null,
-      instructorEmail,
-      tachStart: tachStart || null,
-      tachEnd: tachEnd || null,
-      comments: commentsInput.value || ""
+      startDate: sDate,
+      endDate:   eDate,
+      startTime: sTime || "",
+      endTime:   eTime || "",
+      firstName: first,
+      lastName:  last,
+      email,
+      instructorEmail: instructorSelect.value || "",
+      tachStart: tachS || "",
+      tachEnd:   tachE || "",
+      comments,
+      uid: currentRole.uid,
+      updatedAt: serverTimestamp()
     };
-  }
-
-  async function handleSaveBooking(){
-    if(!currentUser){
-      bookingErrorEl.textContent = "You must be signed in to create or edit a booking.";
-      return;
-    }
 
     try{
-      bookingErrorEl.textContent = "";
-      saveBookingBtn.disabled = true;
-
-      const data = collectBookingForm();
-
       if(selectedBookingId){
-        const ref = doc(db,"bookings",selectedBookingId);
-        await updateDoc(ref,{
-          ...data,
-          updatedAt: serverTimestamp()
+        // Edit existing
+        const ref = doc(db,"bookings", selectedBookingId);
+        await updateDoc(ref, base);
+      } else {
+        // New
+        const ref = await addDoc(collection(db,"bookings"), {
+          ...base,
+          createdAt: serverTimestamp()
         });
-      }else{
-        const ref = doc(collection(db,"bookings"));
-        await setDoc(ref,{
-          ...data,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+        selectedBookingId = ref.id;
       }
-
       closeModal();
-    }catch(err){
-      console.error("Booking save error:", err);
-      bookingErrorEl.textContent = err?.message || "Failed to save booking. Please try again.";
-      saveBookingBtn.disabled = false;
+    }catch(e){
+      console.error(e);
+      bookingErrorEl.textContent = e.message || "Save failed.";
     }
   }
 
-  async function handleDeleteBooking(){
+  async function deleteBooking(){
     if(!selectedBookingId) return;
-    if(!currentUser){
-      bookingErrorEl.textContent = "You must be signed in to delete a booking.";
-      return;
-    }
-
-    const confirmDelete = window.confirm("Delete this booking? This cannot be undone.");
-    if(!confirmDelete) return;
-
+    if(!confirm("Delete this booking?")) return;
     try{
-      bookingErrorEl.textContent = "";
-      deleteBookingBtn.disabled = true;
-      const ref = doc(db,"bookings",selectedBookingId);
-      await deleteDoc(ref);
+      await deleteDoc(doc(db,"bookings", selectedBookingId));
       closeModal();
-    }catch(err){
-      console.error("Delete booking error:", err);
-      bookingErrorEl.textContent = err?.message || "Failed to delete booking. Check your permissions.";
-      deleteBookingBtn.disabled = false;
+    }catch(e){
+      alert(e.message);
     }
   }
 
-  /* ========== EXPORT CURRENT MONTH ========== */
-
+  /* ========== EXPORT (CURRENT MONTH) ========== */
   function exportCurrentMonth(){
-    if(viewYear == null || viewMonth == null){
-      alert("No month selected.");
+    const y = focusDate.getFullYear();
+    const m = focusDate.getMonth(); // 0-based
+    const start = new Date(y,m,1);
+    const end   = new Date(y,m+1,0);
+    const startStr = dateKey(start);
+    const endStr   = dateKey(end);
+
+    const rows = bookings.filter(b=>{
+      const s = b.startDate || "";
+      if(!s) return false;
+      return s >= startStr && s <= endStr;
+    });
+
+    if(!rows.length){
+      alert("No bookings for this month.");
       return;
     }
-
-    const monthStart = new Date(viewYear, viewMonth, 1);
-    const monthEnd   = new Date(viewYear, viewMonth + 1, 0); // last day of month
 
     const header = [
-      "Aircraft","Title",
-      "StartDate","EndDate",
-      "StartTime","EndTime",
-      "FirstName","LastName","Email",
-      "InstructorEmail",
-      "TachStart","TachEnd",
-      "Comments"
+      "Aircraft","Title","StartDate","EndDate","StartTime","EndTime",
+      "FirstName","LastName","Email","InstructorEmail",
+      "TachStart","TachEnd","Comments"
     ];
-    const rows = [header.join(",")];
 
-    bookings.forEach(b=>{
-      const s = parseDateStr(b.startDate);
-      const e = parseDateStr(b.endDate || b.startDate);
-      if(!s || !e) return;
-      if(e < monthStart || s > monthEnd) return; // no overlap with this month
-
+    const lines = [header.join(",")];
+    rows.forEach(b=>{
       const vals = [
         b.aircraft || "",
         b.title || "",
@@ -1288,163 +1646,144 @@
         b.tachEnd || "",
         (b.comments || "").replace(/\r?\n/g," ")
       ];
-
-      const line = vals
-        .map(v => `"${String(v).replace(/"/g,'""')}"`)
-        .join(",");
-      rows.push(line);
+      const escaped = vals.map(v => `"${String(v).replace(/"/g,'""')}"`);
+      lines.push(escaped.join(","));
     });
 
-    if(rows.length <= 1){
-      alert("No bookings for this month to export.");
-      return;
-    }
-
-    const csv = rows.join("\r\n");
-    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
+    const csv = lines.join("\r\n");
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url  = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const mStr = `${viewYear}-${pad(viewMonth+1)}`;
+    const mm = String(m+1).padStart(2,"0");
     a.href = url;
-    a.download = `flying64th-bookings-${mStr}.csv`;
+    a.download = `flying64th-bookings-${y}-${mm}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
-  /* ========== AUTH INIT + PAGE BOOTSTRAP ========== */
-
-  async function loadProfileNames(user){
-    try{
-      const profileRef = doc(db,"profiles",user.uid);
-      const profileSnap = await getDoc(profileRef);
-      if(profileSnap.exists()){
-        const p = profileSnap.data() || {};
-        if(p.firstName) firstNameInput.value = p.firstName;
-        if(p.lastName)  lastNameInput.value  = p.lastName;
-        if(p.email)     emailInput.value     = p.email;
-        return;
-      }
-    }catch(e){
-      console.warn("profile load error:", e);
-    }
-
-    const dn = user.displayName || "";
-    if(dn){
-      const [fn, ...rest] = dn.split(" ");
-      firstNameInput.value = fn || "";
-      lastNameInput.value  = rest.join(" ") || "";
-    }
-    emailInput.value = user.email || "";
-  }
-
-  onAuthChanged(async (user)=>{
-    if(!user){
-      window.location.href = "signin.html";
-      return;
-    }
-
-    currentUser = user;
-    await loadProfileNames(user);
-
-    try{
-      const roleInfo = await getMyRole();
-      isAdmin = !!roleInfo.isAdmin;
-    }catch(e){
-      console.warn("role load error:", e);
-    }
-
-    subscribeAircraftStatus();
-    loadInstructors();
-    subscribeBookings();
-    setViewToToday();
-  });
-
-  /* ========== EVENT WIRING ========== */
-
-  // Month/week/day nav
-  prevMonthBtn.addEventListener('click', ()=>{
-    if(currentView === "month"){
-      focusDate.setMonth(focusDate.getMonth() - 1);
-    }else if(currentView === "week"){
-      focusDate.setDate(focusDate.getDate() - 7);
-    }else{
-      focusDate.setDate(focusDate.getDate() - 1);
-    }
-    setFocusDate(focusDate);
-    renderCalendar();
-  });
-
-  nextMonthBtn.addEventListener('click', ()=>{
-    if(currentView === "month"){
-      focusDate.setMonth(focusDate.getMonth() + 1);
-    }else if(currentView === "week"){
-      focusDate.setDate(focusDate.getDate() + 7);
-    }else{
-      focusDate.setDate(focusDate.getDate() + 1);
-    }
-    setFocusDate(focusDate);
-    renderCalendar();
-  });
-
-  todayBtn.addEventListener('click', ()=>{
-    setViewToToday();
-  });
-
-  // View toggles
-  viewMonthBtn.addEventListener('click', ()=>{
-    currentView = "month";
-    renderCalendar();
-  });
-  viewWeekBtn.addEventListener('click', ()=>{
-    currentView = "week";
-    renderCalendar();
-  });
-  viewDayBtn.addEventListener('click', ()=>{
-    currentView = "day";
-    renderCalendar();
-  });
-
+  /* ========== EVENTS & AUTH STATE ========== */
   // Filters
-  filterPills.forEach(pill=>{
-    pill.addEventListener('click', ()=>{
-      filterPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      aircraftFilter = pill.dataset.aircraft || "all";
+  filterPills.forEach(p=>{
+    p.addEventListener('click', ()=>{
+      filterPills.forEach(x=>x.classList.remove('active'));
+      p.classList.add('active');
+      aircraftFilter = p.getAttribute('data-aircraft') || 'all';
       renderCalendar();
     });
   });
 
-  // Export
-  exportMonthBtn.addEventListener('click', exportCurrentMonth);
+  // View mode
+  function setViewMode(mode){
+    viewMode = mode;
+    [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn=>btn.classList.remove('active'));
+    if(mode === 'month') viewMonthBtn.classList.add('active');
+    if(mode === 'week')  viewWeekBtn.classList.add('active');
+    if(mode === 'day')   viewDayBtn.classList.add('active');
+    renderCalendar();
+  }
+  viewMonthBtn.addEventListener('click', ()=>setViewMode('month'));
+  viewWeekBtn.addEventListener('click', ()=>setViewMode('week'));
+  viewDayBtn.addEventListener('click', ()=>setViewMode('day'));
 
-  // New booking
-  newBookingBtn.addEventListener('click', ()=>{
-    const baseDate = new Date();
-    openNewBookingFromDay(baseDate);
+  // Nav period
+  prevPeriodBtn.addEventListener('click', ()=>{
+    if(viewMode === 'month'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth()-1, 1);
+    }else if(viewMode === 'week'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() - 7);
+    }else{
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() - 1);
+    }
+    renderCalendar();
   });
+  nextPeriodBtn.addEventListener('click', ()=>{
+    if(viewMode === 'month'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth()+1, 1);
+    }else if(viewMode === 'week'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() + 7);
+    }else{
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() + 1);
+    }
+    renderCalendar();
+  });
+  todayBtn.addEventListener('click', setFocusToToday);
 
-  // Date / time icon helpers
-  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.() || startDateInput.focus());
-  endDateIcon.addEventListener('click', ()=> endDateInput.showPicker?.() || endDateInput.focus());
-  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.() || startTimeInput.focus());
-  endTimeIcon.addEventListener('click', ()=> endTimeInput.showPicker?.() || endTimeInput.focus());
-
-  startDateInput.addEventListener('change', ensureEndAfterStart);
-  endDateInput.addEventListener('change', ensureEndAfterStart);
+  exportMonthBtn.addEventListener('click', exportCurrentMonth);
 
   // Modal buttons
   bookingCloseBtn.addEventListener('click', closeModal);
   cancelBookingBtn.addEventListener('click', closeModal);
-  saveBookingBtn.addEventListener('click', handleSaveBooking);
-  deleteBookingBtn.addEventListener('click', handleDeleteBooking);
+  saveBookingBtn.addEventListener('click', saveBooking);
+  deleteBookingBtn.addEventListener('click', deleteBooking);
 
-  modalBackdrop.addEventListener('click', (e)=>{
-    if(e.target === modalBackdrop){
-      closeModal();
+  startDateInput.addEventListener('change', ensureEndAfterStart);
+  endDateInput.addEventListener('change', ensureEndAfterStart);
+  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.());
+  endDateIcon.addEventListener('click', ()=> endDateInput.showPicker?.());
+  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.());
+  endTimeIcon.addEventListener('click', ()=> endTimeInput.showPicker?.());
+
+  newBookingBtn.addEventListener('click', ()=>{
+    if(!currentUser){
+      openAuth();
+      return;
+    }
+    openBookingForDate(focusDate);
+  });
+
+  // Auth state
+  onAuthChanged(async (user)=>{
+    currentUser = user || null;
+    if(!user){
+      signinBtn.textContent = "Sign In";
+      currentRole = null;
+      isAdmin = false;
+      bookings = [];
+      statusCardsEl.innerHTML = "";
+      if(unsubStatus){ unsubStatus(); unsubStatus = null; }
+      if(unsubBookings){ unsubBookings(); unsubBookings = null; }
+      renderCalendar();
+      return;
+    }
+
+    try{
+      currentRole = await getMyRole();
+      isAdmin = !!currentRole.isAdmin;
+      const email = currentRole.email || user.email || "";
+      const shortEmail = email.length > 25 ? email.slice(0,25) + "…" : email;
+      signinBtn.textContent = shortEmail ? `Account – ${shortEmail}` : "Account";
+
+      // Fill readonly name/email on form from profile
+      firstNameInput.value = currentRole.profile?.firstName || "";
+      lastNameInput.value  = currentRole.profile?.lastName || "";
+      emailInput.value     = currentRole.email || "";
+
+      // Maintenance option only for admins
+      const maintOpt = [...titleSelect.options].find(o => o.value === "Maintenance");
+      if(maintOpt){
+        if(!currentRole.isAdmin){
+          maintOpt.disabled = true;
+        }else{
+          maintOpt.disabled = false;
+        }
+      }
+
+      // Subscribe to status + bookings only when signed in
+      if(!unsubStatus)   unsubStatus   = subscribeAircraftStatus();
+      if(!unsubBookings) unsubBookings = subscribeBookings();
+
+      // Load instructors once
+      if(!instructors.length) loadInstructors();
+
+    }catch(e){
+      console.warn("getMyRole error:", e);
     }
   });
+
+  // Initial render
+  renderCalendar();
 </script>
 </body>
 </html>
