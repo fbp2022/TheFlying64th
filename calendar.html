@@ -233,7 +233,7 @@
       background:#0b1120;
     }
 
-    /* ===== CALENDAR (MONTH GRID) ===== */
+    /* ===== CALENDAR (MONTH / WEEK / DAY) ===== */
     .cal-shell{
       background:var(--card);
       border-radius:var(--radius);
@@ -249,14 +249,41 @@
       gap:12px;
       flex-wrap:wrap;
     }
+    .cal-left{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+    }
     .cal-month{
       font-weight:700;
       font-size:1.05rem;
     }
+    .cal-views{
+      display:flex;
+      gap:4px;
+      flex-wrap:wrap;
+    }
+    .view-pill{
+      border-radius:999px;
+      border:1px solid var(--rule);
+      background:#050812;
+      color:var(--muted);
+      font-size:.72rem;
+      padding:3px 8px;
+      cursor:pointer;
+    }
+    .view-pill.active{
+      border-color:var(--accent);
+      color:var(--ink);
+      background:#0b1120;
+    }
+
     .cal-nav{
       display:flex;
       gap:6px;
       align-items:center;
+      flex-wrap:wrap;
     }
     .cal-nav button{
       border-radius:999px;
@@ -456,7 +483,7 @@
       font-size:.72rem;
       cursor:pointer;
       background:#020617;
-      color:var(--muted);
+      color:#9fb1c3;
     }
     .time-chip:hover{
       border-color:var(--accent);
@@ -540,11 +567,16 @@
   <!-- CALENDAR -->
   <section class="cal-shell">
     <div class="cal-header">
-      <div class="cal-month" id="monthLabel">Month YYYY</div>
+      <div class="cal-left">
+        <div class="cal-month" id="monthLabel">Month YYYY</div>
+        <div class="cal-views">
+          <button id="viewMonthBtn" class="view-pill active">Month</button>
+          <button id="viewWeekBtn" class="view-pill">Week</button>
+          <button id="viewDayBtn" class="view-pill">Day</button>
+        </div>
+      </div>
       <div class="cal-nav">
-        <button id="monthOnlyLabel" style="opacity:.75;font-size:.72rem;border-radius:6px;">
-          Month view only for now
-        </button>
+        <button id="exportMonthBtn" class="btn" style="font-size:.75rem;padding:4px 8px;">Export</button>
         <button id="prevMonthBtn">&lt;</button>
         <button id="todayBtn" class="primary">Today</button>
         <button id="nextMonthBtn">&gt;</button>
@@ -705,7 +737,6 @@
 
   /* ========== GLOBAL STATE ========== */
   let currentUser = null;
-  let currentRole = null;
   let isAdmin = false;
 
   let viewYear, viewMonth;
@@ -713,6 +744,11 @@
   let aircraftFilter = "all";
   let instructors = [];
   let selectedBookingId = null;
+
+  let currentView = "month";   // "month" | "week" | "day"
+  let focusDate = new Date();  // central date for week/day nav
+
+  const KNOWN_AIRCRAFT = new Set(["N78710","N10921"]);
 
   /* DOM refs */
   const statusCardsEl   = document.getElementById('statusCards');
@@ -723,6 +759,10 @@
   const prevMonthBtn    = document.getElementById('prevMonthBtn');
   const nextMonthBtn    = document.getElementById('nextMonthBtn');
   const todayBtn        = document.getElementById('todayBtn');
+  const exportMonthBtn  = document.getElementById('exportMonthBtn');
+  const viewMonthBtn    = document.getElementById('viewMonthBtn');
+  const viewWeekBtn     = document.getElementById('viewWeekBtn');
+  const viewDayBtn      = document.getElementById('viewDayBtn');
 
   const modalBackdrop   = document.getElementById('bookingModalBackdrop');
   const modalTitleEl    = document.getElementById('bookingModalTitle');
@@ -784,11 +824,15 @@
     bookingErrorEl.textContent = "";
   }
 
+  function setFocusDate(d){
+    focusDate = new Date(d);
+    viewYear = focusDate.getFullYear();
+    viewMonth = focusDate.getMonth();
+  }
+
   function setViewToToday(){
-    const now = new Date();
-    viewYear = now.getFullYear();
-    viewMonth = now.getMonth();
-    renderMonth();
+    setFocusDate(new Date());
+    renderCalendar();
   }
 
   function ensureEndAfterStart(){
@@ -819,6 +863,7 @@
     onSnapshot(qStatus, (snap)=>{
       statusCardsEl.innerHTML = "";
       snap.forEach(docSnap=>{
+        if(!KNOWN_AIRCRAFT.has(docSnap.id)) return; // ignore random test docs
         const d = docSnap.data();
         const div = document.createElement('div');
         div.className = "tach-card";
@@ -873,82 +918,128 @@
     const e = parseDateStr(booking.endDate || booking.startDate);
     if(!s || !e) return false;
 
-    const dayKey = dateKey(dayDate);
-    const startKey = dateKey(s);
-    const endKey = dateKey(e);
+    const dayK = dateKey(dayDate);
+    const startK = dateKey(s);
+    const endK = dateKey(e);
 
-    return dayKey >= startKey && dayKey <= endKey;
+    return dayK >= startK && dayK <= endK;
   }
 
-  function renderMonth(){
-    if(viewYear == null || viewMonth == null) return;
+  function buildDayCell(d){
+    const cell = document.createElement('div');
+    cell.className = "day-cell";
 
-    const monthName = new Date(viewYear, viewMonth, 1).toLocaleString(undefined, {
+    if(currentView === "month" && d.getMonth() !== viewMonth){
+      cell.classList.add('other-month');
+    }
+
+    const today = new Date();
+    if(isSameDay(d, today)){
+      cell.classList.add('today');
+    }
+
+    const dayNum = document.createElement('div');
+    dayNum.className = "day-num";
+    dayNum.textContent = d.getDate();
+    cell.appendChild(dayNum);
+
+    const dayBookings = bookings.filter(b => bookingMatchesDateAndFilter(b, d));
+
+    dayBookings.forEach(b=>{
+      const pill = document.createElement('div');
+      pill.className = "event-pill";
+
+      if(b.title === "Maintenance"){
+        pill.classList.add('event-maint');
+      }else if(currentUser && b.uid === currentUser.uid){
+        pill.classList.add('event-your');
+      }
+
+      const who = b.firstName || (b.email || "").split("@")[0] || "Member";
+      const labelAircraft = b.aircraft || "";
+      const labelTitle = b.title || "";
+      pill.textContent = `${labelAircraft} – ${labelTitle} (${who})`;
+
+      pill.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        openEditBooking(b);
+        setFocusDate(d);
+      });
+
+      cell.appendChild(pill);
+    });
+
+    cell.dataset.date = dateKey(d);
+    cell.addEventListener('click', ()=>{
+      openNewBookingFromDay(d);
+      setFocusDate(d);
+    });
+
+    return cell;
+  }
+
+  function renderMonthView(){
+    monthGridEl.innerHTML = "";
+    monthGridEl.style.gridTemplateColumns = "repeat(7,1fr)";
+    monthGridEl.style.gridAutoRows = "120px";
+
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const startWeekday = firstOfMonth.getDay(); // 0=Sun
+    const startDate = new Date(viewYear, viewMonth, 1 - startWeekday);
+
+    for(let i = 0; i < 42; i++){
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const cell = buildDayCell(d);
+      monthGridEl.appendChild(cell);
+    }
+  }
+
+  function renderWeekView(){
+    monthGridEl.innerHTML = "";
+    monthGridEl.style.gridTemplateColumns = "repeat(7,1fr)";
+    monthGridEl.style.gridAutoRows = "120px";
+
+    const weekStart = new Date(focusDate);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+    for(let i = 0; i < 7; i++){
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const cell = buildDayCell(d);
+      monthGridEl.appendChild(cell);
+    }
+  }
+
+  function renderDayView(){
+    monthGridEl.innerHTML = "";
+    monthGridEl.style.gridTemplateColumns = "repeat(1,1fr)";
+    monthGridEl.style.gridAutoRows = "160px";
+
+    const d = new Date(focusDate);
+    const cell = buildDayCell(d);
+    monthGridEl.appendChild(cell);
+  }
+
+  function renderCalendar(){
+    if(!focusDate) setFocusDate(new Date());
+
+    const labelDate = new Date(viewYear, viewMonth, 1);
+    const monthName = labelDate.toLocaleString(undefined, {
       month:"long",
       year:"numeric"
     });
     monthLabelEl.textContent = monthName;
 
-    monthGridEl.innerHTML = "";
+    // View pill active state
+    [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn => btn.classList.remove('active'));
+    if(currentView === "month") viewMonthBtn.classList.add('active');
+    else if(currentView === "week") viewWeekBtn.classList.add('active');
+    else viewDayBtn.classList.add('active');
 
-    const firstOfMonth = new Date(viewYear, viewMonth, 1);
-    const startWeekday = firstOfMonth.getDay(); // 0=Sun
-
-    // Start from the Sunday of the first week that contains day 1
-    const startDate = new Date(viewYear, viewMonth, 1 - startWeekday);
-
-    const today = new Date();
-    for(let i = 0; i < 42; i++){
-      const d = new Date(startDate);
-      d.setDate(startDate.getDate() + i);
-
-      const cell = document.createElement('div');
-      cell.className = "day-cell";
-
-      if(d.getMonth() !== viewMonth){
-        cell.classList.add('other-month');
-      }
-      if(isSameDay(d, today)){
-        cell.classList.add('today');
-      }
-
-      const dayNum = document.createElement('div');
-      dayNum.className = "day-num";
-      dayNum.textContent = d.getDate();
-      cell.appendChild(dayNum);
-
-      const dayBookings = bookings.filter(b => bookingMatchesDateAndFilter(b, d));
-
-      dayBookings.forEach(b=>{
-        const pill = document.createElement('div');
-        pill.className = "event-pill";
-
-        if(b.title === "Maintenance"){
-          pill.classList.add('event-maint');
-        }else if(currentUser && b.uid === currentUser.uid){
-          pill.classList.add('event-your');
-        }
-
-        const who = b.firstName || (b.email || "").split("@")[0] || "Member";
-        const labelAircraft = b.aircraft || "";
-        const labelTitle = b.title || "";
-        pill.textContent = `${labelAircraft} – ${labelTitle} (${who})`;
-
-        pill.addEventListener('click',(e)=>{
-          e.stopPropagation();
-          openEditBooking(b);
-        });
-
-        cell.appendChild(pill);
-      });
-
-      cell.dataset.date = dateKey(d);
-      cell.addEventListener('click', ()=>{
-        openNewBookingFromDay(d);
-      });
-
-      monthGridEl.appendChild(cell);
-    }
+    if(currentView === "month") renderMonthView();
+    else if(currentView === "week") renderWeekView();
+    else renderDayView();
   }
 
   function subscribeBookings(){
@@ -961,7 +1052,7 @@
           ...docSnap.data()
         });
       });
-      renderMonth(); // ensure calendar updates whenever bookings change
+      renderCalendar(); // ensure calendar updates whenever bookings change
     });
   }
 
@@ -974,7 +1065,6 @@
     startDateInput.value = dStr;
     endDateInput.value = dStr;
 
-    // Pre-fill aircraft if a filter is applied
     if(aircraftFilter !== "all"){
       aircraftSelect.value = aircraftFilter;
     }else{
@@ -1155,6 +1245,74 @@
     }
   }
 
+  /* ========== EXPORT CURRENT MONTH ========== */
+
+  function exportCurrentMonth(){
+    if(viewYear == null || viewMonth == null){
+      alert("No month selected.");
+      return;
+    }
+
+    const monthStart = new Date(viewYear, viewMonth, 1);
+    const monthEnd   = new Date(viewYear, viewMonth + 1, 0); // last day of month
+
+    const header = [
+      "Aircraft","Title",
+      "StartDate","EndDate",
+      "StartTime","EndTime",
+      "FirstName","LastName","Email",
+      "InstructorEmail",
+      "TachStart","TachEnd",
+      "Comments"
+    ];
+    const rows = [header.join(",")];
+
+    bookings.forEach(b=>{
+      const s = parseDateStr(b.startDate);
+      const e = parseDateStr(b.endDate || b.startDate);
+      if(!s || !e) return;
+      if(e < monthStart || s > monthEnd) return; // no overlap with this month
+
+      const vals = [
+        b.aircraft || "",
+        b.title || "",
+        b.startDate || "",
+        b.endDate || "",
+        b.startTime || "",
+        b.endTime || "",
+        b.firstName || "",
+        b.lastName || "",
+        b.email || "",
+        b.instructorEmail || "",
+        b.tachStart || "",
+        b.tachEnd || "",
+        (b.comments || "").replace(/\r?\n/g," ")
+      ];
+
+      const line = vals
+        .map(v => `"${String(v).replace(/"/g,'""')}"`)
+        .join(",");
+      rows.push(line);
+    });
+
+    if(rows.length <= 1){
+      alert("No bookings for this month to export.");
+      return;
+    }
+
+    const csv = rows.join("\r\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const mStr = `${viewYear}-${pad(viewMonth+1)}`;
+    a.href = url;
+    a.download = `flying64th-bookings-${mStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   /* ========== AUTH INIT + PAGE BOOTSTRAP ========== */
 
   async function loadProfileNames(user){
@@ -1191,8 +1349,8 @@
     await loadProfileNames(user);
 
     try{
-      currentRole = await getMyRole(user.uid);
-      isAdmin = currentRole === "owner" || currentRole === "admin";
+      const roleInfo = await getMyRole();
+      isAdmin = !!roleInfo.isAdmin;
     }catch(e){
       console.warn("role load error:", e);
     }
@@ -1205,29 +1363,47 @@
 
   /* ========== EVENT WIRING ========== */
 
-  // Month nav
+  // Month/week/day nav
   prevMonthBtn.addEventListener('click', ()=>{
-    if(viewMonth == null) return;
-    viewMonth--;
-    if(viewMonth < 0){
-      viewMonth = 11;
-      viewYear--;
+    if(currentView === "month"){
+      focusDate.setMonth(focusDate.getMonth() - 1);
+    }else if(currentView === "week"){
+      focusDate.setDate(focusDate.getDate() - 7);
+    }else{
+      focusDate.setDate(focusDate.getDate() - 1);
     }
-    renderMonth();
+    setFocusDate(focusDate);
+    renderCalendar();
   });
 
   nextMonthBtn.addEventListener('click', ()=>{
-    if(viewMonth == null) return;
-    viewMonth++;
-    if(viewMonth > 11){
-      viewMonth = 0;
-      viewYear++;
+    if(currentView === "month"){
+      focusDate.setMonth(focusDate.getMonth() + 1);
+    }else if(currentView === "week"){
+      focusDate.setDate(focusDate.getDate() + 7);
+    }else{
+      focusDate.setDate(focusDate.getDate() + 1);
     }
-    renderMonth();
+    setFocusDate(focusDate);
+    renderCalendar();
   });
 
   todayBtn.addEventListener('click', ()=>{
     setViewToToday();
+  });
+
+  // View toggles
+  viewMonthBtn.addEventListener('click', ()=>{
+    currentView = "month";
+    renderCalendar();
+  });
+  viewWeekBtn.addEventListener('click', ()=>{
+    currentView = "week";
+    renderCalendar();
+  });
+  viewDayBtn.addEventListener('click', ()=>{
+    currentView = "day";
+    renderCalendar();
   });
 
   // Filters
@@ -1236,9 +1412,12 @@
       filterPills.forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       aircraftFilter = pill.dataset.aircraft || "all";
-      renderMonth();
+      renderCalendar();
     });
   });
+
+  // Export
+  exportMonthBtn.addEventListener('click', exportCurrentMonth);
 
   // New booking
   newBookingBtn.addEventListener('click', ()=>{
@@ -1247,10 +1426,10 @@
   });
 
   // Date / time icon helpers
-  startDateIcon.addEventListener('click', ()=> startDateInput.focus());
-  endDateIcon.addEventListener('click', ()=> endDateInput.focus());
-  startTimeIcon.addEventListener('click', ()=> startTimeInput.focus());
-  endTimeIcon.addEventListener('click', ()=> endTimeInput.focus());
+  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.() || startDateInput.focus());
+  endDateIcon.addEventListener('click', ()=> endDateInput.showPicker?.() || endDateInput.focus());
+  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.() || startTimeInput.focus());
+  endTimeIcon.addEventListener('click', ()=> endTimeInput.showPicker?.() || endTimeInput.focus());
 
   startDateInput.addEventListener('change', ensureEndAfterStart);
   endDateInput.addEventListener('change', ensureEndAfterStart);
