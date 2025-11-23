@@ -3,53 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendar - The Flying 64th</title>
+  <title>The Flying 64th – Calendar</title>
+  <meta name="description" content="Aircraft schedule for The Flying 64th Flying Club at Oliver Springs Airport (Braden Field)." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#0f1115;
-      --ink:#e9eef7;
-      --muted:#b9c2d0;
-      --panel:#151924;
-      --panel2:#0d1018;
-      --accent:#4da3ff;
-      --rule:rgba(255,255,255,.10);
-      --border:rgba(255,255,255,.12);
-      --radius:12px;
-
-      --blue:#4da3ff;   /* N78710 C172 / default bookings */
-      --green:#58d68d;  /* N10921 C150 / my bookings */
-      --red:#ff5c5c;    /* Maintenance */
+      --bg:#0b1117;
+      --ink:#e6edf3;
+      --muted:#9fb1c3;
+      --panel:#0f1722;
+      --rule:#1f2a38;
+      --accent:#58a6ff;
+      --accent-soft:#223c5c;
+      --card:#0f1722cc;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --own:#1f6f3b;
+      --other:#223c5c;
+      --maint:#7c1f1f;
     }
 
-    *{ box-sizing:border-box }
-    html,body{ height:100% }
-
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(circle at top,#161b2b 0,#05060a 46%,#020308 100%);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
       color:var(--ink);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      line-height:1.6;
     }
 
-    /* ===== NAV ===== */
+    /* ===== NAV (desktop + mobile hamburger) ===== */
     .site-header{
       position:sticky;
       top:0;
-      z-index:40;
-      backdrop-filter:saturate(160%) blur(12px);
-      background:linear-gradient(120deg,rgba(4,8,20,.95),rgba(4,10,30,.92));
+      z-index:50;
+      backdrop-filter:saturate(160%) blur(8px);
+      background:rgba(11,17,23,.75);
       border-bottom:1px solid var(--rule);
     }
     .nav{
-      max-width:1400px;
+      max-width:1200px;
       margin:0 auto;
       padding:12px 18px;
       display:flex;
       align-items:center;
-      justify-content:space-between;
       gap:12px;
     }
     .brand{
@@ -57,25 +58,27 @@
       align-items:center;
       gap:10px;
       font-weight:800;
+      letter-spacing:.2px;
       color:var(--ink);
       text-decoration:none;
       font-size:22px;
       white-space:nowrap;
     }
-    .brand img{ height:34px; width:auto; }
+    .brand img{ height:34px; width:auto }
 
     nav.links{
       display:flex;
-      gap:18px;
       align-items:center;
+      gap:18px;
       flex-wrap:nowrap;
+      margin-left:auto;
     }
     nav.links a{
       color:var(--muted);
       text-decoration:none;
       padding:8px 12px;
       border-radius:10px;
-      transition:.18s;
+      transition:all .18s ease;
       white-space:nowrap;
     }
     nav.links a:hover{
@@ -87,27 +90,32 @@
       background:var(--accent);
       font-weight:700;
     }
+
     .btn{
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.16);
       background:#0c1020;
       color:#eaf2ff;
-      padding:10px 14px;
+      padding:8px 12px;
       border-radius:10px;
-      font-weight:700;
+      font-weight:600;
       cursor:pointer;
+      text-decoration:none;
+      white-space:nowrap;
+      font-size:14px;
     }
     .btn.primary{
       background:linear-gradient(180deg,#2b6bb1,#1c4370);
       border:1px solid #2b6bb1;
+      color:#eaf2ff;
     }
-    #signinBtn{ margin-right:8px; cursor:pointer; }
 
     .hamburger{
       display:none;
+      margin-left:auto;
       background:none;
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.16);
       color:var(--ink);
-      padding:8px 10px;
+      padding:6px 10px;
       border-radius:10px;
       cursor:pointer;
       font-size:18px;
@@ -116,250 +124,200 @@
     @media (max-width:900px){
       .nav{
         position:relative;
+        padding:10px 14px;
       }
       nav.links{
         display:none;
         position:absolute;
         top:100%;
-        left:8px;
-        right:8px;
+        left:10px;
+        right:10px;
         margin-top:8px;
         flex-direction:column;
-        gap:8px;
+        gap:10px;
         padding:10px;
-        background:linear-gradient(180deg,var(--panel),var(--panel2));
+        background:#0f1722;
         border-radius:12px;
-        border:1px solid var(--border);
+        border:1px solid var(--rule);
       }
       nav.links.open{
         display:flex;
       }
-      .hamburger{
-        display:inline-flex;
-        margin-left:auto;
+      nav.links a{
+        width:100%;
+        text-align:left;
       }
       #signinBtn{
         width:100%;
         text-align:center;
       }
+      .hamburger{
+        display:inline-flex;
+      }
     }
 
-    /* ===== BANNER ===== */
-    .banner{
-      max-width:1400px;
-      margin:12px auto 0;
-      padding:0 18px;
+    /* ===== LAYOUT ===== */
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px 18px 28px;
     }
-    .banner-inner{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-left:4px solid var(--accent);
-      border-radius:12px;
-      padding:12px 14px;
-    }
-    .banner .icon{ font-size:22px }
-    .banner strong{ color:#cfe1ff }
-
-    /* ===== WRAP / TOOLBAR ===== */
-    .wrap{
-      max-width:1400px;
-      margin:16px auto 80px;
-      padding:0 18px;
-    }
-    .toolbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px;
-    }
-    .pills{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .pill{
-      border:1px solid var(--border);
-      background:#0c0f18;
-      color:#eaf2ff;
-      padding:8px 12px;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:14px;
-    }
-    .pill.active{
-      background:#0e1630;
-      border-color:rgba(77,163,255,.45);
-    }
-
-    /* ===== STATUS CARDS ===== */
-    .status-row{
+    .layout{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
+      grid-template-columns:280px 1fr;
+      gap:18px;
     }
+    @media (max-width:900px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
     .card{
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px 14px;
+      background:var(--card);
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px 16px 14px;
     }
-    .card h3{
-      margin:0 0 6px;
-      font-size:16px;
-    }
-    .chip{
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-    }
-    .chip.blue{
-      background:#1a2d46;
-      color:#cfe1ff;
-      border:1px solid rgba(77,163,255,.35);
-    }
-    .chip.green{
-      background:#123326;
-      color:#d7ffea;
-      border:1px solid rgba(88,214,141,.35);
-    }
-    .meter{
-      display:flex;
-      gap:16px;
-      color:#cfe1ff;
-    }
-    .meter b{ color:#fff }
-    .sub{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:6px;
-    }
+    .card h2{margin:0 0 8px;font-size:1.2rem}
+    .muted{color:var(--muted);font-size:14px}
 
-    /* ===== CALENDAR BAR ===== */
-    .calbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      padding:10px;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
+    /* Tach/Hobbs small card */
+    .status-card{
+      margin-top:10px;
+      padding:10px 12px;
       border-radius:12px;
-    }
-    .navbtns,
-    .viewbtns{
-      display:flex;
-      gap:6px;
-      align-items:center;
-    }
-    .sbtn{
-      border:1px solid var(--border);
-      background:#0c0f18;
-      color:#eaf2ff;
-      padding:8px 12px;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-    }
-    .title{
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-
-    /* ===== MONTH GRID ===== */
-    .calendar{
-      margin-top:12px;
-      width:100%;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:12px;
-      overflow:hidden;
-    }
-    .dow{
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      background:#0c0f18;
-      border-bottom:1px solid var(--border);
-    }
-    .dow div{
-      padding:10px;
-      text-align:center;
-      color:#cfe1ff;
-      font-weight:700;
+      border:1px solid var(--rule);
+      background:#0c131d;
       font-size:13px;
     }
-    .grid{
+    .status-title{
+      font-weight:600;
+      margin-bottom:2px;
+    }
+    .status-line{
+      color:var(--muted);
+    }
+
+    /* ===== MINI LEGEND ===== */
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .legend span{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:var(--other);
+    }
+    .legend-dot.own{background:var(--own);}
+    .legend-dot.maint{background:var(--maint);}
+
+    /* ===== CALENDAR ===== */
+    .cal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .cal-title{
+      font-size:18px;
+      font-weight:700;
+    }
+    .cal-nav{
+      display:flex;
+      gap:6px;
+    }
+    .cal-nav button{
+      border-radius:999px;
+      border:1px solid var(--rule);
+      background:#0b1117;
+      color:var(--ink);
+      padding:4px 8px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .cal-nav button:hover{
+      background:#111827;
+    }
+
+    .cal-grid{
+      border-radius:14px;
+      border:1px solid var(--rule);
+      overflow:hidden;
+      background:#050810;
+    }
+    .cal-row{
       display:grid;
       grid-template-columns:repeat(7,1fr);
     }
-    .cell{
-      min-height:120px;
-      border-right:1px solid var(--border);
-      border-bottom:1px solid var(--border);
-      padding:8px;
+    .cal-head-cell{
+      background:#050810;
+      padding:6px 8px;
+      font-size:12px;
+      text-align:center;
+      color:var(--muted);
+      border-bottom:1px solid var(--rule);
+    }
+    .cal-cell{
+      min-height:90px;
+      border-top:1px solid #111827;
+      border-right:1px solid #111827;
+      padding:4px 4px 2px;
+      font-size:11px;
       position:relative;
       cursor:pointer;
+      background:#050810;
     }
-    .cell:nth-child(7n){ border-right:none; }
-    .date{
-      position:absolute;
-      top:6px;
-      right:8px;
-      font-size:12px;
-      color:#cfe1ff;
-      padding:2px 6px;
-      border-radius:6px;
-      background:rgba(255,255,255,.05);
+    .cal-cell:nth-child(7n){
+      border-right:none;
     }
-    .other-month .date{ opacity:.35; }
-    .today .date{
-      background:#2b6bb1;
-      color:#001a33;
-      font-weight:800;
+    .cal-cell.other-month{
+      background:#020509;
+      color:#4b5563;
     }
-    .events{
-      margin-top:22px;
+    .cal-date-label{
+      font-weight:600;
+      font-size:11px;
+      margin-bottom:2px;
+    }
+    .cal-cell.today .cal-date-label{
+      color:var(--accent);
+    }
+    .cal-events{
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:2px;
+      margin-top:1px;
     }
     .evt{
-      font-size:12px;
-      padding:4px 6px;
-      border-radius:6px;
-      border:1px solid transparent;
-      white-space:nowrap;
+      border-radius:8px;
+      padding:1px 4px;
+      font-size:10px;
       overflow:hidden;
       text-overflow:ellipsis;
+      white-space:nowrap;
+      background:var(--other);
+      color:#e5efff;
     }
-    .evt.other{
-      background:#0e1d31;
-      border-color:#2b6bb1;
-    }
-    .evt.mine{
-      background:#0f261c;
-      border-color:#2b7a55;
-    }
-    .evt.maint{
-      background:#311010;
-      border-color:#b12b2b;
-    }
+    .evt.own{background:var(--own);}
+    .evt.maint{background:var(--maint);}
 
-    /* ===== AUTH MODAL (same pattern as home.html) ===== */
-    .auth-modal{
+    /* ===== MODALS (Auth + Booking) ===== */
+    .auth-modal,
+    .booking-modal{
       position:fixed;
       inset:0;
       background:rgba(0,0,0,.5);
@@ -367,9 +325,11 @@
       place-items:center;
       z-index:1000;
     }
-    .auth-modal.open{ display:grid; }
+    .auth-modal.open,
+    .booking-modal.open{display:grid;}
+
     .auth-card{
-      width:min(480px,92vw);
+      width:min(460px,92vw);
       background:#0f1722;
       color:#e6edf3;
       border:1px solid #1f2a38;
@@ -377,12 +337,26 @@
       padding:18px 18px 12px;
       position:relative;
     }
-    .auth-title{
-      margin:0 0 12px 0;
+    .booking-card{
+      width:min(900px,96vw);
+      max-height:90vh;
+      background:#050810;
+      color:#e6edf3;
+      border:1px solid #1f2a38;
+      border-radius:14px;
+      padding:18px 18px 14px;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+    .auth-title,
+    .booking-title{
+      margin:0 0 10px 0;
       font-size:20px;
       font-weight:800;
     }
-    .auth-x{
+    .auth-x,
+    .booking-x{
       position:absolute;
       right:14px;
       top:12px;
@@ -392,29 +366,42 @@
       font-size:18px;
       cursor:pointer;
     }
-    .auth-label{
+
+    .auth-label,
+    .bk-label{
       display:block;
       margin-top:10px;
       margin-bottom:4px;
       color:#9fb1c3;
       font-size:13px;
     }
-    .auth-input{
+    .auth-input,
+    .bk-input,
+    .bk-select,
+    .bk-textarea{
       width:100%;
-      padding:10px 12px;
+      padding:9px 11px;
       border-radius:10px;
       border:1px solid #1f2a38;
       background:#0b1117;
       color:#e6edf3;
+      font-size:13px;
     }
-    .auth-row{
+    .bk-input[type="time"]::-webkit-calendar-picker-indicator,
+    .bk-input[type="date"]::-webkit-calendar-picker-indicator{
+      opacity:0; /* hide native icon, we draw our own */
+    }
+
+    .auth-row,
+    .bk-row{
       display:flex;
       gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:12px;
+      align-items:flex-start;
+      margin-top:10px;
+      flex-wrap:wrap;
     }
-    .auth-btn{
+    .auth-btn,
+    .bk-btn{
       flex:1;
       padding:10px 12px;
       border-radius:10px;
@@ -422,8 +409,10 @@
       background:#141b26;
       color:#e6edf3;
       cursor:pointer;
+      font-size:14px;
     }
-    .auth-btn.primary{
+    .auth-btn.primary,
+    .bk-btn.primary{
       background:#58a6ff;
       color:#001a33;
       border-color:transparent;
@@ -434,14 +423,73 @@
       border:0;
       color:#9fb1c3;
       cursor:pointer;
+      font-size:13px;
     }
     .auth-msg{
       min-height:18px;
       color:#9fb1c3;
       margin:8px 0 4px;
+      font-size:13px;
     }
-    .view{ display:none; }
-    .view.active{ display:block; }
+
+    .booking-body{
+      overflow:auto;
+      margin-top:6px;
+      padding-right:4px;
+    }
+
+    .bk-col-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:780px){
+      .bk-col-2{grid-template-columns:1fr;}
+    }
+
+    .bk-field-with-icon{
+      position:relative;
+    }
+    .bk-icon-btn{
+      position:absolute;
+      right:7px;
+      top:50%;
+      transform:translateY(-50%);
+      border:none;
+      background:none;
+      padding:0;
+      cursor:pointer;
+      color:#f9fafb;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .bk-icon-btn svg{
+      width:16px;
+      height:16px;
+      stroke:currentColor;
+    }
+
+    .quick-times{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      margin-top:5px;
+    }
+    .quick-times button{
+      border-radius:999px;
+      border:1px solid var(--rule);
+      background:#020617;
+      color:#e5e7eb;
+      padding:2px 7px;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .quick-times button:hover{
+      background:#1f2937;
+    }
+
+    /* Tabs for auth modal */
     .tabs{
       display:flex;
       gap:8px;
@@ -455,6 +503,7 @@
       background:#141b26;
       color:#e6edf3;
       cursor:pointer;
+      font-size:14px;
     }
     .tab.active{
       background:#58a6ff;
@@ -462,961 +511,973 @@
       font-weight:700;
       border-color:transparent;
     }
+    .view{display:none;}
+    .view.active{display:block;}
 
-    /* ===== BOOKING MODAL ===== */
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.5);
-      display:none;
-      place-items:center;
-      z-index:900;
+    /* ===== FOOTER ===== */
+    .site-footer{
+      border-top:1px solid var(--rule);
+      background:#05070d;
     }
-    .modal-backdrop.open{ display:grid; }
-
-    .modal{
-      width:min(820px,92vw);
-      max-height:90vh;
-      overflow-y:auto;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 10px 40px rgba(0,0,0,.5);
-      color:#e6edf3;
-    }
-    .modal-header{
-      padding:12px 16px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .modal-title{
-      flex:1;
-      font-size:20px;
-      font-weight:700;
-      color:#e5f0ff;
-    }
-    .modal-body{
-      padding:16px;
-      display:grid;
-      gap:14px;
-    }
-    .row{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .row-3{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:12px;
-    }
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .field span{
+    .foot{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 18px 24px;
+      color:var(--muted);
       font-size:13px;
-      color:#cfe1ff;
-    }
-    input,select,textarea{
-      background:#0b0e15;
-      color:var(--ink);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px 12px;
-      outline:none;
-      width:100%;
-    }
-    textarea{
-      min-height:84px;
-      resize:vertical;
-    }
-    .inline{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .modal-footer{
-      padding:12px 16px;
-      border-top:1px solid var(--border);
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-      background:linear-gradient(180deg,var(--panel),var(--panel2));
-    }
-    .hint{
-      color:#b9c2d0;
-      font-size:12.5px;
-    }
-
-    @media (max-width:900px){
-      .status-row{ grid-template-columns:1fr; }
-      .row,
-      .row-3{ grid-template-columns:1fr; }
-    }
-
-    /* ===== Make date/time picker icons white (better on dark) ===== */
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator{
-      filter: invert(1);
+      text-align:center;
     }
   </style>
 </head>
 <body>
 
-  <!-- ===== NAV ===== -->
-  <header class="site-header">
-    <div class="nav">
-      <a href="home.html" class="brand">
-        <img src="images/flying64thlogo.png" alt="The Flying 64th Logo">
-        <span>The Flying 64th</span>
-      </a>
+<!-- ===== NAV ===== -->
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="home.html">
+      <img src="images/flying64thlogo.png" alt="The Flying 64th Logo" style="width:80px;height:auto;">
+      <span>The Flying 64th</span>
+    </a>
 
-      <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
+    <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
 
-      <nav class="links" id="mainNav">
-        <a id="signinBtn" class="btn">Sign In</a>
-        <a href="home.html">Home</a>
-        <a class="active" href="calendar.html">Calendar</a>
-        <a href="becomeamember.html">Become a Member</a>
-        <a href="photos.html">Photos</a>
-        <a href="members.html">Members</a>
-        <a href="poh&manuals.html">POH &amp; Manuals</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- ===== AUTH MODAL (same pattern as home.html) ===== -->
-  <div id="authModal" class="auth-modal" aria-hidden="true">
-    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
-
-      <div class="tabs">
-        <button id="tabSignIn" class="tab active">Sign In</button>
-        <button id="tabSignUp" class="tab">Create Account</button>
-      </div>
-
-      <!-- Sign In view -->
-      <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
-        <h3 id="authTitle" class="auth-title">Member Sign In</h3>
-        <label class="auth-label" for="si_email">Email</label>
-        <input id="si_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email">
-        <label class="auth-label" for="si_password">Password</label>
-        <input id="si_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="current-password">
-
-        <div class="auth-row">
-          <button id="doSignIn" class="auth-btn primary">Sign In</button>
-        </div>
-        <div class="auth-row">
-          <button id="doReset" class="auth-link" type="button">Forgot password?</button>
-          <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
-        </div>
-        <p id="authMsg" class="auth-msg"></p>
-      </section>
-
-      <!-- Create Account view -->
-      <section id="viewSignUp" class="view" aria-labelledby="createTitle">
-        <h3 id="createTitle" class="auth-title">Create a New Account</h3>
-        <label class="auth-label" for="su_first">First Name</label>
-        <input id="su_first" class="auth-input" type="text" placeholder="Your first name" required>
-        <label class="auth-label" for="su_last">Last Name</label>
-        <input id="su_last" class="auth-input" type="text" placeholder="Your last name" required>
-        <label class="auth-label" for="su_email">Email</label>
-        <input id="su_email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email" required>
-        <label class="auth-label" for="su_password">Password</label>
-        <input id="su_password" class="auth-input" type="password" placeholder="••••••••" autocomplete="new-password" required>
-        <label class="auth-label" for="su_invite">Invite Code</label>
-        <input id="su_invite" class="auth-input" type="text" placeholder="The invite code will be provided during onboarding." required>
-
-        <div class="auth-row">
-          <button id="doSignUp" class="auth-btn primary">Create Account</button>
-        </div>
-        <p id="createMsg" class="auth-msg"></p>
-      </section>
-    </div>
+    <nav class="links" id="mainNav">
+      <a id="signinBtn" class="btn">Sign In</a>
+      <a href="home.html">Home</a>
+      <a class="active" href="calendar.html">Calendar</a>
+      <a href="becomeamember.html">Become a Member</a>
+      <a href="photos.html">Photos</a>
+      <a href="members.html">Members</a>
+      <a href="poh&manuals.html">POH &amp; Manuals</a>
+    </nav>
   </div>
+</header>
 
-  <!-- ===== BANNER ===== -->
-  <div class="banner">
-    <div class="banner-inner">
-      <div class="icon">⏱️</div>
-      <div>
-        <strong>Reminder:</strong>
-        Enter <strong>Tach</strong> &amp; <strong>Hobbs</strong> start/end after every flight.
-        If the prior end is missing, you’ll be prompted to resolve it before <strong>closing your flight</strong>.
-      </div>
-    </div>
-  </div>
+<!-- ===== MAIN ===== -->
+<main class="container">
+  <div class="layout">
+    <!-- LEFT COLUMN -->
+    <section class="card">
+      <h2>Reminder</h2>
+      <p class="muted">After each flight, please update the tach &amp; hobbs for the aircraft.</p>
 
-  <main class="wrap">
-    <!-- ===== FILTER / NEW BOOKING ===== -->
-    <div class="toolbar">
-      <div class="pills" role="tablist">
-        <button class="pill active" data-filter="ALL">All</button>
-        <button class="pill" data-filter="N78710">N78710 — C172</button>
-        <button class="pill" data-filter="N10921">N10921 — C150</button>
+      <div id="statusCards">
+        <!-- aircraftStatus docs will render here -->
       </div>
-      <div>
-        <button id="newBooking" class="btn primary">＋ New booking</button>
-        <button class="btn" title="Export coming soon" disabled>Export</button>
-      </div>
-    </div>
 
-    <!-- ===== AIRCRAFT STATUS ===== -->
-    <div class="status-row">
-      <div class="card" id="card-78710">
-        <h3><span class="chip blue">N78710 — C172</span></h3>
-        <div class="meter">
-          <div>Tach: <b id="tach-78710">—</b></div>
-          <div>Hobbs: <b id="hobbs-78710">—</b></div>
-        </div>
-        <div class="sub" id="sub-78710">Last updated: —</div>
+      <div class="legend">
+        <span><span class="legend-dot own"></span> Your bookings</span>
+        <span><span class="legend-dot"></span> Other members</span>
+        <span><span class="legend-dot maint"></span> Maintenance</span>
       </div>
-      <div class="card" id="card-10921">
-        <h3><span class="chip green">N10921 — C150</span></h3>
-        <div class="meter">
-          <div>Tach: <b id="tach-10921">—</b></div>
-          <div>Hobbs: <b id="hobbs-10921">—</b></div>
-        </div>
-        <div class="sub" id="sub-10921">Last updated: —</div>
-      </div>
-    </div>
-
-    <!-- ===== CALENDAR BAR ===== -->
-    <div class="calbar">
-      <div class="navbtns">
-        <button class="sbtn" id="prevBtn">◀</button>
-        <button class="sbtn" id="todayBtn">Today</button>
-        <button class="sbtn" id="nextBtn">▶</button>
-      </div>
-      <div class="title" id="rangeTitle">Month</div>
-      <div class="viewbtns">
-        <span style="font-size:12px;color:#9fb1c3;">(Month view only for now)</span>
-      </div>
-    </div>
-
-    <!-- ===== CALENDAR GRID ===== -->
-    <section class="calendar" aria-label="Club bookings calendar">
-      <div class="dow">
-        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-      </div>
-      <div class="grid" id="grid"></div>
     </section>
-  </main>
 
-  <!-- ===== BOOKING MODAL ===== -->
-  <div id="bookingModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
-      <div class="modal-header">
-        <h3 id="bookingTitle" class="modal-title">New Booking</h3>
-        <button id="closeModal" class="auth-x" aria-label="Close">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="row">
-          <label class="field">
-            <span>Aircraft</span>
-            <select id="aircraft">
-              <option value="N78710">N78710 — C172</option>
-              <option value="N10921">N10921 — C150</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Title / purpose</span>
-            <select id="purpose">
-              <!-- Options populated via JS so we can hide Maintenance for non-admins -->
-            </select>
-          </label>
-        </div>
-
-        <!-- Dates / Times -->
-        <div class="row">
-          <label class="field">
-            <span>Start date</span>
-            <input id="startDate" type="date">
-          </label>
-          <label class="field">
-            <span>End date</span>
-            <input id="endDate" type="date">
-          </label>
-        </div>
-        <div class="row">
-          <div class="field">
-            <span>Time window</span>
-            <div class="inline">
-              <input id="startTime" type="time">
-              <span>to</span>
-              <input id="endTime" type="time">
-              <label style="font-size:12px;color:#9fb1c3;">(leave blank for all-day)</label>
-            </div>
-          </div>
-          <label class="field">
-            <span>Instructor</span>
-            <select id="instructorSelect">
-              <!-- N/A + instructors loaded from Firestore -->
-            </select>
-          </label>
-        </div>
-
-        <!-- Member info -->
-        <div class="row">
-          <label class="field">
-            <span>First name</span>
-            <input id="firstName" type="text" placeholder="Your first name">
-          </label>
-          <label class="field">
-            <span>Last name</span>
-            <input id="lastName" type="text" placeholder="Your last name">
-          </label>
-        </div>
-        <div class="row">
-          <label class="field">
-            <span>Email (from your account)</span>
-            <input id="emailField" type="email" readonly>
-          </label>
-          <div class="field">
-            <span>&nbsp;</span>
-            <div class="inline">
-              <small style="color:#9fb1c3;">Linked to your Flying 64th login.</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Meter Readings -->
-        <div class="row-3">
-          <label class="field"><span>Tach start</span><input id="tachStart" type="number" step="0.1" /></label>
-          <label class="field"><span>Tach end</span><input id="tachEnd" type="number" step="0.1" /></label>
-          <label class="field"><span>Tach delta</span><input id="tachDelta" type="number" step="0.1" readonly /></label>
-        </div>
-        <div class="row-3">
-          <label class="field"><span>Hobbs start</span><input id="hobbsStart" type="number" step="0.1" /></label>
-          <label class="field"><span>Hobbs end</span><input id="hobbsEnd" type="number" step="0.1" /></label>
-          <label class="field"><span>Hobbs delta</span><input id="hobbsDelta" type="number" step="0.1" readonly /></label>
-        </div>
-
-        <!-- Comments -->
-        <label class="field">
-          <span>Comments</span>
-          <textarea id="comments"></textarea>
-        </label>
-
-        <div id="authHint" class="hint" style="display:none">
-          Sign in to book. Your email is shared with members for coordination.
+    <!-- RIGHT COLUMN -->
+    <section class="card">
+      <div class="cal-header">
+        <div class="cal-title" id="calTitle">Calendar</div>
+        <div class="cal-nav">
+          <button id="todayBtn">Today</button>
+          <button id="prevBtn">◀</button>
+          <button id="nextBtn">▶</button>
+          <button id="newBookingBtn" class="btn primary">+ New booking</button>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button id="cancelModal" class="btn">Cancel</button>
-        <button id="saveBooking" class="btn primary" disabled>Save</button>
+      <div class="cal-grid" id="calendarGrid">
+        <!-- calendar rows generated by JS -->
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="foot">
+    © <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee
+  </div>
+</footer>
+
+<!-- ===== AUTH MODAL ===== -->
+<div id="authModal" class="auth-modal" aria-hidden="true">
+  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
+
+    <div class="tabs">
+      <button id="tabSignIn" class="tab active">Sign In</button>
+      <button id="tabSignUp" class="tab">Create Account</button>
+    </div>
+
+    <!-- Sign In -->
+    <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
+      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
+
+      <label class="auth-label" for="si_email">Email</label>
+      <input id="si_email" class="auth-input" type="email" autocomplete="email">
+
+      <label class="auth-label" for="si_password">Password</label>
+      <input id="si_password" class="auth-input" type="password" autocomplete="current-password">
+
+      <div class="auth-row">
+        <button id="doSignIn" class="auth-btn primary">Sign In</button>
+      </div>
+
+      <div class="auth-row">
+        <button id="doReset" class="auth-link" type="button">Forgot password?</button>
+        <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+      </div>
+
+      <p id="authMsg" class="auth-msg"></p>
+    </section>
+
+    <!-- Create Account -->
+    <section id="viewSignUp" class="view" aria-labelledby="createTitle">
+      <h3 id="createTitle" class="auth-title">Create a New Account</h3>
+
+      <label class="auth-label" for="su_first">First Name</label>
+      <input id="su_first" class="auth-input" type="text" required>
+
+      <label class="auth-label" for="su_last">Last Name</label>
+      <input id="su_last" class="auth-input" type="text" required>
+
+      <label class="auth-label" for="su_email">Email</label>
+      <input id="su_email" class="auth-input" type="email" autocomplete="email" required>
+
+      <label class="auth-label" for="su_password">Password</label>
+      <input id="su_password" class="auth-input" type="password" autocomplete="new-password" required>
+
+      <label class="auth-label" for="su_invite">Invite Code (new accounts)</label>
+      <input id="su_invite" class="auth-input" type="text" required>
+
+      <div class="auth-row">
+        <button id="doSignUp" class="auth-btn primary">Create Account</button>
+      </div>
+
+      <p id="createMsg" class="auth-msg"></p>
+    </section>
+  </div>
+</div>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div id="bookingModal" class="booking-modal" aria-hidden="true">
+  <div class="booking-card" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+    <button id="closeBooking" class="booking-x" aria-label="Close">✕</button>
+    <h3 id="bookingTitle" class="booking-title">New Booking</h3>
+
+    <div class="booking-body">
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_aircraft">Aircraft</label>
+          <select id="bk_aircraft" class="bk-select">
+            <option value="N78710">N78710 — C172</option>
+            <option value="N10921">N10921 — C150</option>
+          </select>
+        </div>
+        <div>
+          <label class="bk-label" for="bk_title">Title / purpose</label>
+          <select id="bk_title" class="bk-select">
+            <option value="Training">Training</option>
+            <option value="Rental">Rental</option>
+            <option value="Checkride">Checkride</option>
+            <option value="Checkride Prep">Checkride Prep</option>
+            <option value="Maintenance" data-admin-only="true">Maintenance (admin only)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_startDate">Start date</label>
+          <div class="bk-field-with-icon">
+            <input id="bk_startDate" class="bk-input" type="date">
+            <button type="button" class="bk-icon-btn" tabindex="-1">
+              <!-- calendar icon -->
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="17" rx="2" stroke-width="1.6"/>
+                <path d="M8 2v4M16 2v4M3 9h18" stroke-width="1.6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="bk-label" for="bk_endDate">End date</label>
+          <div class="bk-field-with-icon">
+            <input id="bk_endDate" class="bk-input" type="date">
+            <button type="button" class="bk-icon-btn" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="17" rx="2" stroke-width="1.6"/>
+                <path d="M8 2v4M16 2v4M3 9h18" stroke-width="1.6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_startTime">From</label>
+          <div class="bk-field-with-icon">
+            <input id="bk_startTime" class="bk-input" type="time">
+            <button type="button" class="bk-icon-btn" tabindex="-1">
+              <!-- clock icon -->
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
+                <path d="M12 8v4l3 2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="bk-label" for="bk_endTime">To</label>
+          <div class="bk-field-with-icon">
+            <input id="bk_endTime" class="bk-input" type="time">
+            <button type="button" class="bk-icon-btn" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
+                <path d="M12 8v4l3 2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <!-- QUICK-TIME BUTTONS -->
+          <div class="quick-times" id="quickTimes">
+            <button type="button" data-min="30">+0.5 hr</button>
+            <button type="button" data-min="60">+1 hr</button>
+            <button type="button" data-min="90">+1.5 hr</button>
+            <button type="button" data-min="120">+2 hr</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_instructor">Instructor</label>
+          <select id="bk_instructor" class="bk-select">
+            <option value="NA">N/A</option>
+            <!-- instructors from Firestore will be appended -->
+          </select>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_first">First name</label>
+          <input id="bk_first" class="bk-input" type="text">
+        </div>
+        <div>
+          <label class="bk-label" for="bk_last">Last name</label>
+          <input id="bk_last" class="bk-input" type="text">
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_email">Email (from your account)</label>
+          <input id="bk_email" class="bk-input" type="email" readonly>
+        </div>
+        <div>
+          <label class="bk-label">Linked to your Flying 64th login.</label>
+          <div class="muted" style="margin-top:3px;font-size:12px;">
+            Bookings are tied to your member account.
+          </div>
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_tachStart">Tach start</label>
+          <input id="bk_tachStart" class="bk-input" type="text">
+        </div>
+        <div>
+          <label class="bk-label" for="bk_tachEnd">Tach end</label>
+          <input id="bk_tachEnd" class="bk-input" type="text">
+        </div>
+      </div>
+
+      <div class="bk-col-2">
+        <div>
+          <label class="bk-label" for="bk_hobbsStart">Hobbs start</label>
+          <input id="bk_hobbsStart" class="bk-input" type="text">
+        </div>
+        <div>
+          <label class="bk-label" for="bk_hobbsEnd">Hobbs end</label>
+          <input id="bk_hobbsEnd" class="bk-input" type="text">
+        </div>
+      </div>
+
+      <div>
+        <label class="bk-label" for="bk_comments">Comments</label>
+        <textarea id="bk_comments" class="bk-textarea" rows="3"></textarea>
       </div>
     </div>
+
+    <div class="bk-row" style="margin-top:12px;">
+      <button id="cancelBooking" class="bk-btn">Cancel</button>
+      <button id="saveBooking" class="bk-btn primary">Save</button>
+    </div>
+    <p id="bookingMsg" class="auth-msg"></p>
   </div>
+</div>
 
-  <!-- ===== Highlight active nav & hamburger ===== -->
-  <script>
-    (function(){
-      const current = location.pathname.split('/').pop().toLowerCase();
-      document.querySelectorAll('nav.links a').forEach(a=>{
-        let href=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
-        href=href.replace(/&amp;/g,'&');
-        if(href && href===current) a.classList.add('active');
-      });
+<script type="module">
+  // Year + nav highlighting + hamburger
+  document.getElementById("y").textContent = new Date().getFullYear();
+  (function(){
+    const current = location.pathname.split('/').pop().toLowerCase();
+    const mainNav = document.getElementById('mainNav');
+    document.querySelectorAll('#mainNav a[href]').forEach(a=>{
+      let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
+      href = href.replace(/&amp;/g,'&');
+      if(href && href === current) a.classList.add('active');
+    });
 
-      const navToggle = document.getElementById('navToggle');
-      const mainNav  = document.getElementById('mainNav');
-      navToggle?.addEventListener('click', ()=>{
-        mainNav.classList.toggle('open');
-      });
-      mainNav?.querySelectorAll('a').forEach(link=>{
-        link.addEventListener('click', ()=> mainNav.classList.remove('open'));
-      });
+    const navToggle = document.getElementById('navToggle');
+    navToggle?.addEventListener('click', ()=> mainNav.classList.toggle('open'));
+    mainNav?.querySelectorAll('a').forEach(link=>{
+      link.addEventListener('click', ()=> mainNav.classList.remove('open'));
+    });
+  })();
+
+  // ===== Firebase & auth helpers =====
+  import { auth, db, onAuthChanged } from './auth.js';
+
+  import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    sendEmailVerification
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+  import {
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    collection,
+    addDoc,
+    getDocs,
+    onSnapshot,
+    query,
+    where,
+    orderBy,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+  // ===== STATE =====
+  let currentUser = null;
+  let isAdmin = false;
+  let bookingsCache = [];
+  let instructorsList = []; // { id, name, email }
+  const CORE_ADMIN_UIDS = new Set([
+    "dVErHNmaekS7qlBabaRzDzuRxlw2",  // you
+    "ADMIN_UID_2",
+    "ADMIN_UID_3"
+  ]);
+
+  let viewYear, viewMonth; // month index 0-11
+
+  // ===== DOM REFS =====
+
+  // auth
+  const authModal  = document.getElementById('authModal');
+  const openAuthBtn= document.getElementById('signinBtn');
+  const closeAuth  = document.getElementById('closeAuth');
+  const tabSignIn  = document.getElementById('tabSignIn');
+  const tabSignUp  = document.getElementById('tabSignUp');
+  const viewSignIn = document.getElementById('viewSignIn');
+  const viewSignUp = document.getElementById('viewSignUp');
+  const si_email   = document.getElementById('si_email');
+  const si_password= document.getElementById('si_password');
+  const doSignIn   = document.getElementById('doSignIn');
+  const doReset    = document.getElementById('doReset');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const authMsg    = document.getElementById('authMsg');
+
+  const su_first   = document.getElementById('su_first');
+  const su_last    = document.getElementById('su_last');
+  const su_email   = document.getElementById('su_email');
+  const su_password= document.getElementById('su_password');
+  const su_invite  = document.getElementById('su_invite');
+  const doSignUp   = document.getElementById('doSignUp');
+  const createMsg  = document.getElementById('createMsg');
+
+  // calendar
+  const calTitle   = document.getElementById('calTitle');
+  const calGrid    = document.getElementById('calendarGrid');
+  const prevBtn    = document.getElementById('prevBtn');
+  const nextBtn    = document.getElementById('nextBtn');
+  const todayBtn   = document.getElementById('todayBtn');
+  const newBookingBtn = document.getElementById('newBookingBtn');
+  const statusCards = document.getElementById('statusCards');
+
+  // booking modal
+  const bookingModal   = document.getElementById('bookingModal');
+  const closeBooking   = document.getElementById('closeBooking');
+  const cancelBooking  = document.getElementById('cancelBooking');
+  const saveBookingBtn = document.getElementById('saveBooking');
+  const bookingMsg     = document.getElementById('bookingMsg');
+
+  const bk_aircraft   = document.getElementById('bk_aircraft');
+  const bk_title      = document.getElementById('bk_title');
+  const bk_startDate  = document.getElementById('bk_startDate');
+  const bk_endDate    = document.getElementById('bk_endDate');
+  const bk_startTime  = document.getElementById('bk_startTime');
+  const bk_endTime    = document.getElementById('bk_endTime');
+  const bk_instructor = document.getElementById('bk_instructor');
+  const bk_first      = document.getElementById('bk_first');
+  const bk_last       = document.getElementById('bk_last');
+  const bk_email      = document.getElementById('bk_email');
+  const bk_tachStart  = document.getElementById('bk_tachStart');
+  const bk_tachEnd    = document.getElementById('bk_tachEnd');
+  const bk_hobbsStart = document.getElementById('bk_hobbsStart');
+  const bk_hobbsEnd   = document.getElementById('bk_hobbsEnd');
+  const bk_comments   = document.getElementById('bk_comments');
+  const quickTimes    = document.getElementById('quickTimes');
+
+  // ===== UTIL =====
+  const say  = (t, isErr=false)=>{ authMsg.textContent=t; authMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+  const csay = (t, isErr=false)=>{ createMsg.textContent=t; createMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+  const bsay = (t, isErr=false)=>{ bookingMsg.textContent=t; bookingMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+
+  function dateToKey(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+
+  function parseDate(str){
+    const [y,m,d] = str.split("-").map(Number);
+    if(!y||!m||!d) return null;
+    return new Date(y, m-1, d);
+  }
+
+  function addMinutesToTimeStr(timeStr, minutes){
+    if(!timeStr) return "";
+    const [h,m] = timeStr.split(":").map(Number);
+    if(isNaN(h)||isNaN(m)) return "";
+    let total = h*60 + m + minutes;
+    total = ((total % (24*60)) + (24*60)) % (24*60);
+    const hh = Math.floor(total/60);
+    const mm = total % 60;
+    return `${pad2(hh)}:${pad2(mm)}`;
+  }
+
+  function openAuth(){
+    authModal.classList.add('open');
+    authModal.setAttribute('aria-hidden','false');
+    say(""); csay("");
+  }
+  function closeAuthModal(){
+    authModal.classList.remove('open');
+    authModal.setAttribute('aria-hidden','true');
+  }
+  openAuthBtn?.addEventListener('click', openAuth);
+  closeAuth?.addEventListener('click', closeAuthModal);
+  authModal?.addEventListener('click', e=>{ if(e.target===authModal) closeAuthModal(); });
+
+  function setAuthView(kind){
+    [tabSignIn,tabSignUp].forEach(t=>t.classList.remove('active'));
+    [viewSignIn,viewSignUp].forEach(v=>v.classList.remove('active'));
+    if(kind==='in'){ tabSignIn.classList.add('active'); viewSignIn.classList.add('active'); }
+    else{ tabSignUp.classList.add('active'); viewSignUp.classList.add('active'); }
+  }
+  tabSignIn?.addEventListener('click',()=>setAuthView('in'));
+  tabSignUp?.addEventListener('click',()=>setAuthView('up'));
+
+  // Booking modal open/close
+  function openBooking(prefillDateStr){
+    if(!currentUser){
+      openAuth();
+      return;
+    }
+    bookingMsg.textContent = "";
+    // default dates
+    const todayKey = prefillDateStr ||
+      dateToKey(new Date());
+    bk_startDate.value = todayKey;
+    // if end date blank or before start, set to same
+    if(!bk_endDate.value || bk_endDate.value < todayKey){
+      bk_endDate.value = todayKey;
+    }
+    bk_startTime.value = "";
+    bk_endTime.value = "";
+    bk_tachStart.value = "";
+    bk_tachEnd.value = "";
+    bk_hobbsStart.value = "";
+    bk_hobbsEnd.value = "";
+    bk_comments.value = "";
+    // default title
+    bk_title.value = "Training";
+
+    // default member info
+    bk_email.value = currentUser.email || "";
+    // Pull profile for first/last if available
+    (async ()=>{
+      try{
+        const snap = await getDoc(doc(db,"profiles",currentUser.uid));
+        if(snap.exists()){
+          const d = snap.data();
+          if(d.firstName) bk_first.value = d.firstName;
+          if(d.lastName)  bk_last.value = d.lastName;
+        }else{
+          const guess = (currentUser.email||"").split("@")[0] || "";
+          bk_first.value = bk_first.value || guess;
+        }
+      }catch{/* ignore */}
     })();
-  </script>
 
-  <!-- ===== Firebase auth + calendar wiring via auth.js ===== -->
-  <script type="module">
-    import {
-      auth,
-      db,
-      onAuthChanged,
-      signInEmailPassword,
-      signUpWithInvite,
-      resetPassword,
-      signOut
-    } from "./auth.js";
+    bookingModal.classList.add('open');
+    bookingModal.setAttribute('aria-hidden','false');
+  }
+  function closeBookingModal(){
+    bookingModal.classList.remove('open');
+    bookingModal.setAttribute('aria-hidden','true');
+  }
+  closeBooking?.addEventListener('click', closeBookingModal);
+  cancelBooking?.addEventListener('click', closeBookingModal);
+  bookingModal?.addEventListener('click', e=>{ if(e.target===bookingModal) closeBookingModal(); });
 
-    import {
-      collection,
-      addDoc,
-      serverTimestamp,
-      onSnapshot,
-      getDocs,
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-    /* ---------- AUTH UI REFS (same pattern as home.html) ---------- */
-    const signinBtn  = document.getElementById('signinBtn');
-
-    // Auth modal + tabs
-    const authModal  = document.getElementById('authModal');
-    const closeAuth  = document.getElementById('closeAuth');
-    const tabSignIn  = document.getElementById('tabSignIn');
-    const tabSignUp  = document.getElementById('tabSignUp');
-    const viewSignIn = document.getElementById('viewSignIn');
-    const viewSignUp = document.getElementById('viewSignUp');
-
-    // Sign-in inputs
-    const si_email    = document.getElementById('si_email');
-    const si_password = document.getElementById('si_password');
-    const doSignInBtn = document.getElementById('doSignIn');
-    const doResetBtn  = document.getElementById('doReset');
-    const signOutBtn  = document.getElementById('signOutBtn');
-    const authMsg     = document.getElementById('authMsg');
-
-    // Sign-up inputs
-    const su_first    = document.getElementById('su_first');
-    const su_last     = document.getElementById('su_last');
-    const su_email    = document.getElementById('su_email');
-    const su_password = document.getElementById('su_password');
-    const su_invite   = document.getElementById('su_invite');
-    const doSignUpBtn = document.getElementById('doSignUp');
-    const createMsg   = document.getElementById('createMsg');
-
-    // Calendar-specific auth deps
-    const emailField  = document.getElementById('emailField');
-    const authHint    = document.getElementById('authHint');
-    const saveBtn     = document.getElementById('saveBooking');
-
-    // Booking form fields
-    const aircraftSel   = document.getElementById('aircraft');
-    const purposeSel    = document.getElementById('purpose');
-    const instructorSel = document.getElementById('instructorSelect');
-    const startDateEl   = document.getElementById('startDate');
-    const endDateEl     = document.getElementById('endDate');
-    const startTimeEl   = document.getElementById('startTime');
-    const endTimeEl     = document.getElementById('endTime');
-    const firstNameEl   = document.getElementById('firstName');
-    const lastNameEl    = document.getElementById('lastName');
-    const commentsEl    = document.getElementById('comments');
-
-    const say  = (t, err=false)=>{ authMsg.textContent=t||""; authMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
-    const csay = (t, err=false)=>{ createMsg.textContent=t||""; createMsg.style.color=err?'#ffb4b4':'#9fb1c3'; };
-
-    let currentUser = null;
-    let isAdmin = false;
-    let bookings = [];
-
-    /* ---------- Auth modal open/close & tabs ---------- */
-    function openAuth(){
-      authModal.classList.add('open');
-      authModal.setAttribute('aria-hidden','false');
-      say("");
-      csay("");
-    }
-    function closeAuthModal(){
-      authModal.classList.remove('open');
-      authModal.setAttribute('aria-hidden','true');
-    }
-
-    signinBtn?.addEventListener('click', openAuth);
-    closeAuth?.addEventListener('click', closeAuthModal);
-    authModal?.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
-
-    function activate(view){
-      [tabSignIn, tabSignUp].forEach(t=>t.classList.remove('active'));
-      [viewSignIn, viewSignUp].forEach(v=>v.classList.remove('active'));
-      if (view === 'in'){
-        tabSignIn.classList.add('active');
-        viewSignIn.classList.add('active');
-      } else {
-        tabSignUp.classList.add('active');
-        viewSignUp.classList.add('active');
-      }
-    }
-    tabSignIn.addEventListener('click', ()=>activate('in'));
-    tabSignUp.addEventListener('click', ()=>activate('up'));
-
-    // Deep link #signin
-    if (location.hash === '#signin') openAuth();
-    window.addEventListener('hashchange', ()=>{ if (location.hash === '#signin') openAuth(); });
-
-    /* ---------- Role + options helpers ---------- */
-    async function loadRole(user){
-      isAdmin = false;
-      if (!user) { updatePurposeOptions(); return; }
-      try{
-        const snap = await getDoc(doc(db,'profiles', user.uid));
-        const role = (snap.exists() ? (snap.data().role || '') : '').toLowerCase();
-        if (role === 'admin') isAdmin = true;
-      }catch(err){
-        console.error('loadRole error', err);
-      }
-      updatePurposeOptions();
-    }
-
-    function updatePurposeOptions(){
-      if (!purposeSel) return;
-      const prev = purposeSel.value;
-      const base = ['Training','Rental','Checkride','Checkride Prep'];
-      purposeSel.innerHTML = '';
-      base.forEach(label=>{
-        const opt = document.createElement('option');
-        opt.value = label;
-        opt.textContent = label;
-        purposeSel.appendChild(opt);
+  // quick time buttons
+  if(quickTimes){
+    quickTimes.querySelectorAll("button[data-min]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const mins = Number(btn.dataset.min||"0");
+        const base = bk_startTime.value || "00:00";
+        const newEnd = addMinutesToTimeStr(base, mins);
+        if(newEnd) bk_endTime.value = newEnd;
       });
-      if (isAdmin){
-        const opt = document.createElement('option');
-        opt.value = 'Maintenance';
-        opt.textContent = 'Maintenance';
-        purposeSel.appendChild(opt);
-      }
-      // restore previous if still valid, otherwise default to Training
-      const ok = [...purposeSel.options].some(o=>o.value===prev);
-      purposeSel.value = ok ? prev : 'Training';
+    });
+  }
+
+  // keep end date >= start date
+  bk_startDate.addEventListener("change", ()=>{
+    if(bk_endDate.value && bk_endDate.value < bk_startDate.value){
+      bk_endDate.value = bk_startDate.value;
+    }
+  });
+
+  // ===== AUTH HANDLERS =====
+  doSignIn?.addEventListener('click', async ()=>{
+    const email = si_email.value.trim();
+    const pass  = si_password.value;
+    if(!email || !pass) return say("Enter email and password.", true);
+    try{
+      await signInWithEmailAndPassword(auth, email, pass);
+      say("Signed in.");
+      closeAuthModal();
+      setAuthView('in');
+    }catch(err){ say(err.message,true); }
+  });
+
+  doSignUp?.addEventListener('click', async ()=>{
+    const email = su_email.value.trim();
+    const pass  = su_password.value;
+    const code  = (su_invite.value||"").trim();
+    const first = su_first.value.trim();
+    const last  = su_last.value.trim();
+    if(!email || !pass || !code || !first || !last){
+      return csay("First and last name, email, password, and invite code are required.", true);
+    }
+    try{
+      // Invite document: invites/{code}
+      const inviteRef  = doc(db, "invites", code);
+      const inviteSnap = await getDoc(inviteRef);
+      if(!inviteSnap.exists()) return csay("Invalid invite code.", true);
+      const d = inviteSnap.data();
+      if(d.disabled === true) return csay("This invite code is disabled.", true);
+      if(d.used === true && d.multi !== true) return csay("This invite code has already been used.", true);
+
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await sendEmailVerification(cred.user);
+
+      const baseData = {
+        uid: cred.user.uid,
+        email,
+        firstName:first,
+        lastName:last,
+        emailVerified:false,
+        active:true,
+        role:"member",
+        createdAt:serverTimestamp(),
+        updatedAt:serverTimestamp()
+      };
+      await Promise.all([
+        setDoc(doc(db,"profiles",cred.user.uid), baseData, {merge:true}),
+        setDoc(doc(db,"members", cred.user.uid), baseData, {merge:true})
+      ]);
+      await updateDoc(inviteRef,{
+        used:true,
+        usedByLast:cred.user.uid,
+        usedAtLast:serverTimestamp()
+      });
+
+      csay("Account created! Check your inbox to verify your email.");
+      setAuthView('in');
+    }catch(err){ csay(err.message,true); }
+  });
+
+  doReset?.addEventListener('click', async ()=>{
+    const email = si_email.value.trim();
+    if(!email) return say("Enter your email first.", true);
+    try{
+      await sendPasswordResetEmail(auth, email);
+      say("Password reset email sent.");
+    }catch(err){ say(err.message,true); }
+  });
+
+  signOutBtn?.addEventListener('click', async ()=>{
+    await auth.signOut();
+    say("Signed out.");
+  });
+
+  function handleAuthEnter(e){
+    if(e.key !== "Enter") return;
+    if(viewSignIn.classList.contains('active')) doSignIn.click();
+    else doSignUp.click();
+  }
+  [si_email,si_password,su_first,su_last,su_email,su_password,su_invite]
+    .forEach(el=> el?.addEventListener('keydown',handleAuthEnter));
+
+  // ===== LOAD ROLE & INSTRUCTORS =====
+  async function reloadRoleAndProfile(){
+    isAdmin = false;
+    if(!currentUser) return;
+    if(CORE_ADMIN_UIDS.has(currentUser.uid)){
+      isAdmin = true;
+    }else{
+      try{
+        const snap = await getDoc(doc(db,"profiles",currentUser.uid));
+        if(snap.exists()){
+          const role = (snap.data().role || "").toLowerCase();
+          if(role === "admin") isAdmin = true;
+        }
+      }catch{/* ignore */}
     }
 
-    async function loadInstructors(){
-      if (!instructorSel) return;
-      instructorSel.innerHTML = '';
-      const naOpt = document.createElement('option');
-      naOpt.value = '';
-      naOpt.textContent = 'N/A';
-      instructorSel.appendChild(naOpt);
+    // hide Maintenance option if not admin
+    const maintOption = Array.from(bk_title.options).find(o=>o.value==="Maintenance");
+    if(maintOption){
+      maintOption.disabled = !isAdmin;
+      maintOption.hidden   = !isAdmin;
+      if(!isAdmin && bk_title.value==="Maintenance"){
+        bk_title.value = "Training";
+      }
+    }
+  }
 
-      try{
-        const snap = await getDocs(collection(db,'instructors'));
-        snap.forEach(docu=>{
-          const data = docu.data() || {};
-          Object.entries(data).forEach(([name,email])=>{
-            const opt = document.createElement('option');
-            opt.value = String(email || '').trim();
-            opt.textContent = name;
-            instructorSel.appendChild(opt);
+  async function loadInstructors(){
+    try{
+      const snap = await getDocs(collection(db,"instructors"));
+      instructorsList = [];
+      bk_instructor.innerHTML = `<option value="NA">N/A</option>`;
+      snap.forEach(docu=>{
+        const data = docu.data();
+        const [name, email] = Object.entries(data)[0] || [];
+        if(name && email){
+          instructorsList.push({ id: docu.id, name, email });
+          const opt = document.createElement("option");
+          opt.value = docu.id;
+          opt.textContent = name;
+          bk_instructor.appendChild(opt);
+        }
+      });
+    }catch(e){
+      console.warn("loadInstructors error", e);
+    }
+  }
+
+  async function loadAircraftStatus(){
+    try{
+      statusCards.innerHTML = "";
+      const col = collection(db,"aircraftStatus");
+      const snap = await getDocs(col);
+      snap.forEach(docu=>{
+        const d = docu.data();
+        const div = document.createElement("div");
+        div.className = "status-card";
+        div.innerHTML = `
+          <div class="status-title">${docu.id}</div>
+          <div class="status-line">Tach: <strong>${d.currentTach ?? "—"}</strong></div>
+          <div class="status-line">Hobbs: <strong>${d.currentHobbs ?? "—"}</strong></div>
+        `;
+        statusCards.appendChild(div);
+      });
+    }catch(e){
+      console.warn("status error", e);
+    }
+  }
+
+  // ===== CALENDAR RENDER =====
+  function setViewToToday(){
+    const now = new Date();
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+  }
+  setViewToToday();
+
+  function renderCalendar(){
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const startDow = firstOfMonth.getDay(); // 0=Sun
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+
+    const monthName = firstOfMonth.toLocaleString(undefined,{month:"long", year:"numeric"});
+    calTitle.textContent = monthName;
+
+    const todayKey = dateToKey(new Date());
+
+    calGrid.innerHTML = "";
+    // header row
+    const headRow = document.createElement("div");
+    headRow.className = "cal-row";
+    const dowNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    dowNames.forEach(n=>{
+      const cell = document.createElement("div");
+      cell.className="cal-head-cell";
+      cell.textContent = n;
+      headRow.appendChild(cell);
+    });
+    calGrid.appendChild(headRow);
+
+    const totalCells = 42; // 6 weeks
+    let dayNum = 1;
+    for(let i=0;i<6;i++){
+      const row = document.createElement("div");
+      row.className = "cal-row";
+      for(let j=0;j<7;j++){
+        const index = i*7 + j;
+        const cell = document.createElement("div");
+        cell.className = "cal-cell";
+        let cellDay;
+        let cellMonth = viewMonth;
+        let cellYear  = viewYear;
+        if(index < startDow){
+          // prev month
+          const d = prevMonthDays - (startDow - 1 - index);
+          cellDay = d;
+          cellMonth = viewMonth - 1;
+          if(cellMonth < 0){ cellMonth = 11; cellYear--; }
+          cell.classList.add("other-month");
+        }else if(dayNum > daysInMonth){
+          // next month
+          const d = dayNum - daysInMonth;
+          cellDay = d;
+          cellMonth = viewMonth + 1;
+          if(cellMonth > 11){ cellMonth = 0; cellYear++; }
+          cell.classList.add("other-month");
+          dayNum++;
+        }else{
+          cellDay = dayNum++;
+        }
+
+        const cellDate = new Date(cellYear, cellMonth, cellDay);
+        const key = dateToKey(cellDate);
+        const label = document.createElement("div");
+        label.className = "cal-date-label";
+        label.textContent = cellDay;
+        cell.appendChild(label);
+
+        if(key === todayKey) cell.classList.add("today");
+
+        const eventsWrap = document.createElement("div");
+        eventsWrap.className = "cal-events";
+
+        // bookings for this date
+        bookingsCache
+          .filter(b => {
+            // if date range, include if key between startDate and endDate inclusive
+            const sd = b.startDate || key;
+            const ed = b.endDate || sd;
+            return key >= sd && key <= ed;
+          })
+          .forEach(b=>{
+            const evt = document.createElement("div");
+            evt.className = "evt";
+            if(b.title === "Maintenance") evt.classList.add("maint");
+            else if(currentUser && b.uid === currentUser.uid) evt.classList.add("own");
+
+            const who = (b.member_last || b.member_first) ?
+              `${b.member_first || ""} ${b.member_last || ""}`.trim() :
+              (b.member_email || "Member");
+
+            const timeLabel = (b.startTime && b.endTime)
+              ? `${b.startTime}-${b.endTime} `
+              : "";
+
+            evt.textContent = `${timeLabel}${b.title} (${who})`;
+            eventsWrap.appendChild(evt);
           });
-        });
-      }catch(err){
-        console.error('loadInstructors error', err);
-      }
-    }
-    loadInstructors();
 
-    /* ---------- Auth state handling (hooked into booking UI) ---------- */
-    onAuthChanged(async (user)=>{
-      currentUser = user || null;
-      const verified = !!user?.emailVerified;
-
-      if (user){
-        const shortEmail = user.email && user.email.length>28
-          ? user.email.slice(0,28)+'…'
-          : (user.email || '');
-        signinBtn.textContent = verified
-          ? `Account – ${shortEmail}`
-          : `Unverified – ${shortEmail}`;
-
-        if (emailField) emailField.value = user.email || "";
-        if (saveBtn)   saveBtn.disabled = false;
-        if (authHint)  authHint.style.display = "none";
-
-        await loadRole(user);
-      } else {
-        signinBtn.textContent = "Sign In";
-        if (emailField) emailField.value = "";
-        if (saveBtn)   saveBtn.disabled = true;
-        if (authHint)  authHint.style.display = "block";
-        isAdmin = false;
-        updatePurposeOptions();
-      }
-
-      renderMonth(); // re-color bookings for my/others
-    });
-
-    /* ---------- Sign in / up / reset / out ---------- */
-    doSignInBtn.addEventListener('click', async ()=>{
-      const email = si_email.value.trim();
-      const pass  = si_password.value;
-      if (!email || !pass) return say("Enter email and password.", true);
-      try{
-        await signInEmailPassword(email, pass);
-        say("Signed in.");
-        closeAuthModal();
-      }catch(err){ say(err.message || String(err), true); }
-    });
-
-    doSignUpBtn.addEventListener('click', async ()=>{
-      const first = su_first.value.trim();
-      const last  = su_last.value.trim();
-      const email = su_email.value.trim();
-      const pass  = su_password.value;
-      const code  = su_invite.value.trim();
-      if (!first || !last || !email || !pass || !code) return csay("All fields are required.", true);
-      try{
-        await signUpWithInvite({ email, password:pass, firstName:first, lastName:last, code });
-        csay("Account created! Check your inbox to verify your email.");
-        activate('in');
-      }catch(err){ csay(err.message || String(err), true); }
-    });
-
-    doResetBtn.addEventListener('click', async ()=>{
-      const email = si_email.value.trim();
-      if (!email) return say("Enter your email first.", true);
-      try{
-        await resetPassword(email);
-        say("Password reset email sent.");
-      }catch(err){ say(err.message || String(err), true); }
-    });
-
-    signOutBtn.addEventListener('click', async ()=>{
-      try{
-        await signOut();
-        say("Signed out.");
-      }catch(err){ say(err.message || String(err), true); }
-    });
-
-    // Enter key behavior
-    function handleEnter(e){
-      if (e.key !== 'Enter') return;
-      if (viewSignIn.classList.contains('active')) doSignInBtn.click();
-      else doSignUpBtn.click();
-    }
-    [si_email, si_password, su_first, su_last, su_email, su_password, su_invite]
-      .forEach(el => el.addEventListener('keydown', handleEnter));
-
-    /* ===== Calendar logic (month grid) ===== */
-    const grid    = document.getElementById('grid');
-    const titleEl = document.getElementById('rangeTitle');
-    let today     = new Date();
-    let viewDate  = new Date(today.getFullYear(), today.getMonth(), 1);
-    let currentFilter = 'ALL';
-
-    function fmtMonthYear(d){
-      return d.toLocaleString(undefined,{month:'long',year:'numeric'});
-    }
-    function daysInMonth(y,m){
-      return new Date(y, m+1, 0).getDate();
-    }
-
-    function sameDay(a,b){
-      return a.getFullYear()===b.getFullYear() &&
-             a.getMonth()===b.getMonth() &&
-             a.getDate()===b.getDate();
-    }
-
-    function bookingCoversDate(bookingDateStart, bookingDateEnd, cellDate){
-      const start = bookingDateStart;
-      const end   = bookingDateEnd;
-      return cellDate >= start && cellDate <= end;
-    }
-
-    function renderMonth(){
-      if (!grid) return;
-      grid.innerHTML='';
-      const y = viewDate.getFullYear();
-      const m = viewDate.getMonth();
-      titleEl.textContent = fmtMonthYear(viewDate);
-
-      const firstDow  = new Date(y,m,1).getDay();
-      const totalDays = daysInMonth(y,m);
-      const prevDays  = daysInMonth(y,m-1);
-
-      const cells=[];
-      for(let i=firstDow-1;i>=0;i--) cells.push({y,m:m-1,d:prevDays-i,other:true});
-      for(let d=1; d<=totalDays; d++) cells.push({y,m,d,other:false});
-      while(cells.length%7!==0){
-        cells.push({y,m:m+1,d:cells.length-(firstDow+totalDays)+1,other:true});
-      }
-      while(cells.length<42){
-        const last=cells[cells.length-1];
-        cells.push({y:last.y,m:last.m,d:last.d+1,other:true});
-      }
-
-      const tY=today.getFullYear(), tM=today.getMonth(), tD=today.getDate();
-
-      cells.forEach(c=>{
-        const cell=document.createElement('div');
-        cell.className='cell'+(c.other?' other-month':'');
-        const dateBox=document.createElement('div');
-        dateBox.className='date';
-        dateBox.textContent=c.d;
-        cell.appendChild(dateBox);
-        if(c.y===tY && c.m===tM && c.d===tD && !c.other) cell.classList.add('today');
-
-        const eventsWrap=document.createElement('div');
-        eventsWrap.className='events';
         cell.appendChild(eventsWrap);
 
-        const cellDate = new Date(c.y, c.m, c.d);
-
-        // Attach click: open booking modal prefilled with this date
-        cell.addEventListener('click', ()=>{
-          openModal(cellDate);
+        cell.addEventListener("click", ()=>{
+          const keyStr = dateToKey(cellDate);
+          openBooking(keyStr);
         });
 
-        // Add bookings
-        bookings.forEach(b=>{
-          if (currentFilter !== 'ALL' && b.aircraft !== currentFilter) return;
-          if (!b.start || !b.end) return;
-          if (!bookingCoversDate(b.start, b.end, cellDate)) return;
-
-          const evt = document.createElement('div');
-          evt.classList.add('evt');
-
-          if (b.maintenance){
-            evt.classList.add('maint');
-          } else if (currentUser && b.createdByUid === currentUser.uid){
-            evt.classList.add('mine');
-          } else {
-            evt.classList.add('other');
-          }
-
-          const purpose = b.purpose || 'Booking';
-          evt.textContent = `${b.aircraft || ''} – ${purpose}`;
-          eventsWrap.appendChild(evt);
-        });
-
-        grid.appendChild(cell);
-      });
+        calGrid.appendChild(cell);
+      }
     }
+  }
 
-    document.getElementById('prevBtn').onclick = ()=>{
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
-      renderMonth();
-    };
-    document.getElementById('nextBtn').onclick = ()=>{
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
-      renderMonth();
-    };
-    document.getElementById('todayBtn').onclick = ()=>{
-      today    = new Date();
-      viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
-      renderMonth();
-    };
-    renderMonth();
+  prevBtn.addEventListener("click", ()=>{
+    viewMonth--;
+    if(viewMonth<0){ viewMonth=11; viewYear--; }
+    renderCalendar();
+  });
+  nextBtn.addEventListener("click", ()=>{
+    viewMonth++;
+    if(viewMonth>11){ viewMonth=0; viewYear++; }
+    renderCalendar();
+  });
+  todayBtn.addEventListener("click", ()=>{
+    setViewToToday();
+    renderCalendar();
+  });
+  newBookingBtn.addEventListener("click", ()=> openBooking());
 
-    // ===== Filter pills =====
-    document.querySelectorAll('.pill').forEach(p=>{
-      p.addEventListener('click',()=>{
-        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
-        p.classList.add('active');
-        currentFilter = p.dataset.filter || 'ALL';
-        renderMonth();
-      });
-    });
-
-    // ===== Listen to bookings from Firestore =====
-    onSnapshot(collection(db,'bookings'), snap=>{
-      bookings = [];
+  // ===== BOOKINGS LISTENERS =====
+  function listenBookings(){
+    const qRef = query(collection(db,"bookings"), orderBy("createdAt","desc"));
+    onSnapshot(qRef, snap=>{
+      bookingsCache = [];
       snap.forEach(docu=>{
-        const d = docu.data() || {};
-        const start = d.start?.toDate ? d.start.toDate() : null;
-        const end   = d.end?.toDate ? d.end.toDate() : null;
-        if (!start || !end) return;
-        bookings.push({
+        const d = docu.data();
+        bookingsCache.push({
           id: docu.id,
-          ...d,
-          start,
-          end,
-          maintenance: !!d.maintenance
+          uid: d.uid || d.createdByUid || "",
+          aircraft: d.aircraft || "",
+          title: d.title || "",
+          startDate: d.startDate || "",
+          endDate: d.endDate || d.startDate || "",
+          startTime: d.startTime || "",
+          endTime: d.endTime || "",
+          member_first: d.member_first || "",
+          member_last: d.member_last || "",
+          member_email: d.member_email || "",
         });
       });
-      renderMonth();
+      renderCalendar();
     });
+  }
 
-    // ===== Booking modal behavior =====
-    const bookingModal = document.getElementById('bookingModal');
-    const openBtn      = document.getElementById('newBooking');
-    const closeBtn     = document.getElementById('closeModal');
-    const cancelBtn    = document.getElementById('cancelModal');
+  // ===== SAVE BOOKING =====
+  saveBookingBtn.addEventListener("click", async ()=>{
+    if(!currentUser){
+      bsay("Please sign in first.", true);
+      openAuth();
+      return;
+    }
+    bsay("");
 
-    function pad(n){ return String(n).padStart(2,'0'); }
+    const aircraft = bk_aircraft.value;
+    const title    = bk_title.value;
+    const startDate= bk_startDate.value;
+    const endDate  = bk_endDate.value || startDate;
+    const startTime= bk_startTime.value || "";
+    const endTime  = bk_endTime.value || "";
 
-    function setDateInputs(date){
-      const yyyy = date.getFullYear();
-      const mm   = pad(date.getMonth()+1);
-      const dd   = pad(date.getDate());
-      const iso  = `${yyyy}-${mm}-${dd}`;
-      startDateEl.value = iso;
-      // Sync end date if empty or before start
-      if (!endDateEl.value || new Date(endDateEl.value) < new Date(iso)){
-        endDateEl.value = iso;
+    if(!aircraft || !startDate){
+      bsay("Aircraft and start date are required.", true);
+      return;
+    }
+    if(title === "Maintenance" && !isAdmin){
+      bsay("Only admins can create Maintenance bookings.", true);
+      return;
+    }
+
+    const member_first = bk_first.value.trim();
+    const member_last  = bk_last.value.trim();
+    const member_email = bk_email.value.trim();
+
+    let instructorName = null;
+    let instructorEmail = null;
+    if(bk_instructor.value !== "NA"){
+      const inst = instructorsList.find(x=>x.id === bk_instructor.value);
+      if(inst){
+        instructorName = inst.name;
+        instructorEmail = inst.email;
       }
     }
 
-    function openModal(prefillDate){
-      bookingModal.classList.add('open');
-      bookingModal.setAttribute('aria-hidden','false');
+    const data = {
+      member_first,
+      member_last,
+      member_email,
+      aircraft,
+      title,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      allDay: !startTime && !endTime,
+      instructorName,
+      instructorEmail,
+      tach_start: bk_tachStart.value || null,
+      tach_end: bk_tachEnd.value || null,
+      hobbs_start: bk_hobbsStart.value || null,
+      hobbs_end: bk_hobbsEnd.value || null,
+      comments: bk_comments.value || "",
+      uid: currentUser.uid,
+      createdAt: serverTimestamp()
+    };
 
-      const now = prefillDate ? new Date(prefillDate) : new Date();
-      setDateInputs(now);
+    try{
+      await addDoc(collection(db,"bookings"), data);
+      bsay("Booking saved.");
+      // email instructor if selected
+      if(instructorEmail){
+        const subject = `New booking – ${aircraft} (${title})`;
+        const whenStr = `${startDate}${startTime ? " " + startTime : ""} → ${endDate}${endTime ? " " + endTime : ""}`;
+        const body = `Hi ${instructorName},
 
-      const minutes = now.getMinutes();
-      const rounded = Math.ceil(minutes/30)*30;
-      let hour = now.getHours();
-      let min  = rounded;
-      if (rounded===60){
-        hour += 1;
-        min = 0;
+${member_first} ${member_last} has booked ${aircraft} for an instructional flight.
+
+When: ${whenStr}
+Member email: ${member_email}
+
+Comments:
+${bk_comments.value || "(none)"}
+
+— The Flying 64th scheduler`;
+        const mailto = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailto;
       }
-      startTimeEl.value = `${pad(hour)}:${pad(min)}`;
-      endTimeEl.value   = `${pad(hour)}:${pad((min+30)%60)}`;
-
-      if (currentUser){
-        if (!firstNameEl.value) firstNameEl.value = (currentUser.displayName || '').split(' ')[0] || '';
-        if (!lastNameEl.value && currentUser.displayName){
-          const parts = currentUser.displayName.split(' ');
-          if (parts.length>1) lastNameEl.value = parts.slice(1).join(' ');
-        }
-      }
+      closeBookingModal();
+    }catch(e){
+      console.error(e);
+      bsay("Could not save booking: Missing or insufficient permissions.", true);
+      alert("Could not save booking: Missing or insufficient permissions.");
     }
-    function closeBookingModal(){
-      bookingModal.classList.remove('open');
-      bookingModal.setAttribute('aria-hidden','true');
-    }
+  });
 
-    openBtn.addEventListener('click', ()=>openModal(null));
-    closeBtn.addEventListener('click', closeBookingModal);
-    cancelBtn.addEventListener('click', closeBookingModal);
-    bookingModal.addEventListener('click',(e)=>{ if(e.target===bookingModal) closeBookingModal(); });
+  // ===== AUTH STATE =====
+  onAuthChanged(async (user)=>{
+    currentUser = user || null;
+    const verified = !!user?.emailVerified;
 
-    // Keep end date >= start date
-    startDateEl.addEventListener('change', ()=>{
-      if (!startDateEl.value) return;
-      const s = new Date(startDateEl.value);
-      const e = endDateEl.value ? new Date(endDateEl.value) : null;
-      if (!e || e < s){
-        endDateEl.value = startDateEl.value;
-      }
-    });
+    if(user){
+      const shortEmail = user.email && user.email.length>25
+        ? user.email.slice(0,25) + "…"
+        : (user.email || "");
+      document.getElementById("signinBtn").textContent = verified
+        ? `Account – ${shortEmail}`
+        : `Unverified – ${shortEmail}`;
 
-    // Meter deltas
-    const tachStart  = document.getElementById('tachStart');
-    const tachEnd    = document.getElementById('tachEnd');
-    const tachDelta  = document.getElementById('tachDelta');
-    const hobbsStart = document.getElementById('hobbsStart');
-    const hobbsEnd   = document.getElementById('hobbsEnd');
-    const hobbsDelta = document.getElementById('hobbsDelta');
-
-    function calcDelta(start,end,out){
-      const s=parseFloat(start.value), e=parseFloat(end.value);
-      out.value = (isFinite(s)&&isFinite(e)) ? (e-s).toFixed(1) : '';
-    }
-    [tachStart,tachEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(tachStart,tachEnd,tachDelta)));
-    [hobbsStart,hobbsEnd].forEach(el=>el.addEventListener('input',()=>calcDelta(hobbsStart,hobbsEnd,hobbsDelta)));
-
-    function combineDateTime(dateStr, timeStr, endOfDay=false){
-      if (!dateStr){
-        return null;
-      }
-      if (!timeStr){
-        if (endOfDay){
-          return new Date(dateStr + 'T23:59:59');
-        }
-        return new Date(dateStr + 'T00:00:00');
-      }
-      return new Date(`${dateStr}T${timeStr}`);
+      await reloadRoleAndProfile();
+    }else{
+      document.getElementById("signinBtn").textContent = "Sign In";
+      isAdmin = false;
     }
 
-    // Save booking -> Firestore
-    document.getElementById('saveBooking').addEventListener('click', async ()=>{
-      const user = auth.currentUser;
-      if(!user){
-        alert('Please sign in first.');
-        return;
-      }
-      const fn = firstNameEl.value.trim();
-      const ln = lastNameEl.value.trim();
-      if(!fn || !ln){
-        alert('Please enter your first and last name.');
-        return;
-      }
+    renderCalendar();
+  });
 
-      const startDateStr = startDateEl.value;
-      const endDateStr   = endDateEl.value || startDateStr;
-
-      if (!startDateStr){
-        alert('Select a start date.');
-        return;
-      }
-
-      const start = combineDateTime(startDateStr, startTimeEl.value, !startTimeEl.value);
-      const end   = combineDateTime(endDateStr,   endTimeEl.value,   !endTimeEl.value);
-
-      if (!start || !end || !(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())){
-        alert('Invalid start or end date/time.');
-        return;
-      }
-      if (end <= start){
-        alert('End must be after start.');
-        return;
-      }
-
-      const purpose = purposeSel.value || 'Training';
-      const isMaintenance = purpose === 'Maintenance';
-
-      const instructorEmail = instructorSel.value || '';
-      const instructorName  = instructorSel.options[instructorSel.selectedIndex]?.text || '';
-
-      const data = {
-        aircraft       : aircraftSel.value,
-        purpose        : purpose,
-        maintenance    : isMaintenance,
-        firstName      : fn,
-        lastName       : ln,
-        member_email   : user.email || "",
-        start          : start,
-        end            : end,
-        startDateStr   : startDateStr,
-        endDateStr     : endDateStr,
-        startTimeStr   : startTimeEl.value || null,
-        endTimeStr     : endTimeEl.value || null,
-        tach_start     : tachStart.value || null,
-        tach_end       : tachEnd.value || null,
-        hobbs_start    : hobbsStart.value || null,
-        hobbs_end      : hobbsEnd.value || null,
-        comments       : commentsEl.value.trim(),
-        instructorEmail: instructorEmail || null,
-        instructorName : instructorName || null,
-        createdByUid   : user.uid,
-        createdAt      : serverTimestamp()
-      };
-
-      try{
-        await addDoc(collection(db, "bookings"), data);
-        console.log('Booking saved:', data);
-
-        // If an instructor is selected, open email to them
-        if (instructorEmail){
-          const subject = `New booking – ${data.aircraft} (${purpose})`;
-          const bodyLines = [
-            `Hello ${instructorName || ''},`,
-            '',
-            `A member has booked ${data.aircraft}.`,
-            '',
-            `Member: ${fn} ${ln}`,
-            `Email: ${user.email || ''}`,
-            `Purpose: ${purpose}${isMaintenance ? ' (maintenance)' : ''}`,
-            '',
-            `Start: ${start.toLocaleString()}`,
-            `End:   ${end.toLocaleString()}`,
-            '',
-            data.comments ? `Comments:\n${data.comments}\n` : '',
-            '— Sent automatically from The Flying 64th calendar.'
-          ];
-          const mailto = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
-          window.location.href = mailto;
-        }
-
-        closeBookingModal();
-      }catch(err){
-        console.error(err);
-        alert('Could not save booking: ' + (err.message || String(err)));
-      }
-    });
-  </script>
+  // ===== INIT =====
+  await loadInstructors();
+  await loadAircraftStatus();
+  listenBookings();
+  renderCalendar();
+</script>
 </body>
 </html>
