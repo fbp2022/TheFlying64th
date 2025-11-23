@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Flying 64th – Calendar</title>
-  <meta name="description" content="Aircraft schedule for The Flying 64th Flying Club at Oliver Springs Airport (Braden Field)." />
+  <meta name="description" content="Member booking calendar for The Flying 64th Flying Club at Oliver Springs Airport (Braden Field)." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,13 +18,14 @@
       --panel:#0f1722;
       --rule:#1f2a38;
       --accent:#58a6ff;
-      --accent-soft:#223c5c;
+      --accent-soft:#374151;
       --card:#0f1722cc;
       --shadow:0 10px 30px rgba(0,0,0,.35);
       --radius:16px;
-      --own:#1f6f3b;
-      --other:#223c5c;
-      --maint:#7c1f1f;
+
+      --your:#22c55e;
+      --other:#3b82f6;
+      --maint:#ef4444;
     }
 
     *{box-sizing:border-box}
@@ -36,19 +37,19 @@
       line-height:1.6;
     }
 
-    /* ===== NAV (desktop + mobile hamburger) ===== */
+    /* ===== NAV (shared with home) ===== */
     .site-header{
       position:sticky;
       top:0;
       z-index:50;
       backdrop-filter:saturate(160%) blur(8px);
-      background:rgba(11,17,23,.75);
+      background:rgba(11,17,23,.85);
       border-bottom:1px solid var(--rule);
     }
     .nav{
       max-width:1200px;
       margin:0 auto;
-      padding:12px 18px;
+      padding:10px 18px;
       display:flex;
       align-items:center;
       gap:12px;
@@ -64,7 +65,7 @@
       font-size:22px;
       white-space:nowrap;
     }
-    .brand img{ height:34px; width:auto }
+    .brand img{height:34px;width:auto}
 
     nav.links{
       display:flex;
@@ -90,7 +91,6 @@
       background:var(--accent);
       font-weight:700;
     }
-
     .btn{
       border:1px solid rgba(255,255,255,.16);
       background:#0c1020;
@@ -101,7 +101,6 @@
       cursor:pointer;
       text-decoration:none;
       white-space:nowrap;
-      font-size:14px;
     }
     .btn.primary{
       background:linear-gradient(180deg,#2b6bb1,#1c4370);
@@ -122,10 +121,7 @@
     }
 
     @media (max-width:900px){
-      .nav{
-        position:relative;
-        padding:10px 14px;
-      }
+      .nav{position:relative}
       nav.links{
         display:none;
         position:absolute;
@@ -140,35 +136,22 @@
         border-radius:12px;
         border:1px solid var(--rule);
       }
-      nav.links.open{
-        display:flex;
-      }
-      nav.links a{
-        width:100%;
-        text-align:left;
-      }
-      #signinBtn{
-        width:100%;
-        text-align:center;
-      }
-      .hamburger{
-        display:inline-flex;
-      }
+      nav.links.open{display:flex;}
+      nav.links a{width:100%;text-align:left;}
+      .hamburger{display:inline-flex;}
     }
 
     /* ===== LAYOUT ===== */
-    .container{
+    main{
       max-width:1200px;
-      margin:0 auto;
-      padding:20px 18px 28px;
-    }
-    .layout{
+      margin:18px auto 40px;
+      padding:0 18px;
       display:grid;
-      grid-template-columns:280px 1fr;
+      grid-template-columns:260px minmax(0,1fr);
       gap:18px;
     }
-    @media (max-width:900px){
-      .layout{
+    @media (max-width:960px){
+      main{
         grid-template-columns:1fr;
       }
     }
@@ -180,51 +163,49 @@
       box-shadow:var(--shadow);
       padding:16px 16px 14px;
     }
-    .card h2{margin:0 0 8px;font-size:1.2rem}
-    .muted{color:var(--muted);font-size:14px}
+    .card h2{
+      margin:0 0 8px;
+      font-size:1.1rem;
+    }
+    .muted{color:var(--muted);font-size:.9rem;}
 
-    /* Tach/Hobbs small card */
-    .status-card{
-      margin-top:10px;
+    /* Tach cards */
+    .tach-card{
+      margin-top:12px;
       padding:10px 12px;
       border-radius:12px;
       border:1px solid var(--rule);
-      background:#0c131d;
-      font-size:13px;
+      background:#050812;
+      font-size:.9rem;
     }
-    .status-title{
-      font-weight:600;
-      margin-bottom:2px;
-    }
-    .status-line{
-      color:var(--muted);
-    }
+    .tach-title{font-weight:600;margin-bottom:4px;}
+    .tach-row{display:flex;justify-content:space-between;font-size:.85rem;}
 
-    /* ===== MINI LEGEND ===== */
     .legend{
       display:flex;
+      gap:10px;
+      margin-top:10px;
+      font-size:.8rem;
+      align-items:center;
       flex-wrap:wrap;
-      gap:8px;
-      margin-top:8px;
-      font-size:12px;
-      color:var(--muted);
     }
     .legend span{
       display:inline-flex;
       align-items:center;
-      gap:4px;
+      gap:6px;
     }
-    .legend-dot{
+    .dot{
       width:10px;
       height:10px;
       border-radius:999px;
-      background:var(--other);
+      display:inline-block;
     }
-    .legend-dot.own{background:var(--own);}
-    .legend-dot.maint{background:var(--maint);}
+    .dot.your{background:var(--your);}
+    .dot.other{background:var(--other);}
+    .dot.maint{background:var(--maint);}
 
-    /* ===== CALENDAR ===== */
-    .cal-header{
+    /* ===== FILTERS BAR ===== */
+    .filters{
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -232,306 +213,276 @@
       margin-bottom:12px;
       flex-wrap:wrap;
     }
-    .cal-title{
-      font-size:18px;
+    .filter-group{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid var(--rule);
+      background:#050812;
+      color:var(--muted);
+      font-size:.8rem;
+      cursor:pointer;
+    }
+    .pill.active{
+      border-color:var(--accent);
+      color:var(--ink);
+      background:#0b1120;
+    }
+
+    /* ===== CALENDAR (MONTH GRID) ===== */
+    .cal-shell{
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--rule);
+      box-shadow:var(--shadow);
+      padding:14px 16px 18px;
+    }
+    .cal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cal-month{
       font-weight:700;
+      font-size:1.05rem;
     }
     .cal-nav{
       display:flex;
       gap:6px;
+      align-items:center;
     }
     .cal-nav button{
       border-radius:999px;
       border:1px solid var(--rule);
-      background:#0b1117;
+      background:#050812;
       color:var(--ink);
       padding:4px 8px;
+      font-size:.8rem;
       cursor:pointer;
-      font-size:13px;
     }
-    .cal-nav button:hover{
-      background:#111827;
+    .cal-nav button.primary{
+      background:var(--accent);
+      border-color:transparent;
+      color:#001a33;
+      font-weight:600;
     }
 
-    .cal-grid{
-      border-radius:14px;
-      border:1px solid var(--rule);
-      overflow:hidden;
-      background:#050810;
-    }
-    .cal-row{
+    .weekday-row{
       display:grid;
       grid-template-columns:repeat(7,1fr);
-    }
-    .cal-head-cell{
-      background:#050810;
-      padding:6px 8px;
-      font-size:12px;
-      text-align:center;
+      font-size:.8rem;
       color:var(--muted);
+      padding:4px 2px 4px;
       border-bottom:1px solid var(--rule);
     }
-    .cal-cell{
-      min-height:90px;
-      border-top:1px solid #111827;
-      border-right:1px solid #111827;
+    .weekday-row div{
+      text-align:right;
+      padding-right:6px;
+    }
+
+    .month-grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      grid-auto-rows:120px;
+      gap:0;
+      font-size:.8rem;
+    }
+    @media (max-width:800px){
+      .month-grid{grid-auto-rows:90px;}
+    }
+    @media (max-width:640px){
+      .month-grid{grid-auto-rows:80px;}
+    }
+
+    .day-cell{
+      border-right:1px solid var(--rule);
+      border-bottom:1px solid var(--rule);
       padding:4px 4px 2px;
-      font-size:11px;
       position:relative;
       cursor:pointer;
-      background:#050810;
+      overflow:hidden;
     }
-    .cal-cell:nth-child(7n){
+    .day-cell:nth-child(7n){
       border-right:none;
     }
-    .cal-cell.other-month{
-      background:#020509;
-      color:#4b5563;
-    }
-    .cal-date-label{
-      font-weight:600;
-      font-size:11px;
+    .day-num{
+      text-align:right;
+      font-size:.8rem;
+      color:var(--muted);
       margin-bottom:2px;
     }
-    .cal-cell.today .cal-date-label{
-      color:var(--accent);
+    .day-cell.other-month .day-num{
+      opacity:.4;
     }
-    .cal-events{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      margin-top:1px;
+    .day-cell.today{
+      box-shadow:0 0 0 1px var(--accent) inset;
     }
-    .evt{
-      border-radius:8px;
-      padding:1px 4px;
-      font-size:10px;
+
+    .event-pill{
+      font-size:.74rem;
+      border-radius:999px;
+      padding:2px 6px;
+      margin-bottom:2px;
+      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      white-space:nowrap;
       background:var(--other);
-      color:#e5efff;
+      color:#001021;
     }
-    .evt.own{background:var(--own);}
-    .evt.maint{background:var(--maint);}
+    .event-your{
+      background:var(--your);
+      color:#001b0a;
+    }
+    .event-maint{
+      background:var(--maint);
+      color:#1f0202;
+    }
 
-    /* ===== MODALS (Auth + Booking) ===== */
-    .auth-modal,
-    .booking-modal{
+    /* ===== MODAL ===== */
+    .modal-backdrop{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.5);
+      background:rgba(0,0,0,.55);
       display:none;
-      place-items:center;
-      z-index:1000;
+      align-items:center;
+      justify-content:center;
+      z-index:80;
     }
-    .auth-modal.open,
-    .booking-modal.open{display:grid;}
+    .modal-backdrop.open{display:flex;}
 
-    .auth-card{
-      width:min(460px,92vw);
-      background:#0f1722;
-      color:#e6edf3;
-      border:1px solid #1f2a38;
-      border-radius:14px;
-      padding:18px 18px 12px;
-      position:relative;
-    }
-    .booking-card{
-      width:min(900px,96vw);
-      max-height:90vh;
-      background:#050810;
-      color:#e6edf3;
-      border:1px solid #1f2a38;
-      border-radius:14px;
-      padding:18px 18px 14px;
-      position:relative;
+    .modal{
+      width:min(860px,96vw);
+      max-height:92vh;
+      background:#050812;
+      border-radius:18px;
+      border:1px solid var(--rule);
+      box-shadow:0 24px 60px rgba(0,0,0,.7);
       display:flex;
       flex-direction:column;
     }
-    .auth-title,
-    .booking-title{
-      margin:0 0 10px 0;
-      font-size:20px;
-      font-weight:800;
+    .modal-header{
+      padding:14px 18px 10px;
+      border-bottom:1px solid var(--rule);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
     }
-    .auth-x,
-    .booking-x{
-      position:absolute;
-      right:14px;
-      top:12px;
+    .modal-title{font-weight:700;font-size:1rem;}
+    .modal-close{
       border:0;
-      background:transparent;
-      color:#9fb1c3;
+      background:none;
+      color:var(--muted);
       font-size:18px;
       cursor:pointer;
     }
-
-    .auth-label,
-    .bk-label{
-      display:block;
-      margin-top:10px;
-      margin-bottom:4px;
-      color:#9fb1c3;
-      font-size:13px;
+    .modal-body{
+      padding:14px 18px 16px;
+      overflow-y:auto;
     }
-    .auth-input,
-    .bk-input,
-    .bk-select,
-    .bk-textarea{
-      width:100%;
-      padding:9px 11px;
-      border-radius:10px;
-      border:1px solid #1f2a38;
-      background:#0b1117;
-      color:#e6edf3;
-      font-size:13px;
-    }
-    .bk-input[type="time"]::-webkit-calendar-picker-indicator,
-    .bk-input[type="date"]::-webkit-calendar-picker-indicator{
-      opacity:0; /* hide native icon, we draw our own */
-    }
-
-    .auth-row,
-    .bk-row{
+    .modal-footer{
+      padding:10px 18px 12px;
+      border-top:1px solid var(--rule);
       display:flex;
-      gap:10px;
-      align-items:flex-start;
-      margin-top:10px;
+      justify-content:flex-end;
+      gap:8px;
       flex-wrap:wrap;
     }
-    .auth-btn,
-    .bk-btn{
-      flex:1;
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid #1f2a38;
-      background:#141b26;
-      color:#e6edf3;
-      cursor:pointer;
-      font-size:14px;
-    }
-    .auth-btn.primary,
-    .bk-btn.primary{
-      background:#58a6ff;
-      color:#001a33;
-      border-color:transparent;
-      font-weight:700;
-    }
-    .auth-link{
-      background:none;
-      border:0;
-      color:#9fb1c3;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .auth-msg{
-      min-height:18px;
-      color:#9fb1c3;
-      margin:8px 0 4px;
-      font-size:13px;
-    }
 
-    .booking-body{
-      overflow:auto;
-      margin-top:6px;
-      padding-right:4px;
-    }
-
-    .bk-col-2{
+    .form-grid{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px 14px;
     }
-    @media (max-width:780px){
-      .bk-col-2{grid-template-columns:1fr;}
+    @media (max-width:720px){
+      .form-grid{grid-template-columns:1fr;}
     }
-
-    .bk-field-with-icon{
-      position:relative;
-    }
-    .bk-icon-btn{
-      position:absolute;
-      right:7px;
-      top:50%;
-      transform:translateY(-50%);
-      border:none;
-      background:none;
-      padding:0;
-      cursor:pointer;
-      color:#f9fafb;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .bk-icon-btn svg{
-      width:16px;
-      height:16px;
-      stroke:currentColor;
-    }
-
-    .quick-times{
+    .form-field{
       display:flex;
-      flex-wrap:wrap;
+      flex-direction:column;
       gap:4px;
-      margin-top:5px;
     }
-    .quick-times button{
-      border-radius:999px;
+    .label{
+      font-size:.78rem;
+      color:var(--muted);
+    }
+    .input,
+    .select{
+      border-radius:10px;
       border:1px solid var(--rule);
       background:#020617;
-      color:#e5e7eb;
-      padding:2px 7px;
-      font-size:11px;
-      cursor:pointer;
+      color:var(--ink);
+      padding:8px 9px;
+      font-size:.85rem;
+      width:100%;
     }
-    .quick-times button:hover{
-      background:#1f2937;
+    .input:focus,
+    .select:focus{
+      outline:none;
+      border-color:var(--accent);
     }
-
-    /* Tabs for auth modal */
-    .tabs{
+    .row-inline{
       display:flex;
-      gap:8px;
-      margin-bottom:8px;
+      gap:6px;
+      align-items:center;
     }
-    .tab{
-      flex:1;
-      padding:8px 10px;
-      border:1px solid #1f2a38;
+    .icon-btn{
       border-radius:10px;
-      background:#141b26;
-      color:#e6edf3;
+      border:1px solid var(--rule);
+      background:#020617;
+      color:var(--ink);
+      padding:6px 8px;
       cursor:pointer;
-      font-size:14px;
+      font-size:.8rem;
     }
-    .tab.active{
-      background:#58a6ff;
-      color:#001a33;
-      font-weight:700;
-      border-color:transparent;
-    }
-    .view{display:none;}
-    .view.active{display:block;}
 
-    /* ===== FOOTER ===== */
-    .site-footer{
-      border-top:1px solid var(--rule);
-      background:#05070d;
+    .time-chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
     }
-    .foot{
-      max-width:1100px;
-      margin:0 auto;
-      padding:14px 18px 24px;
+    .time-chip{
+      border-radius:999px;
+      border:1px solid var(--rule);
+      padding:2px 6px;
+      font-size:.72rem;
+      cursor:pointer;
+      background:#020617;
       color:var(--muted);
-      font-size:13px;
-      text-align:center;
+    }
+    .time-chip:hover{
+      border-color:var(--accent);
+      color:var(--ink);
+    }
+
+    textarea.input{
+      min-height:70px;
+      resize:vertical;
+    }
+
+    .danger{
+      background:#7f1d1d;
+      border-color:#b91c1c;
+      color:#fee2e2;
+    }
+
+    .hint-text{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:3px;
     }
   </style>
 </head>
 <body>
 
-<!-- ===== NAV ===== -->
 <header class="site-header">
   <div class="nav">
     <a class="brand" href="home.html">
@@ -542,7 +493,6 @@
     <button class="hamburger" id="navToggle" aria-label="Toggle navigation">☰</button>
 
     <nav class="links" id="mainNav">
-      <a id="signinBtn" class="btn">Sign In</a>
       <a href="home.html">Home</a>
       <a class="active" href="calendar.html">Calendar</a>
       <a href="becomeamember.html">Become a Member</a>
@@ -553,931 +503,731 @@
   </div>
 </header>
 
-<!-- ===== MAIN ===== -->
-<main class="container">
-  <div class="layout">
-    <!-- LEFT COLUMN -->
+<main>
+  <!-- LEFT SIDEBAR -->
+  <aside>
     <section class="card">
       <h2>Reminder</h2>
-      <p class="muted">After each flight, please update the tach &amp; hobbs for the aircraft.</p>
+      <p class="muted">
+        Enter <strong>Tach</strong> &amp; <strong>Hobbs</strong> start/end after every flight.
+        If the prior end is missing, you'll be prompted to resolve it before closing your flight.
+      </p>
 
-      <div id="statusCards">
-        <!-- aircraftStatus docs will render here -->
-      </div>
+      <div id="statusCards"></div>
 
       <div class="legend">
-        <span><span class="legend-dot own"></span> Your bookings</span>
-        <span><span class="legend-dot"></span> Other members</span>
-        <span><span class="legend-dot maint"></span> Maintenance</span>
+        <span><span class="dot your"></span>Your bookings</span>
+        <span><span class="dot other"></span>Other members</span>
+        <span><span class="dot maint"></span>Maintenance</span>
       </div>
     </section>
+  </aside>
 
-    <!-- RIGHT COLUMN -->
-    <section class="card">
-      <div class="cal-header">
-        <div class="cal-title" id="calTitle">Calendar</div>
-        <div class="cal-nav">
-          <button id="todayBtn">Today</button>
-          <button id="prevBtn">◀</button>
-          <button id="nextBtn">▶</button>
+  <!-- MAIN CALENDAR AREA -->
+  <section>
+    <div class="card" style="margin-bottom:10px;">
+      <div class="filters">
+        <div class="filter-group">
+          <button class="pill active" data-aircraft="all">All</button>
+          <button class="pill" data-aircraft="N78710">N78710 — C172</button>
+          <button class="pill" data-aircraft="N10921">N10921 — C150</button>
+        </div>
+        <div>
           <button id="newBookingBtn" class="btn primary">+ New booking</button>
         </div>
       </div>
-
-      <div class="cal-grid" id="calendarGrid">
-        <!-- calendar rows generated by JS -->
-      </div>
-    </section>
-  </div>
-</main>
-
-<!-- ===== FOOTER ===== -->
-<footer class="site-footer">
-  <div class="foot">
-    © <span id="y"></span> The Flying 64th • Oliver Springs, Tennessee
-  </div>
-</footer>
-
-<!-- ===== AUTH MODAL ===== -->
-<div id="authModal" class="auth-modal" aria-hidden="true">
-  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <button id="closeAuth" class="auth-x" aria-label="Close">✕</button>
-
-    <div class="tabs">
-      <button id="tabSignIn" class="tab active">Sign In</button>
-      <button id="tabSignUp" class="tab">Create Account</button>
     </div>
 
-    <!-- Sign In -->
-    <section id="viewSignIn" class="view active" aria-labelledby="authTitle">
-      <h3 id="authTitle" class="auth-title">Member Sign In</h3>
-
-      <label class="auth-label" for="si_email">Email</label>
-      <input id="si_email" class="auth-input" type="email" autocomplete="email">
-
-      <label class="auth-label" for="si_password">Password</label>
-      <input id="si_password" class="auth-input" type="password" autocomplete="current-password">
-
-      <div class="auth-row">
-        <button id="doSignIn" class="auth-btn primary">Sign In</button>
+    <div class="cal-shell">
+      <div class="cal-header">
+        <div class="cal-month" id="monthLabel">Month YYYY</div>
+        <div class="cal-nav">
+          <button id="monthOnlyLabel" style="opacity:.75;font-size:.72rem;border-radius:6px;">
+            Month view only for now
+          </button>
+          <button id="prevMonthBtn">&lt;</button>
+          <button id="todayBtn" class="primary">Today</button>
+          <button id="nextMonthBtn">&gt;</button>
+        </div>
       </div>
 
-      <div class="auth-row">
-        <button id="doReset" class="auth-link" type="button">Forgot password?</button>
-        <button id="signOutBtn" class="auth-link" type="button">Sign out</button>
+      <div class="weekday-row">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
       </div>
+      <div id="monthGrid" class="month-grid"></div>
+    </div>
+  </section>
+</main>
 
-      <p id="authMsg" class="auth-msg"></p>
-    </section>
-
-    <!-- Create Account -->
-    <section id="viewSignUp" class="view" aria-labelledby="createTitle">
-      <h3 id="createTitle" class="auth-title">Create a New Account</h3>
-
-      <label class="auth-label" for="su_first">First Name</label>
-      <input id="su_first" class="auth-input" type="text" required>
-
-      <label class="auth-label" for="su_last">Last Name</label>
-      <input id="su_last" class="auth-input" type="text" required>
-
-      <label class="auth-label" for="su_email">Email</label>
-      <input id="su_email" class="auth-input" type="email" autocomplete="email" required>
-
-      <label class="auth-label" for="su_password">Password</label>
-      <input id="su_password" class="auth-input" type="password" autocomplete="new-password" required>
-
-      <label class="auth-label" for="su_invite">Invite Code (new accounts)</label>
-      <input id="su_invite" class="auth-input" type="text" required>
-
-      <div class="auth-row">
-        <button id="doSignUp" class="auth-btn primary">Create Account</button>
-      </div>
-
-      <p id="createMsg" class="auth-msg"></p>
-    </section>
-  </div>
-</div>
-
-<!-- ===== BOOKING MODAL ===== -->
-<div id="bookingModal" class="booking-modal" aria-hidden="true">
-  <div class="booking-card" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
-    <button id="closeBooking" class="booking-x" aria-label="Close">✕</button>
-    <h3 id="bookingTitle" class="booking-title">New Booking</h3>
-
-    <div class="booking-body">
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_aircraft">Aircraft</label>
-          <select id="bk_aircraft" class="bk-select">
+<!-- BOOKING MODAL -->
+<div id="bookingModalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title" id="bookingModalTitle">New booking</div>
+      <button class="modal-close" id="bookingCloseBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="label" for="aircraftSelect">Aircraft</label>
+          <select id="aircraftSelect" class="select">
             <option value="N78710">N78710 — C172</option>
             <option value="N10921">N10921 — C150</option>
           </select>
         </div>
-        <div>
-          <label class="bk-label" for="bk_title">Title / purpose</label>
-          <select id="bk_title" class="bk-select">
+
+        <div class="form-field">
+          <label class="label" for="titleSelect">Title / purpose</label>
+          <select id="titleSelect" class="select">
             <option value="Training">Training</option>
             <option value="Rental">Rental</option>
-            <option value="Checkride">Checkride</option>
             <option value="Checkride Prep">Checkride Prep</option>
-            <option value="Maintenance" data-admin-only="true">Maintenance (admin only)</option>
+            <option value="Checkride">Checkride</option>
+            <option value="Maintenance">Maintenance</option>
           </select>
         </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_startDate">Start date</label>
-          <div class="bk-field-with-icon">
-            <input id="bk_startDate" class="bk-input" type="date">
-            <button type="button" class="bk-icon-btn" tabindex="-1">
-              <!-- calendar icon -->
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="4" width="18" height="17" rx="2" stroke-width="1.6"/>
-                <path d="M8 2v4M16 2v4M3 9h18" stroke-width="1.6"/>
-              </svg>
-            </button>
+        <div class="form-field">
+          <label class="label">Start date</label>
+          <div class="row-inline">
+            <input id="startDateInput" type="date" class="input">
+            <button type="button" class="icon-btn" id="startDateIcon">📅</button>
           </div>
         </div>
-        <div>
-          <label class="bk-label" for="bk_endDate">End date</label>
-          <div class="bk-field-with-icon">
-            <input id="bk_endDate" class="bk-input" type="date">
-            <button type="button" class="bk-icon-btn" tabindex="-1">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="4" width="18" height="17" rx="2" stroke-width="1.6"/>
-                <path d="M8 2v4M16 2v4M3 9h18" stroke-width="1.6"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_startTime">From</label>
-          <div class="bk-field-with-icon">
-            <input id="bk_startTime" class="bk-input" type="time">
-            <button type="button" class="bk-icon-btn" tabindex="-1">
-              <!-- clock icon -->
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
-                <path d="M12 8v4l3 2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
+        <div class="form-field">
+          <label class="label">End date</label>
+          <div class="row-inline">
+            <input id="endDateInput" type="date" class="input">
+            <button type="button" class="icon-btn" id="endDateIcon">📅</button>
           </div>
         </div>
-        <div>
-          <label class="bk-label" for="bk_endTime">To</label>
-          <div class="bk-field-with-icon">
-            <input id="bk_endTime" class="bk-input" type="time">
-            <button type="button" class="bk-icon-btn" tabindex="-1">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
-                <path d="M12 8v4l3 2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-          <!-- QUICK-TIME BUTTONS -->
-          <div class="quick-times" id="quickTimes">
-            <button type="button" data-min="30">+0.5 hr</button>
-            <button type="button" data-min="60">+1 hr</button>
-            <button type="button" data-min="90">+1.5 hr</button>
-            <button type="button" data-min="120">+2 hr</button>
-          </div>
-        </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_instructor">Instructor</label>
-          <select id="bk_instructor" class="bk-select">
-            <option value="NA">N/A</option>
-            <!-- instructors from Firestore will be appended -->
+        <div class="form-field">
+          <label class="label">Time window – from</label>
+          <div class="row-inline">
+            <input id="startTimeInput" type="time" class="input">
+            <button type="button" class="icon-btn" id="startTimeIcon">🕒</button>
+          </div>
+          <div class="hint-text">Leave blank for all-day booking.</div>
+        </div>
+
+        <div class="form-field">
+          <label class="label">Time window – to</label>
+          <div class="row-inline">
+            <input id="endTimeInput" type="time" class="input">
+            <button type="button" class="icon-btn" id="endTimeIcon">🕒</button>
+          </div>
+          <div class="time-chips" id="quickTimesRow">
+            <!-- quick chips injected by JS -->
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="label">First name</label>
+          <input id="firstNameInput" class="input" type="text" readonly>
+        </div>
+
+        <div class="form-field">
+          <label class="label">Last name</label>
+          <input id="lastNameInput" class="input" type="text" readonly>
+        </div>
+
+        <div class="form-field">
+          <label class="label">Email (from your account)</label>
+          <input id="emailInput" class="input" type="email" readonly>
+        </div>
+
+        <div class="form-field">
+          <label class="label" for="instructorSelect">Instructor</label>
+          <select id="instructorSelect" class="select">
+            <option value="">N/A</option>
           </select>
+          <div class="hint-text" id="instructorEmailDisplay"></div>
         </div>
-        <div></div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_first">First name</label>
-          <input id="bk_first" class="bk-input" type="text">
+        <div class="form-field">
+          <label class="label">Tach start</label>
+          <input id="tachStartInput" class="input" type="text" placeholder="">
         </div>
-        <div>
-          <label class="bk-label" for="bk_last">Last name</label>
-          <input id="bk_last" class="bk-input" type="text">
-        </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_email">Email (from your account)</label>
-          <input id="bk_email" class="bk-input" type="email" readonly>
+        <div class="form-field">
+          <label class="label">Tach end</label>
+          <input id="tachEndInput" class="input" type="text" placeholder="">
         </div>
-        <div>
-          <label class="bk-label">Linked to your Flying 64th login.</label>
-          <div class="muted" style="margin-top:3px;font-size:12px;">
-            Bookings are tied to your member account.
-          </div>
-        </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_tachStart">Tach start</label>
-          <input id="bk_tachStart" class="bk-input" type="text">
+        <div class="form-field">
+          <label class="label">Hobbs start</label>
+          <input id="hobbsStartInput" class="input" type="text" placeholder="">
         </div>
-        <div>
-          <label class="bk-label" for="bk_tachEnd">Tach end</label>
-          <input id="bk_tachEnd" class="bk-input" type="text">
-        </div>
-      </div>
 
-      <div class="bk-col-2">
-        <div>
-          <label class="bk-label" for="bk_hobbsStart">Hobbs start</label>
-          <input id="bk_hobbsStart" class="bk-input" type="text">
+        <div class="form-field">
+          <label class="label">Hobbs end</label>
+          <input id="hobbsEndInput" class="input" type="text" placeholder="">
         </div>
-        <div>
-          <label class="bk-label" for="bk_hobbsEnd">Hobbs end</label>
-          <input id="bk_hobbsEnd" class="bk-input" type="text">
-        </div>
-      </div>
 
-      <div>
-        <label class="bk-label" for="bk_comments">Comments</label>
-        <textarea id="bk_comments" class="bk-textarea" rows="3"></textarea>
+        <div class="form-field" style="grid-column:1 / -1;">
+          <label class="label">Comments</label>
+          <textarea id="commentsInput" class="input" placeholder=""></textarea>
+        </div>
       </div>
+      <div class="hint-text" id="bookingError" style="color:#fecaca;margin-top:8px;"></div>
     </div>
-
-    <div class="bk-row" style="margin-top:12px;">
-      <button id="cancelBooking" class="bk-btn">Cancel</button>
-      <button id="saveBooking" class="bk-btn primary">Save</button>
+    <div class="modal-footer">
+      <button id="deleteBookingBtn" class="btn danger" style="display:none;">Delete booking</button>
+      <div style="flex:1;"></div>
+      <button id="cancelBookingBtn" class="btn">Cancel</button>
+      <button id="saveBookingBtn" class="btn primary">Save</button>
     </div>
-    <p id="bookingMsg" class="auth-msg"></p>
   </div>
 </div>
 
 <script type="module">
-  // Year + nav highlighting + hamburger
-  document.getElementById("y").textContent = new Date().getFullYear();
+  /* ================= NAV HAMBURGER ================= */
   (function(){
-    const current = location.pathname.split('/').pop().toLowerCase();
-    const mainNav = document.getElementById('mainNav');
-    document.querySelectorAll('#mainNav a[href]').forEach(a=>{
-      let href = (a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      href = href.replace(/&amp;/g,'&');
-      if(href && href === current) a.classList.add('active');
-    });
-
     const navToggle = document.getElementById('navToggle');
+    const mainNav  = document.getElementById('mainNav');
     navToggle?.addEventListener('click', ()=> mainNav.classList.toggle('open'));
-    mainNav?.querySelectorAll('a').forEach(link=>{
-      link.addEventListener('click', ()=> mainNav.classList.remove('open'));
+    mainNav?.querySelectorAll('a').forEach(a=>{
+      a.addEventListener('click', ()=> mainNav.classList.remove('open'));
     });
   })();
 
-  // ===== Firebase & auth helpers =====
-  import { auth, db, onAuthChanged } from './auth.js';
+  /* ================= FIREBASE IMPORTS ================= */
+  import {
+    app,
+    auth,
+    db,
+    onAuthChanged,
+    getMyRole
+  } from './auth.js';
 
   import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    sendPasswordResetEmail,
-    sendEmailVerification
-  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-
-  import {
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    getDocs,
     doc,
     getDoc,
     setDoc,
     updateDoc,
-    collection,
-    addDoc,
-    getDocs,
-    onSnapshot,
-    query,
-    where,
-    orderBy,
+    deleteDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-  // ===== STATE =====
+  /* ================= GLOBAL STATE ================= */
   let currentUser = null;
+  let currentRole = null; // {uid,email,firstName,lastName,isAdmin,...}
   let isAdmin = false;
-  let bookingsCache = [];
-  let instructorsList = []; // { id, name, email }
-  const CORE_ADMIN_UIDS = new Set([
-    "dVErHNmaekS7qlBabaRzDzuRxlw2",  // you
-    "ADMIN_UID_2",
-    "ADMIN_UID_3"
-  ]);
 
-  let viewYear, viewMonth; // month index 0-11
+  let viewYear, viewMonth; // JS month (0-11)
+  let bookings = [];       // raw bookings from Firestore
+  let aircraftFilter = "all";
 
-  // ===== DOM REFS =====
+  let instructors = [];    // {name,email}
 
-  // auth
-  const authModal  = document.getElementById('authModal');
-  const openAuthBtn= document.getElementById('signinBtn');
-  const closeAuth  = document.getElementById('closeAuth');
-  const tabSignIn  = document.getElementById('tabSignIn');
-  const tabSignUp  = document.getElementById('tabSignUp');
-  const viewSignIn = document.getElementById('viewSignIn');
-  const viewSignUp = document.getElementById('viewSignUp');
-  const si_email   = document.getElementById('si_email');
-  const si_password= document.getElementById('si_password');
-  const doSignIn   = document.getElementById('doSignIn');
-  const doReset    = document.getElementById('doReset');
-  const signOutBtn = document.getElementById('signOutBtn');
-  const authMsg    = document.getElementById('authMsg');
+  let selectedBookingId = null; // null = new booking
 
-  const su_first   = document.getElementById('su_first');
-  const su_last    = document.getElementById('su_last');
-  const su_email   = document.getElementById('su_email');
-  const su_password= document.getElementById('su_password');
-  const su_invite  = document.getElementById('su_invite');
-  const doSignUp   = document.getElementById('doSignUp');
-  const createMsg  = document.getElementById('createMsg');
+  /* ================= DOM REFS ================= */
+  const statusCardsEl   = document.getElementById('statusCards');
+  const monthLabelEl    = document.getElementById('monthLabel');
+  const monthGridEl     = document.getElementById('monthGrid');
 
-  // calendar
-  const calTitle   = document.getElementById('calTitle');
-  const calGrid    = document.getElementById('calendarGrid');
-  const prevBtn    = document.getElementById('prevBtn');
-  const nextBtn    = document.getElementById('nextBtn');
-  const todayBtn   = document.getElementById('todayBtn');
-  const newBookingBtn = document.getElementById('newBookingBtn');
-  const statusCards = document.getElementById('statusCards');
+  const filterPills     = [...document.querySelectorAll('.pill[data-aircraft]')];
+  const newBookingBtn   = document.getElementById('newBookingBtn');
 
-  // booking modal
-  const bookingModal   = document.getElementById('bookingModal');
-  const closeBooking   = document.getElementById('closeBooking');
-  const cancelBooking  = document.getElementById('cancelBooking');
-  const saveBookingBtn = document.getElementById('saveBooking');
-  const bookingMsg     = document.getElementById('bookingMsg');
+  const prevMonthBtn    = document.getElementById('prevMonthBtn');
+  const nextMonthBtn    = document.getElementById('nextMonthBtn');
+  const todayBtn        = document.getElementById('todayBtn');
 
-  const bk_aircraft   = document.getElementById('bk_aircraft');
-  const bk_title      = document.getElementById('bk_title');
-  const bk_startDate  = document.getElementById('bk_startDate');
-  const bk_endDate    = document.getElementById('bk_endDate');
-  const bk_startTime  = document.getElementById('bk_startTime');
-  const bk_endTime    = document.getElementById('bk_endTime');
-  const bk_instructor = document.getElementById('bk_instructor');
-  const bk_first      = document.getElementById('bk_first');
-  const bk_last       = document.getElementById('bk_last');
-  const bk_email      = document.getElementById('bk_email');
-  const bk_tachStart  = document.getElementById('bk_tachStart');
-  const bk_tachEnd    = document.getElementById('bk_tachEnd');
-  const bk_hobbsStart = document.getElementById('bk_hobbsStart');
-  const bk_hobbsEnd   = document.getElementById('bk_hobbsEnd');
-  const bk_comments   = document.getElementById('bk_comments');
-  const quickTimes    = document.getElementById('quickTimes');
+  // Modal
+  const modalBackdrop   = document.getElementById('bookingModalBackdrop');
+  const modalTitleEl    = document.getElementById('bookingModalTitle');
+  const bookingCloseBtn = document.getElementById('bookingCloseBtn');
+  const cancelBookingBtn= document.getElementById('cancelBookingBtn');
+  const saveBookingBtn  = document.getElementById('saveBookingBtn');
+  const deleteBookingBtn= document.getElementById('deleteBookingBtn');
+  const bookingErrorEl  = document.getElementById('bookingError');
 
-  // ===== UTIL =====
-  const say  = (t, isErr=false)=>{ authMsg.textContent=t; authMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
-  const csay = (t, isErr=false)=>{ createMsg.textContent=t; createMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
-  const bsay = (t, isErr=false)=>{ bookingMsg.textContent=t; bookingMsg.style.color=isErr?'#ffb4b4':'#9fb1c3'; };
+  // Form fields
+  const aircraftSelect  = document.getElementById('aircraftSelect');
+  const titleSelect     = document.getElementById('titleSelect');
+  const startDateInput  = document.getElementById('startDateInput');
+  const endDateInput    = document.getElementById('endDateInput');
+  const startTimeInput  = document.getElementById('startTimeInput');
+  const endTimeInput    = document.getElementById('endTimeInput');
+  const startDateIcon   = document.getElementById('startDateIcon');
+  const endDateIcon     = document.getElementById('endDateIcon');
+  const startTimeIcon   = document.getElementById('startTimeIcon');
+  const endTimeIcon     = document.getElementById('endTimeIcon');
 
-  function pad2(n){ return String(n).padStart(2,"0"); }
+  const firstNameInput  = document.getElementById('firstNameInput');
+  const lastNameInput   = document.getElementById('lastNameInput');
+  const emailInput      = document.getElementById('emailInput');
 
-  function dateToKey(d){
-    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const instructorSelect= document.getElementById('instructorSelect');
+  const instructorEmailDisplay = document.getElementById('instructorEmailDisplay');
+
+  const tachStartInput  = document.getElementById('tachStartInput');
+  const tachEndInput    = document.getElementById('tachEndInput');
+  const hobbsStartInput = document.getElementById('hobbsStartInput');
+  const hobbsEndInput   = document.getElementById('hobbsEndInput');
+  const commentsInput   = document.getElementById('commentsInput');
+
+  const quickTimesRow   = document.getElementById('quickTimesRow');
+
+  /* ================= UTILITIES ================= */
+  const pad = (n)=> String(n).padStart(2,'0');
+  const dateKey = (d)=> `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+  function parseDateStr(str){
+    if(!str) return null;
+    const [y,m,d] = str.split('-').map(Number);
+    if(!y || !m || !d) return null;
+    return new Date(y,m-1,d);
   }
 
-  function parseDate(str){
-    const [y,m,d] = str.split("-").map(Number);
-    if(!y||!m||!d) return null;
-    return new Date(y, m-1, d);
+  function openModal(){
+    modalBackdrop.classList.add('open');
+    modalBackdrop.setAttribute('aria-hidden','false');
+  }
+  function closeModal(){
+    modalBackdrop.classList.remove('open');
+    modalBackdrop.setAttribute('aria-hidden','true');
+    selectedBookingId = null;
+    bookingErrorEl.textContent = "";
   }
 
-  function addMinutesToTimeStr(timeStr, minutes){
-    if(!timeStr) return "";
-    const [h,m] = timeStr.split(":").map(Number);
-    if(isNaN(h)||isNaN(m)) return "";
-    let total = h*60 + m + minutes;
-    total = ((total % (24*60)) + (24*60)) % (24*60);
-    const hh = Math.floor(total/60);
-    const mm = total % 60;
-    return `${pad2(hh)}:${pad2(mm)}`;
-  }
-
-  function openAuth(){
-    authModal.classList.add('open');
-    authModal.setAttribute('aria-hidden','false');
-    say(""); csay("");
-  }
-  function closeAuthModal(){
-    authModal.classList.remove('open');
-    authModal.setAttribute('aria-hidden','true');
-  }
-  openAuthBtn?.addEventListener('click', openAuth);
-  closeAuth?.addEventListener('click', closeAuthModal);
-  authModal?.addEventListener('click', e=>{ if(e.target===authModal) closeAuthModal(); });
-
-  function setAuthView(kind){
-    [tabSignIn,tabSignUp].forEach(t=>t.classList.remove('active'));
-    [viewSignIn,viewSignUp].forEach(v=>v.classList.remove('active'));
-    if(kind==='in'){ tabSignIn.classList.add('active'); viewSignIn.classList.add('active'); }
-    else{ tabSignUp.classList.add('active'); viewSignUp.classList.add('active'); }
-  }
-  tabSignIn?.addEventListener('click',()=>setAuthView('in'));
-  tabSignUp?.addEventListener('click',()=>setAuthView('up'));
-
-  // Booking modal open/close
-  function openBooking(prefillDateStr){
-    if(!currentUser){
-      openAuth();
-      return;
-    }
-    bookingMsg.textContent = "";
-    // default dates
-    const todayKey = prefillDateStr ||
-      dateToKey(new Date());
-    bk_startDate.value = todayKey;
-    // if end date blank or before start, set to same
-    if(!bk_endDate.value || bk_endDate.value < todayKey){
-      bk_endDate.value = todayKey;
-    }
-    bk_startTime.value = "";
-    bk_endTime.value = "";
-    bk_tachStart.value = "";
-    bk_tachEnd.value = "";
-    bk_hobbsStart.value = "";
-    bk_hobbsEnd.value = "";
-    bk_comments.value = "";
-    // default title
-    bk_title.value = "Training";
-
-    // default member info
-    bk_email.value = currentUser.email || "";
-    // Pull profile for first/last if available
-    (async ()=>{
-      try{
-        const snap = await getDoc(doc(db,"profiles",currentUser.uid));
-        if(snap.exists()){
-          const d = snap.data();
-          if(d.firstName) bk_first.value = d.firstName;
-          if(d.lastName)  bk_last.value = d.lastName;
-        }else{
-          const guess = (currentUser.email||"").split("@")[0] || "";
-          bk_first.value = bk_first.value || guess;
-        }
-      }catch{/* ignore */}
-    })();
-
-    bookingModal.classList.add('open');
-    bookingModal.setAttribute('aria-hidden','false');
-  }
-  function closeBookingModal(){
-    bookingModal.classList.remove('open');
-    bookingModal.setAttribute('aria-hidden','true');
-  }
-  closeBooking?.addEventListener('click', closeBookingModal);
-  cancelBooking?.addEventListener('click', closeBookingModal);
-  bookingModal?.addEventListener('click', e=>{ if(e.target===bookingModal) closeBookingModal(); });
-
-  // quick time buttons
-  if(quickTimes){
-    quickTimes.querySelectorAll("button[data-min]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const mins = Number(btn.dataset.min||"0");
-        const base = bk_startTime.value || "00:00";
-        const newEnd = addMinutesToTimeStr(base, mins);
-        if(newEnd) bk_endTime.value = newEnd;
-      });
-    });
-  }
-
-  // keep end date >= start date
-  bk_startDate.addEventListener("change", ()=>{
-    if(bk_endDate.value && bk_endDate.value < bk_startDate.value){
-      bk_endDate.value = bk_startDate.value;
-    }
-  });
-
-  // ===== AUTH HANDLERS =====
-  doSignIn?.addEventListener('click', async ()=>{
-    const email = si_email.value.trim();
-    const pass  = si_password.value;
-    if(!email || !pass) return say("Enter email and password.", true);
-    try{
-      await signInWithEmailAndPassword(auth, email, pass);
-      say("Signed in.");
-      closeAuthModal();
-      setAuthView('in');
-    }catch(err){ say(err.message,true); }
-  });
-
-  doSignUp?.addEventListener('click', async ()=>{
-    const email = su_email.value.trim();
-    const pass  = su_password.value;
-    const code  = (su_invite.value||"").trim();
-    const first = su_first.value.trim();
-    const last  = su_last.value.trim();
-    if(!email || !pass || !code || !first || !last){
-      return csay("First and last name, email, password, and invite code are required.", true);
-    }
-    try{
-      // Invite document: invites/{code}
-      const inviteRef  = doc(db, "invites", code);
-      const inviteSnap = await getDoc(inviteRef);
-      if(!inviteSnap.exists()) return csay("Invalid invite code.", true);
-      const d = inviteSnap.data();
-      if(d.disabled === true) return csay("This invite code is disabled.", true);
-      if(d.used === true && d.multi !== true) return csay("This invite code has already been used.", true);
-
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await sendEmailVerification(cred.user);
-
-      const baseData = {
-        uid: cred.user.uid,
-        email,
-        firstName:first,
-        lastName:last,
-        emailVerified:false,
-        active:true,
-        role:"member",
-        createdAt:serverTimestamp(),
-        updatedAt:serverTimestamp()
-      };
-      await Promise.all([
-        setDoc(doc(db,"profiles",cred.user.uid), baseData, {merge:true}),
-        setDoc(doc(db,"members", cred.user.uid), baseData, {merge:true})
-      ]);
-      await updateDoc(inviteRef,{
-        used:true,
-        usedByLast:cred.user.uid,
-        usedAtLast:serverTimestamp()
-      });
-
-      csay("Account created! Check your inbox to verify your email.");
-      setAuthView('in');
-    }catch(err){ csay(err.message,true); }
-  });
-
-  doReset?.addEventListener('click', async ()=>{
-    const email = si_email.value.trim();
-    if(!email) return say("Enter your email first.", true);
-    try{
-      await sendPasswordResetEmail(auth, email);
-      say("Password reset email sent.");
-    }catch(err){ say(err.message,true); }
-  });
-
-  signOutBtn?.addEventListener('click', async ()=>{
-    await auth.signOut();
-    say("Signed out.");
-  });
-
-  function handleAuthEnter(e){
-    if(e.key !== "Enter") return;
-    if(viewSignIn.classList.contains('active')) doSignIn.click();
-    else doSignUp.click();
-  }
-  [si_email,si_password,su_first,su_last,su_email,su_password,su_invite]
-    .forEach(el=> el?.addEventListener('keydown',handleAuthEnter));
-
-  // ===== LOAD ROLE & INSTRUCTORS =====
-  async function reloadRoleAndProfile(){
-    isAdmin = false;
-    if(!currentUser) return;
-    if(CORE_ADMIN_UIDS.has(currentUser.uid)){
-      isAdmin = true;
-    }else{
-      try{
-        const snap = await getDoc(doc(db,"profiles",currentUser.uid));
-        if(snap.exists()){
-          const role = (snap.data().role || "").toLowerCase();
-          if(role === "admin") isAdmin = true;
-        }
-      }catch{/* ignore */}
-    }
-
-    // hide Maintenance option if not admin
-    const maintOption = Array.from(bk_title.options).find(o=>o.value==="Maintenance");
-    if(maintOption){
-      maintOption.disabled = !isAdmin;
-      maintOption.hidden   = !isAdmin;
-      if(!isAdmin && bk_title.value==="Maintenance"){
-        bk_title.value = "Training";
-      }
-    }
-  }
-
-  async function loadInstructors(){
-    try{
-      const snap = await getDocs(collection(db,"instructors"));
-      instructorsList = [];
-      bk_instructor.innerHTML = `<option value="NA">N/A</option>`;
-      snap.forEach(docu=>{
-        const data = docu.data();
-        const [name, email] = Object.entries(data)[0] || [];
-        if(name && email){
-          instructorsList.push({ id: docu.id, name, email });
-          const opt = document.createElement("option");
-          opt.value = docu.id;
-          opt.textContent = name;
-          bk_instructor.appendChild(opt);
-        }
-      });
-    }catch(e){
-      console.warn("loadInstructors error", e);
-    }
-  }
-
-  async function loadAircraftStatus(){
-    try{
-      statusCards.innerHTML = "";
-      const col = collection(db,"aircraftStatus");
-      const snap = await getDocs(col);
-      snap.forEach(docu=>{
-        const d = docu.data();
-        const div = document.createElement("div");
-        div.className = "status-card";
-        div.innerHTML = `
-          <div class="status-title">${docu.id}</div>
-          <div class="status-line">Tach: <strong>${d.currentTach ?? "—"}</strong></div>
-          <div class="status-line">Hobbs: <strong>${d.currentHobbs ?? "—"}</strong></div>
-        `;
-        statusCards.appendChild(div);
-      });
-    }catch(e){
-      console.warn("status error", e);
-    }
-  }
-
-  // ===== CALENDAR RENDER =====
   function setViewToToday(){
     const now = new Date();
     viewYear = now.getFullYear();
     viewMonth = now.getMonth();
+    renderMonth();
   }
-  setViewToToday();
 
-  function renderCalendar(){
-    const firstOfMonth = new Date(viewYear, viewMonth, 1);
-    const startDow = firstOfMonth.getDay(); // 0=Sun
-    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
-    const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
-
-    const monthName = firstOfMonth.toLocaleString(undefined,{month:"long", year:"numeric"});
-    calTitle.textContent = monthName;
-
-    const todayKey = dateToKey(new Date());
-
-    calGrid.innerHTML = "";
-    // header row
-    const headRow = document.createElement("div");
-    headRow.className = "cal-row";
-    const dowNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    dowNames.forEach(n=>{
-      const cell = document.createElement("div");
-      cell.className="cal-head-cell";
-      cell.textContent = n;
-      headRow.appendChild(cell);
-    });
-    calGrid.appendChild(headRow);
-
-    const totalCells = 42; // 6 weeks
-    let dayNum = 1;
-    for(let i=0;i<6;i++){
-      const row = document.createElement("div");
-      row.className = "cal-row";
-      for(let j=0;j<7;j++){
-        const index = i*7 + j;
-        const cell = document.createElement("div");
-        cell.className = "cal-cell";
-        let cellDay;
-        let cellMonth = viewMonth;
-        let cellYear  = viewYear;
-        if(index < startDow){
-          // prev month
-          const d = prevMonthDays - (startDow - 1 - index);
-          cellDay = d;
-          cellMonth = viewMonth - 1;
-          if(cellMonth < 0){ cellMonth = 11; cellYear--; }
-          cell.classList.add("other-month");
-        }else if(dayNum > daysInMonth){
-          // next month
-          const d = dayNum - daysInMonth;
-          cellDay = d;
-          cellMonth = viewMonth + 1;
-          if(cellMonth > 11){ cellMonth = 0; cellYear++; }
-          cell.classList.add("other-month");
-          dayNum++;
-        }else{
-          cellDay = dayNum++;
-        }
-
-        const cellDate = new Date(cellYear, cellMonth, cellDay);
-        const key = dateToKey(cellDate);
-        const label = document.createElement("div");
-        label.className = "cal-date-label";
-        label.textContent = cellDay;
-        cell.appendChild(label);
-
-        if(key === todayKey) cell.classList.add("today");
-
-        const eventsWrap = document.createElement("div");
-        eventsWrap.className = "cal-events";
-
-        // bookings for this date
-        bookingsCache
-          .filter(b => {
-            // if date range, include if key between startDate and endDate inclusive
-            const sd = b.startDate || key;
-            const ed = b.endDate || sd;
-            return key >= sd && key <= ed;
-          })
-          .forEach(b=>{
-            const evt = document.createElement("div");
-            evt.className = "evt";
-            if(b.title === "Maintenance") evt.classList.add("maint");
-            else if(currentUser && b.uid === currentUser.uid) evt.classList.add("own");
-
-            const who = (b.member_last || b.member_first) ?
-              `${b.member_first || ""} ${b.member_last || ""}`.trim() :
-              (b.member_email || "Member");
-
-            const timeLabel = (b.startTime && b.endTime)
-              ? `${b.startTime}-${b.endTime} `
-              : "";
-
-            evt.textContent = `${timeLabel}${b.title} (${who})`;
-            eventsWrap.appendChild(evt);
-          });
-
-        cell.appendChild(eventsWrap);
-
-        cell.addEventListener("click", ()=>{
-          const keyStr = dateToKey(cellDate);
-          openBooking(keyStr);
-        });
-
-        calGrid.appendChild(cell);
-      }
+  function ensureEndAfterStart(){
+    const s = parseDateStr(startDateInput.value);
+    const e = parseDateStr(endDateInput.value);
+    if(!s || !e) return;
+    if(e < s){
+      endDateInput.value = startDateInput.value;
     }
   }
 
-  prevBtn.addEventListener("click", ()=>{
-    viewMonth--;
-    if(viewMonth<0){ viewMonth=11; viewYear--; }
-    renderCalendar();
-  });
-  nextBtn.addEventListener("click", ()=>{
-    viewMonth++;
-    if(viewMonth>11){ viewMonth=0; viewYear++; }
-    renderCalendar();
-  });
-  todayBtn.addEventListener("click", ()=>{
-    setViewToToday();
-    renderCalendar();
-  });
-  newBookingBtn.addEventListener("click", ()=> openBooking());
+  /* ================= QUICK TIME CHIPS ================= */
+  (function initQuickTimes(){
+    const times = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"];
+    times.forEach(t=>{
+      const chip = document.createElement('button');
+      chip.type = "button";
+      chip.className = "time-chip";
+      chip.textContent = t;
+      chip.addEventListener('click', ()=> { endTimeInput.value = t; });
+      quickTimesRow.appendChild(chip);
+    });
+  })();
 
-  // ===== BOOKINGS LISTENERS =====
-  function listenBookings(){
-    const qRef = query(collection(db,"bookings"), orderBy("createdAt","desc"));
-    onSnapshot(qRef, snap=>{
-      bookingsCache = [];
-      snap.forEach(docu=>{
-        const d = docu.data();
-        bookingsCache.push({
-          id: docu.id,
-          uid: d.uid || d.createdByUid || "",
-          aircraft: d.aircraft || "",
-          title: d.title || "",
-          startDate: d.startDate || "",
-          endDate: d.endDate || d.startDate || "",
-          startTime: d.startTime || "",
-          endTime: d.endTime || "",
-          member_first: d.member_first || "",
-          member_last: d.member_last || "",
-          member_email: d.member_email || "",
+  /* ================= AIRCRAFT STATUS ================= */
+  function subscribeAircraftStatus(){
+    const qStatus = query(collection(db,"aircraftStatus"));
+    onSnapshot(qStatus, (snap)=>{
+      statusCardsEl.innerHTML = "";
+      snap.forEach(docSnap=>{
+        const d = docSnap.data();
+        const div = document.createElement('div');
+        div.className = "tach-card";
+        div.innerHTML = `
+          <div class="tach-title">${docSnap.id}</div>
+          <div class="tach-row"><span>Tach:</span><span>${d.currentTach ?? '—'}</span></div>
+          <div class="tach-row"><span>Hobbs:</span><span>${d.currentHobbs ?? '—'}</span></div>
+          <div style="margin-top:4px;font-size:.75rem;color:var(--muted);">
+            Last updated: ${d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : '—'}
+          </div>
+        `;
+        statusCardsEl.appendChild(div);
+      });
+    });
+  }
+
+  /* ================= INSTRUCTORS ================= */
+  async function loadInstructors(){
+    instructors = [];
+    try{
+      const snap = await getDocs(collection(db,"instructors"));
+      snap.forEach(docSnap=>{
+        const data = docSnap.data() || {};
+        Object.entries(data).forEach(([name,email])=>{
+          if(!name || !email) return;
+          instructors.push({name,email});
         });
       });
-      renderCalendar();
+    }catch(e){
+      console.warn("instructors error:", e);
+    }
+    // populate select
+    instructorSelect.innerHTML = `<option value="">N/A</option>`;
+    instructors.forEach(i=>{
+      const opt = document.createElement('option');
+      opt.value = i.email;
+      opt.textContent = i.name;
+      instructorSelect.appendChild(opt);
     });
   }
 
-  // ===== SAVE BOOKING =====
-  saveBookingBtn.addEventListener("click", async ()=>{
-    if(!currentUser){
-      bsay("Please sign in first.", true);
-      openAuth();
-      return;
+  instructorSelect.addEventListener('change', ()=>{
+    const email = instructorSelect.value || "";
+    const inst = instructors.find(i => i.email === email);
+    instructorEmailDisplay.textContent = inst ? inst.email : "";
+  });
+
+  /* ================= BOOKINGS LOAD / RENDER ================= */
+  function subscribeBookings(){
+    const qBookings = query(collection(db,"bookings"), orderBy("startDate","asc"), orderBy("startTime","asc"));
+    onSnapshot(qBookings, (snap)=>{
+      bookings = [];
+      snap.forEach(d=>{
+        bookings.push({id:d.id, ...d.data()});
+      });
+      renderMonth();
+    });
+  }
+
+  function renderMonth(){
+    const monthName = new Date(viewYear,viewMonth,1).toLocaleString(undefined,{month:"long",year:"numeric"});
+    monthLabelEl.textContent = monthName;
+
+    // build grid dates: start Sunday before 1st
+    const first = new Date(viewYear,viewMonth,1);
+    const start = new Date(first);
+    start.setDate(first.getDate() - first.getDay()); // Sunday
+    const last = new Date(viewYear,viewMonth+1,0);
+    const end = new Date(last);
+    end.setDate(last.getDate() + (6-last.getDay())); // Saturday
+
+    const days = [];
+    for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+      days.push(new Date(d));
     }
-    bsay("");
 
-    const aircraft = bk_aircraft.value;
-    const title    = bk_title.value;
-    const startDate= bk_startDate.value;
-    const endDate  = bk_endDate.value || startDate;
-    const startTime= bk_startTime.value || "";
-    const endTime  = bk_endTime.value || "";
+    monthGridEl.innerHTML = "";
+    const todayKey = dateKey(new Date());
 
-    if(!aircraft || !startDate){
-      bsay("Aircraft and start date are required.", true);
-      return;
-    }
-    if(title === "Maintenance" && !isAdmin){
-      bsay("Only admins can create Maintenance bookings.", true);
-      return;
-    }
+    days.forEach(day=>{
+      const cell = document.createElement('div');
+      cell.className = "day-cell";
+      const dk = dateKey(day);
+      if(day.getMonth() !== viewMonth) cell.classList.add('other-month');
+      if(dk === todayKey) cell.classList.add('today');
+      cell.dataset.date = dk;
+      cell.innerHTML = `<div class="day-num">${day.getDate()}</div>`;
+      monthGridEl.appendChild(cell);
+    });
 
-    const member_first = bk_first.value.trim();
-    const member_last  = bk_last.value.trim();
-    const member_email = bk_email.value.trim();
+    // add bookings as pills
+    const cellsByDate = {};
+    [...monthGridEl.children].forEach(c=>{
+      cellsByDate[c.dataset.date] = c;
+    });
 
-    let instructorName = null;
-    let instructorEmail = null;
-    if(bk_instructor.value !== "NA"){
-      const inst = instructorsList.find(x=>x.id === bk_instructor.value);
-      if(inst){
-        instructorName = inst.name;
-        instructorEmail = inst.email;
+    bookings.forEach(b=>{
+      if(aircraftFilter !== "all" && b.aircraft !== aircraftFilter) return;
+
+      const s = parseDateStr(b.startDate);
+      const e = parseDateStr(b.endDate || b.startDate);
+      if(!s || !e) return;
+
+      const startTime = (b.startTime || "").slice(0,5);
+      const endTime   = (b.endTime || "").slice(0,5);
+      const labelTime = startTime && endTime ? `${startTime}-${endTime} ` : startTime ? `${startTime} ` : "";
+
+      const ownerLabel = b.member_last ? `${b.member_first || ''} ${b.member_last || ''}`.trim() : (b.member_first || 'Member');
+      const title = b.title || "Flight";
+
+      const isYour = currentUser && b.uid === currentUser.uid;
+      const isMaint = title === "Maintenance";
+
+      // place pill on each day the booking covers
+      let d = new Date(s);
+      while(d <= e){
+        const dk = dateKey(d);
+        const cell = cellsByDate[dk];
+        if(cell){
+          const pill = document.createElement('div');
+          pill.className = "event-pill";
+          if(isYour) pill.classList.add('event-your');
+          if(isMaint) pill.classList.add('event-maint');
+          pill.textContent = `${labelTime}${title} (${ownerLabel || 'Member'})`;
+          pill.dataset.bookingId = b.id;
+          cell.appendChild(pill);
+        }
+        d.setDate(d.getDate()+1);
       }
+    });
+
+    // click handlers (day & events)
+    [...monthGridEl.querySelectorAll('.day-cell')].forEach(cell=>{
+      cell.addEventListener('click', (e)=>{
+        // if event pill clicked, that handler will run; don't also open new
+        if(e.target.closest('.event-pill')) return;
+        const dStr = cell.dataset.date;
+        openNewBookingForDate(dStr);
+      });
+    });
+
+    [...monthGridEl.querySelectorAll('.event-pill')].forEach(pill=>{
+      pill.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = pill.dataset.bookingId;
+        const booking = bookings.find(b=>b.id === id);
+        if(booking) openEditBooking(booking);
+      });
+    });
+  }
+
+  /* ================= OPEN MODAL: NEW / EDIT ================= */
+  function fillMemberFields(){
+    if(!currentRole) return;
+    firstNameInput.value = currentRole.profile?.firstName || "";
+    lastNameInput.value  = currentRole.profile?.lastName || "";
+    emailInput.value     = currentRole.email || "";
+  }
+
+  function openNewBookingForDate(dateStr){
+    if(!currentUser){
+      alert("Sign in to create a booking.");
+      return;
+    }
+    selectedBookingId = null;
+    modalTitleEl.textContent = "New booking";
+    deleteBookingBtn.style.display = "none";
+    bookingErrorEl.textContent = "";
+
+    fillMemberFields();
+
+    const s = dateStr || dateKey(new Date());
+    startDateInput.value = s;
+    endDateInput.value   = s;
+    startTimeInput.value = "";
+    endTimeInput.value   = "";
+    titleSelect.value    = "Training";
+    aircraftSelect.value = aircraftFilter !== "all" ? aircraftFilter : "N78710";
+    instructorSelect.value = "";
+    instructorEmailDisplay.textContent = "";
+    tachStartInput.value  = "";
+    tachEndInput.value    = "";
+    hobbsStartInput.value = "";
+    hobbsEndInput.value   = "";
+    commentsInput.value   = "";
+
+    openModal();
+  }
+
+  function openEditBooking(b){
+    selectedBookingId = b.id;
+    modalTitleEl.textContent = "Edit booking";
+    bookingErrorEl.textContent = "";
+
+    aircraftSelect.value = b.aircraft || "N78710";
+    titleSelect.value    = b.title || "Training";
+    startDateInput.value = b.startDate || dateKey(new Date());
+    endDateInput.value   = b.endDate || b.startDate || startDateInput.value;
+    startTimeInput.value = b.startTime || "";
+    endTimeInput.value   = b.endTime || "";
+
+    firstNameInput.value = b.member_first || "";
+    lastNameInput.value  = b.member_last || "";
+    emailInput.value     = b.member_email || "";
+
+    instructorSelect.value = b.instructorEmail || "";
+    const inst = instructors.find(i => i.email === b.instructorEmail);
+    instructorEmailDisplay.textContent = inst ? inst.email : "";
+
+    tachStartInput.value  = b.tach_start  || "";
+    tachEndInput.value    = b.tach_end    || "";
+    hobbsStartInput.value = b.hobbs_start || "";
+    hobbsEndInput.value   = b.hobbs_end   || "";
+    commentsInput.value   = b.comments    || "";
+
+    const canDelete = isAdmin || (currentUser && b.uid === currentUser.uid && b.title !== "Maintenance");
+    deleteBookingBtn.style.display = canDelete ? "inline-flex" : "none";
+
+    openModal();
+  }
+
+  /* ================= SAVE / DELETE ================= */
+  function validateBooking(){
+    bookingErrorEl.textContent = "";
+
+    const sDate = startDateInput.value;
+    const eDate = endDateInput.value || sDate;
+    if(!sDate){
+      bookingErrorEl.textContent = "Start date is required.";
+      return null;
+    }
+    const sd = parseDateStr(sDate);
+    const ed = parseDateStr(eDate);
+    if(!sd || !ed){
+      bookingErrorEl.textContent = "Invalid dates.";
+      return null;
+    }
+    if(ed < sd){
+      bookingErrorEl.textContent = "End date cannot be before start date.";
+      return null;
     }
 
-    const data = {
+    const title = titleSelect.value || "Training";
+    if(title === "Maintenance" && !isAdmin){
+      bookingErrorEl.textContent = "Only admins can create Maintenance bookings.";
+      return null;
+    }
+
+    const member_first = firstNameInput.value.trim();
+    const member_last  = lastNameInput.value.trim();
+    if(!member_first || !member_last){
+      bookingErrorEl.textContent = "First and last name are required on your profile.";
+      return null;
+    }
+
+    return {
+      aircraft: aircraftSelect.value || "N78710",
+      title,
+      startDate: sDate,
+      endDate: eDate,
+      startTime: startTimeInput.value || "",
+      endTime:   endTimeInput.value   || "",
+      allDay: (!startTimeInput.value && !endTimeInput.value),
       member_first,
       member_last,
-      member_email,
-      aircraft,
-      title,
-      startDate,
-      endDate,
-      startTime,
-      endTime,
-      allDay: !startTime && !endTime,
-      instructorName,
-      instructorEmail,
-      tach_start: bk_tachStart.value || null,
-      tach_end: bk_tachEnd.value || null,
-      hobbs_start: bk_hobbsStart.value || null,
-      hobbs_end: bk_hobbsEnd.value || null,
-      comments: bk_comments.value || "",
-      uid: currentUser.uid,
-      createdAt: serverTimestamp()
+      member_email: emailInput.value || currentUser?.email || "",
+      instructorName: (instructors.find(i => i.email === instructorSelect.value)?.name) || "",
+      instructorEmail: instructorSelect.value || "",
+      tach_start:  tachStartInput.value  || "",
+      tach_end:    tachEndInput.value    || "",
+      hobbs_start: hobbsStartInput.value || "",
+      hobbs_end:   hobbsEndInput.value   || "",
+      comments: commentsInput.value || ""
     };
+  }
+
+  async function saveBooking(){
+    if(!currentUser){
+      bookingErrorEl.textContent = "Sign in required.";
+      return;
+    }
+    const data = validateBooking();
+    if(!data) return;
 
     try{
-      await addDoc(collection(db,"bookings"), data);
-      bsay("Booking saved.");
-      // email instructor if selected
-      if(instructorEmail){
-        const subject = `New booking – ${aircraft} (${title})`;
-        const whenStr = `${startDate}${startTime ? " " + startTime : ""} → ${endDate}${endTime ? " " + endTime : ""}`;
-        const body = `Hi ${instructorName},
-
-${member_first} ${member_last} has booked ${aircraft} for an instructional flight.
-
-When: ${whenStr}
-Member email: ${member_email}
-
-Comments:
-${bk_comments.value || "(none)"}
-
-— The Flying 64th scheduler`;
-        const mailto = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailto;
+      if(!selectedBookingId){
+        const docRef = doc(collection(db,"bookings"));
+        await setDoc(docRef, {
+          ...data,
+          uid: currentUser.uid,
+          createdAt: serverTimestamp()
+        });
+      }else{
+        const existing = bookings.find(b => b.id === selectedBookingId);
+        const isMaint = existing && existing.title === "Maintenance";
+        if(isMaint && !isAdmin){
+          bookingErrorEl.textContent = "Only admins can update Maintenance bookings.";
+          return;
+        }
+        if(!isAdmin && existing && existing.uid !== currentUser.uid){
+          bookingErrorEl.textContent = "You can only edit your own bookings.";
+          return;
+        }
+        await updateDoc(doc(db,"bookings",selectedBookingId), data);
       }
-      closeBookingModal();
+      closeModal();
     }catch(e){
       console.error(e);
-      bsay("Could not save booking: Missing or insufficient permissions.", true);
-      alert("Could not save booking: Missing or insufficient permissions.");
+      bookingErrorEl.textContent = e.message || "Failed to save booking.";
     }
+  }
+
+  async function deleteBooking(){
+    if(!selectedBookingId) return;
+    const b = bookings.find(b=>b.id === selectedBookingId);
+    if(!b) return;
+    const isMaint = b.title === "Maintenance";
+    if(isMaint && !isAdmin){
+      alert("Only admins can delete Maintenance bookings.");
+      return;
+    }
+    if(!isAdmin && currentUser && b.uid !== currentUser.uid){
+      alert("You can only delete your own bookings.");
+      return;
+    }
+    if(!confirm("Delete this booking?")) return;
+    try{
+      await deleteDoc(doc(db,"bookings",selectedBookingId));
+      closeModal();
+    }catch(e){
+      alert(e.message || "Failed to delete booking.");
+    }
+  }
+
+  /* ================= EVENT WIRES ================= */
+  newBookingBtn.addEventListener('click', ()=> openNewBookingForDate());
+
+  prevMonthBtn.addEventListener('click', ()=>{
+    viewMonth--;
+    if(viewMonth < 0){viewMonth = 11; viewYear--;}
+    renderMonth();
+  });
+  nextMonthBtn.addEventListener('click', ()=>{
+    viewMonth++;
+    if(viewMonth > 11){viewMonth = 0; viewYear++;}
+    renderMonth();
+  });
+  todayBtn.addEventListener('click', ()=> setViewToToday());
+
+  filterPills.forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      filterPills.forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      aircraftFilter = pill.dataset.aircraft;
+      renderMonth();
+    });
   });
 
-  // ===== AUTH STATE =====
+  bookingCloseBtn.addEventListener('click', closeModal);
+  cancelBookingBtn.addEventListener('click', closeModal);
+  saveBookingBtn.addEventListener('click', saveBooking);
+  deleteBookingBtn.addEventListener('click', deleteBooking);
+
+  startDateInput.addEventListener('change', ensureEndAfterStart);
+  endDateInput.addEventListener('change', ensureEndAfterStart);
+
+  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.());
+  endDateIcon.addEventListener('click',   ()=> endDateInput.showPicker?.());
+  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.());
+  endTimeIcon.addEventListener('click',   ()=> endTimeInput.showPicker?.());
+
+  /* ================= AUTH / ROLE ================= */
   onAuthChanged(async (user)=>{
     currentUser = user || null;
-    const verified = !!user?.emailVerified;
-
-    if(user){
-      const shortEmail = user.email && user.email.length>25
-        ? user.email.slice(0,25) + "…"
-        : (user.email || "");
-      document.getElementById("signinBtn").textContent = verified
-        ? `Account – ${shortEmail}`
-        : `Unverified – ${shortEmail}`;
-
-      await reloadRoleAndProfile();
-    }else{
-      document.getElementById("signinBtn").textContent = "Sign In";
+    if(!user){
+      currentRole = null;
+      isAdmin = false;
+      return;
+    }
+    try{
+      currentRole = await getMyRole();
+      isAdmin = !!currentRole?.isAdmin;
+    }catch(e){
+      console.warn("getMyRole error", e);
       isAdmin = false;
     }
-
-    renderCalendar();
   });
 
-  // ===== INIT =====
-  await loadInstructors();
-  await loadAircraftStatus();
-  listenBookings();
-  renderCalendar();
+  /* ================= INIT ================= */
+  subscribeAircraftStatus();
+  subscribeBookings();
+  loadInstructors();
+  setViewToToday();
 </script>
 </body>
 </html>
