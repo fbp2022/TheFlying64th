@@ -374,7 +374,7 @@
       max-width:1100px;
       margin:0 auto;
       padding:14px 18px 24px;
-      color:var(--muted);
+      color:#9fb1c3;
       font-size:13px;
       text-align:center;
     }
@@ -566,35 +566,23 @@
 
 <!-- ===== Firebase + Auth + Board Logic ===== -->
 <script type="module">
-  // Shared app + helpers + delete from auth.js
-  import {
-    auth,
-    db,
-    onAuthChanged,
-    signOut,
-    signInEmailPassword,
-    signUpWithInvite,
-    resetPassword,
-    escapeHtml,
-    doc,
-    deleteDoc
-  } from './auth.js';
+  // Shared app from auth.js
+  import { auth, db, onAuthChanged, signOut } from './auth.js';
 
   import {
-    getDoc,
-    serverTimestamp,
-    collection,
-    query,
-    orderBy,
-    onSnapshot,
-    addDoc,
-    getDocs,
-    where,
-    Timestamp
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    sendEmailVerification
+  } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+  import {
+    doc, getDoc, setDoc, updateDoc, serverTimestamp,
+    collection, query, orderBy, onSnapshot, addDoc, deleteDoc, getDocs, where, Timestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
   // ===== Admin allow-list (fallback while profiles populate) =====
-  const BOARD_EMAILS    = ["theflying64@gmail.com"];
+  const BOARD_EMAILS   = ["theflying64@gmail.com"];
   const FALLBACK_EMAILS = [];
 
   let currentUser = null;
@@ -652,6 +640,7 @@
   const say  = (t, isErr=false)=>{ authMsg.textContent = t; authMsg.style.color  = isErr ? '#ffb4b4' : '#9fb1c3'; };
   const csay = (t, isErr=false)=>{ createMsg.textContent = t; createMsg.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
   const psay = (t, isErr=false)=>{ postMsgEl.textContent = t; postMsgEl.style.color = isErr ? '#ffb4b4' : '#9fb1c3'; };
+  const escapeHtml = (s)=> (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
   function toLocalDatetimeValue(d=new Date()){
     const pad = (n)=> String(n).padStart(2,'0');
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -747,13 +736,13 @@
     }
   });
 
-  // Sign in / up / reset / out (using auth.js helpers)
+  // Sign in / up / reset / out
   doSignIn.addEventListener('click', async ()=>{
     const email = si_email.value.trim();
     const pass  = si_password.value;
     if (!email || !pass) return say("Enter email and password.", true);
     try {
-      await signInEmailPassword(email, pass);
+      await signInWithEmailAndPassword(auth, email, pass);
       say("Signed in.");
       closeAuthModal();
       setAuthView('in');
@@ -771,12 +760,40 @@
       return csay("First and last name, email, password, and invite code are required.", true);
 
     try {
-      await signUpWithInvite({
+      // Validate invite document by code
+      const inviteRef  = doc(db, "invites", code);
+      const inviteSnap = await getDoc(inviteRef);
+      if (!inviteSnap.exists()) return csay("Invalid invite code.", true);
+      const d = inviteSnap.data();
+      if (d.disabled === true) return csay("This invite code is disabled.", true);
+      if (d.used === true && d.multi !== true) return csay("This invite code has already been used.", true);
+
+      // Create auth user
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await sendEmailVerification(cred.user);
+
+      // Create profile + member docs
+      const baseData = {
+        uid: cred.user.uid,
         email,
-        password: pass,
         firstName: first,
-        lastName: last,
-        code
+        lastName : last,
+        emailVerified: false,
+        active: true,
+        role: "member",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      await Promise.all([
+        setDoc(doc(db, "profiles", cred.user.uid), baseData, { merge: true }),
+        setDoc(doc(db, "members",  cred.user.uid), baseData, { merge: true })
+      ]);
+
+      // Mark invite as used
+      await updateDoc(inviteRef, {
+        used: true,
+        usedByLast: cred.user.uid,
+        usedAtLast: serverTimestamp()
       });
 
       csay("Account created! Check your inbox to verify your email.");
@@ -787,14 +804,12 @@
   doReset.addEventListener('click', async ()=>{
     const email = si_email.value.trim();
     if (!email) return say("Enter your email first.", true);
-    try {
-      await resetPassword(email);
-      say("Password reset email sent.");
-    } catch(err){ say(err.message, true); }
+    try { await sendPasswordResetEmail(auth, email); say("Password reset email sent."); }
+    catch(err){ say(err.message, true); }
   });
 
   signOutBtn.addEventListener('click', async ()=>{
-    await signOut();
+    await signOut(auth);
     say("Signed out.");
   });
 
@@ -911,7 +926,9 @@ ${created.text}
       const m = d.data();
       const ts = m.createdAt?.toDate ? m.createdAt.toDate() : null;
       const when = ts ? ts.toLocaleString() : "…";
-      const canDelete = verified && (isAdmin || currentUser?.uid === m.authorUid);
+
+      // 🔥 Only admins can see delete
+      const canDelete = verified && isAdmin;
 
       const div = document.createElement("div");
       div.className = "msg";
@@ -935,11 +952,7 @@ ${created.text}
         const id = btn.getAttribute("data-del");
         if (!id) return;
         if (!confirm("Delete this message?")) return;
-        try{
-          await deleteDoc(doc(db,"board",id));
-        }catch(e){
-          alert(e.message);
-        }
+        try{ await deleteDoc(doc(db,"board",id)); }catch(e){ alert(e.message); }
       });
     });
   });
