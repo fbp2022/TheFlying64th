@@ -146,14 +146,9 @@
       max-width:1200px;
       margin:18px auto 40px;
       padding:0 18px;
-      display:grid;
-      grid-template-columns:260px minmax(0,1fr);
-      gap:18px;
-    }
-    @media (max-width:960px){
-      main{
-        grid-template-columns:1fr;
-      }
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
 
     .card{
@@ -170,8 +165,14 @@
     .muted{color:var(--muted);font-size:.9rem;}
 
     /* Tach cards */
+    .tach-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
+    }
     .tach-card{
-      margin-top:12px;
+      flex:1 1 180px;
       padding:10px 12px;
       border-radius:12px;
       border:1px solid var(--rule);
@@ -210,7 +211,6 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:12px;
       flex-wrap:wrap;
     }
     .filter-group{
@@ -504,58 +504,58 @@
 </header>
 
 <main>
-  <!-- LEFT SIDEBAR -->
-  <aside>
-    <section class="card">
-      <h2>Reminder</h2>
-      <p class="muted">
-        Enter <strong>Tach</strong> &amp; <strong>Hobbs</strong> start/end after every flight.
-        If the prior end is missing, you'll be prompted to resolve it before closing your flight.
-      </p>
+  <!-- TOP REMINDER BAR -->
+  <section class="card">
+    <h2>Reminder</h2>
+    <p class="muted">
+      Enter <strong>Tach</strong> start &amp; end after every flight.
+      If the prior end is missing, you'll be prompted to resolve it before closing your flight.
+    </p>
 
-      <div id="statusCards"></div>
+    <div id="statusCards" class="tach-wrap">
+      <!-- aircraftStatus cards injected here -->
+    </div>
 
-      <div class="legend">
-        <span><span class="dot your"></span>Your bookings</span>
-        <span><span class="dot other"></span>Other members</span>
-        <span><span class="dot maint"></span>Maintenance</span>
+    <div class="legend">
+      <span><span class="dot your"></span>Your bookings</span>
+      <span><span class="dot other"></span>Other members</span>
+      <span><span class="dot maint"></span>Maintenance</span>
+    </div>
+  </section>
+
+  <!-- FILTERS + NEW BOOKING -->
+  <section class="card">
+    <div class="filters">
+      <div class="filter-group">
+        <button class="pill active" data-aircraft="all">All</button>
+        <button class="pill" data-aircraft="N78710">N78710 — C172</button>
+        <button class="pill" data-aircraft="N10921">N10921 — C150</button>
       </div>
-    </section>
-  </aside>
+      <div>
+        <button id="newBookingBtn" class="btn primary">+ New booking</button>
+      </div>
+    </div>
+  </section>
 
-  <!-- MAIN CALENDAR AREA -->
-  <section>
-    <div class="card" style="margin-bottom:10px;">
-      <div class="filters">
-        <div class="filter-group">
-          <button class="pill active" data-aircraft="all">All</button>
-          <button class="pill" data-aircraft="N78710">N78710 — C172</button>
-          <button class="pill" data-aircraft="N10921">N10921 — C150</button>
-        </div>
-        <div>
-          <button id="newBookingBtn" class="btn primary">+ New booking</button>
-        </div>
+  <!-- CALENDAR -->
+  <section class="cal-shell">
+    <div class="cal-header">
+      <div class="cal-month" id="monthLabel">Month YYYY</div>
+      <div class="cal-nav">
+        <button id="monthOnlyLabel" style="opacity:.75;font-size:.72rem;border-radius:6px;">
+          Month view only for now
+        </button>
+        <button id="prevMonthBtn">&lt;</button>
+        <button id="todayBtn" class="primary">Today</button>
+        <button id="nextMonthBtn">&gt;</button>
       </div>
     </div>
 
-    <div class="cal-shell">
-      <div class="cal-header">
-        <div class="cal-month" id="monthLabel">Month YYYY</div>
-        <div class="cal-nav">
-          <button id="monthOnlyLabel" style="opacity:.75;font-size:.72rem;border-radius:6px;">
-            Month view only for now
-          </button>
-          <button id="prevMonthBtn">&lt;</button>
-          <button id="todayBtn" class="primary">Today</button>
-          <button id="nextMonthBtn">&gt;</button>
-        </div>
-      </div>
-
-      <div class="weekday-row">
-        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-      </div>
-      <div id="monthGrid" class="month-grid"></div>
+    <div class="weekday-row">
+      <div>Sun</div><div>Mon</div><div>Tue</div>
+      <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
     </div>
+    <div id="monthGrid" class="month-grid"></div>
   </section>
 </main>
 
@@ -618,9 +618,7 @@
             <input id="endTimeInput" type="time" class="input">
             <button type="button" class="icon-btn" id="endTimeIcon">🕒</button>
           </div>
-          <div class="time-chips" id="quickTimesRow">
-            <!-- quick chips injected by JS -->
-          </div>
+          <div class="time-chips" id="quickTimesRow"></div>
         </div>
 
         <div class="form-field">
@@ -648,27 +646,17 @@
 
         <div class="form-field">
           <label class="label">Tach start</label>
-          <input id="tachStartInput" class="input" type="text" placeholder="">
+          <input id="tachStartInput" class="input" type="text">
         </div>
 
         <div class="form-field">
           <label class="label">Tach end</label>
-          <input id="tachEndInput" class="input" type="text" placeholder="">
-        </div>
-
-        <div class="form-field">
-          <label class="label">Hobbs start</label>
-          <input id="hobbsStartInput" class="input" type="text" placeholder="">
-        </div>
-
-        <div class="form-field">
-          <label class="label">Hobbs end</label>
-          <input id="hobbsEndInput" class="input" type="text" placeholder="">
+          <input id="tachEndInput" class="input" type="text">
         </div>
 
         <div class="form-field" style="grid-column:1 / -1;">
           <label class="label">Comments</label>
-          <textarea id="commentsInput" class="input" placeholder=""></textarea>
+          <textarea id="commentsInput" class="input"></textarea>
         </div>
       </div>
       <div class="hint-text" id="bookingError" style="color:#fecaca;margin-top:8px;"></div>
@@ -683,7 +671,7 @@
 </div>
 
 <script type="module">
-  /* ================= NAV HAMBURGER ================= */
+  /* ========== NAV HAMBURGER ========== */
   (function(){
     const navToggle = document.getElementById('navToggle');
     const mainNav  = document.getElementById('mainNav');
@@ -693,7 +681,7 @@
     });
   })();
 
-  /* ================= FIREBASE IMPORTS ================= */
+  /* ========== FIREBASE IMPORTS ========== */
   import {
     app,
     auth,
@@ -705,8 +693,6 @@
   import {
     collection,
     query,
-    where,
-    orderBy,
     onSnapshot,
     getDocs,
     doc,
@@ -717,32 +703,27 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-  /* ================= GLOBAL STATE ================= */
+  /* ========== GLOBAL STATE ========== */
   let currentUser = null;
-  let currentRole = null; // {uid,email,firstName,lastName,isAdmin,...}
+  let currentRole = null;
   let isAdmin = false;
 
-  let viewYear, viewMonth; // JS month (0-11)
-  let bookings = [];       // raw bookings from Firestore
+  let viewYear, viewMonth;
+  let bookings = [];
   let aircraftFilter = "all";
+  let instructors = [];
+  let selectedBookingId = null;
 
-  let instructors = [];    // {name,email}
-
-  let selectedBookingId = null; // null = new booking
-
-  /* ================= DOM REFS ================= */
+  /* DOM refs */
   const statusCardsEl   = document.getElementById('statusCards');
   const monthLabelEl    = document.getElementById('monthLabel');
   const monthGridEl     = document.getElementById('monthGrid');
-
   const filterPills     = [...document.querySelectorAll('.pill[data-aircraft]')];
   const newBookingBtn   = document.getElementById('newBookingBtn');
-
   const prevMonthBtn    = document.getElementById('prevMonthBtn');
   const nextMonthBtn    = document.getElementById('nextMonthBtn');
   const todayBtn        = document.getElementById('todayBtn');
 
-  // Modal
   const modalBackdrop   = document.getElementById('bookingModalBackdrop');
   const modalTitleEl    = document.getElementById('bookingModalTitle');
   const bookingCloseBtn = document.getElementById('bookingCloseBtn');
@@ -751,7 +732,6 @@
   const deleteBookingBtn= document.getElementById('deleteBookingBtn');
   const bookingErrorEl  = document.getElementById('bookingError');
 
-  // Form fields
   const aircraftSelect  = document.getElementById('aircraftSelect');
   const titleSelect     = document.getElementById('titleSelect');
   const startDateInput  = document.getElementById('startDateInput');
@@ -772,13 +752,11 @@
 
   const tachStartInput  = document.getElementById('tachStartInput');
   const tachEndInput    = document.getElementById('tachEndInput');
-  const hobbsStartInput = document.getElementById('hobbsStartInput');
-  const hobbsEndInput   = document.getElementById('hobbsEndInput');
   const commentsInput   = document.getElementById('commentsInput');
 
   const quickTimesRow   = document.getElementById('quickTimesRow');
 
-  /* ================= UTILITIES ================= */
+  /* ========== UTILITIES ========== */
   const pad = (n)=> String(n).padStart(2,'0');
   const dateKey = (d)=> `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
@@ -787,6 +765,12 @@
     const [y,m,d] = str.split('-').map(Number);
     if(!y || !m || !d) return null;
     return new Date(y,m-1,d);
+  }
+
+  function isSameDay(a,b){
+    return a.getFullYear() === b.getFullYear() &&
+           a.getMonth() === b.getMonth() &&
+           a.getDate() === b.getDate();
   }
 
   function openModal(){
@@ -816,7 +800,7 @@
     }
   }
 
-  /* ================= QUICK TIME CHIPS ================= */
+  /* ========== QUICK TIME CHIPS ========== */
   (function initQuickTimes(){
     const times = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"];
     times.forEach(t=>{
@@ -829,7 +813,7 @@
     });
   })();
 
-  /* ================= AIRCRAFT STATUS ================= */
+  /* ========== AIRCRAFT STATUS ========== */
   function subscribeAircraftStatus(){
     const qStatus = query(collection(db,"aircraftStatus"));
     onSnapshot(qStatus, (snap)=>{
@@ -841,7 +825,6 @@
         div.innerHTML = `
           <div class="tach-title">${docSnap.id}</div>
           <div class="tach-row"><span>Tach:</span><span>${d.currentTach ?? '—'}</span></div>
-          <div class="tach-row"><span>Hobbs:</span><span>${d.currentHobbs ?? '—'}</span></div>
           <div style="margin-top:4px;font-size:.75rem;color:var(--muted);">
             Last updated: ${d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : '—'}
           </div>
@@ -851,7 +834,7 @@
     });
   }
 
-  /* ================= INSTRUCTORS ================= */
+  /* ========== INSTRUCTORS ========== */
   async function loadInstructors(){
     instructors = [];
     try{
@@ -866,7 +849,6 @@
     }catch(e){
       console.warn("instructors error:", e);
     }
-    // populate select
     instructorSelect.innerHTML = `<option value="">N/A</option>`;
     instructors.forEach(i=>{
       const opt = document.createElement('option');
@@ -882,352 +864,408 @@
     instructorEmailDisplay.textContent = inst ? inst.email : "";
   });
 
-  /* ================= BOOKINGS LOAD / RENDER ================= */
-  function subscribeBookings(){
-    const qBookings = query(collection(db,"bookings"), orderBy("startDate","asc"), orderBy("startTime","asc"));
-    onSnapshot(qBookings, (snap)=>{
-      bookings = [];
-      snap.forEach(d=>{
-        bookings.push({id:d.id, ...d.data()});
-      });
-      renderMonth();
-    });
+  /* ========== BOOKINGS LOAD / RENDER ========== */
+
+  function bookingMatchesDateAndFilter(booking, dayDate){
+    if(aircraftFilter !== "all" && booking.aircraft !== aircraftFilter) return false;
+
+    const s = parseDateStr(booking.startDate);
+    const e = parseDateStr(booking.endDate || booking.startDate);
+    if(!s || !e) return false;
+
+    const dayKey = dateKey(dayDate);
+    const startKey = dateKey(s);
+    const endKey = dateKey(e);
+
+    return dayKey >= startKey && dayKey <= endKey;
   }
 
   function renderMonth(){
-    const monthName = new Date(viewYear,viewMonth,1).toLocaleString(undefined,{month:"long",year:"numeric"});
+    if(viewYear == null || viewMonth == null) return;
+
+    const monthName = new Date(viewYear, viewMonth, 1).toLocaleString(undefined, {
+      month:"long",
+      year:"numeric"
+    });
     monthLabelEl.textContent = monthName;
 
-    // build grid dates: start Sunday before 1st
-    const first = new Date(viewYear,viewMonth,1);
-    const start = new Date(first);
-    start.setDate(first.getDate() - first.getDay()); // Sunday
-    const last = new Date(viewYear,viewMonth+1,0);
-    const end = new Date(last);
-    end.setDate(last.getDate() + (6-last.getDay())); // Saturday
-
-    const days = [];
-    for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
-      days.push(new Date(d));
-    }
-
     monthGridEl.innerHTML = "";
-    const todayKey = dateKey(new Date());
 
-    days.forEach(day=>{
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const startWeekday = firstOfMonth.getDay(); // 0=Sun
+
+    // Start from the Sunday of the first week that contains day 1
+    const startDate = new Date(viewYear, viewMonth, 1 - startWeekday);
+
+    const today = new Date();
+    for(let i = 0; i < 42; i++){
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+
       const cell = document.createElement('div');
       cell.className = "day-cell";
-      const dk = dateKey(day);
-      if(day.getMonth() !== viewMonth) cell.classList.add('other-month');
-      if(dk === todayKey) cell.classList.add('today');
-      cell.dataset.date = dk;
-      cell.innerHTML = `<div class="day-num">${day.getDate()}</div>`;
-      monthGridEl.appendChild(cell);
-    });
 
-    // add bookings as pills
-    const cellsByDate = {};
-    [...monthGridEl.children].forEach(c=>{
-      cellsByDate[c.dataset.date] = c;
-    });
-
-    bookings.forEach(b=>{
-      if(aircraftFilter !== "all" && b.aircraft !== aircraftFilter) return;
-
-      const s = parseDateStr(b.startDate);
-      const e = parseDateStr(b.endDate || b.startDate);
-      if(!s || !e) return;
-
-      const startTime = (b.startTime || "").slice(0,5);
-      const endTime   = (b.endTime || "").slice(0,5);
-      const labelTime = startTime && endTime ? `${startTime}-${endTime} ` : startTime ? `${startTime} ` : "";
-
-      const ownerLabel = b.member_last ? `${b.member_first || ''} ${b.member_last || ''}`.trim() : (b.member_first || 'Member');
-      const title = b.title || "Flight";
-
-      const isYour = currentUser && b.uid === currentUser.uid;
-      const isMaint = title === "Maintenance";
-
-      // place pill on each day the booking covers
-      let d = new Date(s);
-      while(d <= e){
-        const dk = dateKey(d);
-        const cell = cellsByDate[dk];
-        if(cell){
-          const pill = document.createElement('div');
-          pill.className = "event-pill";
-          if(isYour) pill.classList.add('event-your');
-          if(isMaint) pill.classList.add('event-maint');
-          pill.textContent = `${labelTime}${title} (${ownerLabel || 'Member'})`;
-          pill.dataset.bookingId = b.id;
-          cell.appendChild(pill);
-        }
-        d.setDate(d.getDate()+1);
+      if(d.getMonth() !== viewMonth){
+        cell.classList.add('other-month');
       }
-    });
+      if(isSameDay(d, today)){
+        cell.classList.add('today');
+      }
 
-    // click handlers (day & events)
-    [...monthGridEl.querySelectorAll('.day-cell')].forEach(cell=>{
-      cell.addEventListener('click', (e)=>{
-        // if event pill clicked, that handler will run; don't also open new
-        if(e.target.closest('.event-pill')) return;
-        const dStr = cell.dataset.date;
-        openNewBookingForDate(dStr);
+      const dayNum = document.createElement('div');
+      dayNum.className = "day-num";
+      dayNum.textContent = d.getDate();
+      cell.appendChild(dayNum);
+
+      const dayBookings = bookings.filter(b => bookingMatchesDateAndFilter(b, d));
+
+      dayBookings.forEach(b=>{
+        const pill = document.createElement('div');
+        pill.className = "event-pill";
+
+        if(b.title === "Maintenance"){
+          pill.classList.add('event-maint');
+        }else if(currentUser && b.uid === currentUser.uid){
+          pill.classList.add('event-your');
+        }
+
+        const who = b.firstName || (b.email || "").split("@")[0] || "Member";
+        const labelAircraft = b.aircraft || "";
+        const labelTitle = b.title || "";
+        pill.textContent = `${labelAircraft} – ${labelTitle} (${who})`;
+
+        pill.addEventListener('click',(e)=>{
+          e.stopPropagation();
+          openEditBooking(b);
+        });
+
+        cell.appendChild(pill);
       });
-    });
 
-    [...monthGridEl.querySelectorAll('.event-pill')].forEach(pill=>{
-      pill.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        const id = pill.dataset.bookingId;
-        const booking = bookings.find(b=>b.id === id);
-        if(booking) openEditBooking(booking);
+      cell.dataset.date = dateKey(d);
+      cell.addEventListener('click', ()=>{
+        openNewBookingFromDay(d);
       });
-    });
-  }
 
-  /* ================= OPEN MODAL: NEW / EDIT ================= */
-  function fillMemberFields(){
-    if(!currentRole) return;
-    firstNameInput.value = currentRole.profile?.firstName || "";
-    lastNameInput.value  = currentRole.profile?.lastName || "";
-    emailInput.value     = currentRole.email || "";
-  }
-
-  function openNewBookingForDate(dateStr){
-    if(!currentUser){
-      alert("Sign in to create a booking.");
-      return;
+      monthGridEl.appendChild(cell);
     }
+  }
+
+  function subscribeBookings(){
+    const qBookings = query(collection(db,"bookings"));
+    onSnapshot(qBookings,(snap)=>{
+      bookings = [];
+      snap.forEach(docSnap=>{
+        bookings.push({
+          id: docSnap.id,
+          ...docSnap.data()
+        });
+      });
+      renderMonth(); // ensure calendar updates whenever bookings change
+    });
+  }
+
+  function openNewBookingFromDay(dateObj){
+    clearBookingForm();
     selectedBookingId = null;
     modalTitleEl.textContent = "New booking";
+
+    const dStr = dateKey(dateObj);
+    startDateInput.value = dStr;
+    endDateInput.value = dStr;
+
+    // Pre-fill aircraft if a filter is applied
+    if(aircraftFilter !== "all"){
+      aircraftSelect.value = aircraftFilter;
+    }else{
+      aircraftSelect.value = "N78710";
+    }
+
     deleteBookingBtn.style.display = "none";
     bookingErrorEl.textContent = "";
+    saveBookingBtn.disabled = false;
+    openModal();
+  }
 
-    fillMemberFields();
+  function clearBookingForm(){
+    aircraftSelect.value = "N78710";
+    titleSelect.value = "Training";
 
-    const s = dateStr || dateKey(new Date());
-    startDateInput.value = s;
-    endDateInput.value   = s;
+    const todayStr = dateKey(new Date());
+    startDateInput.value = todayStr;
+    endDateInput.value = todayStr;
+
     startTimeInput.value = "";
-    endTimeInput.value   = "";
-    titleSelect.value    = "Training";
-    aircraftSelect.value = aircraftFilter !== "all" ? aircraftFilter : "N78710";
+    endTimeInput.value = "";
+
+    tachStartInput.value = "";
+    tachEndInput.value = "";
+    commentsInput.value = "";
+
     instructorSelect.value = "";
     instructorEmailDisplay.textContent = "";
-    tachStartInput.value  = "";
-    tachEndInput.value    = "";
-    hobbsStartInput.value = "";
-    hobbsEndInput.value   = "";
-    commentsInput.value   = "";
-
-    openModal();
+    bookingErrorEl.textContent = "";
   }
 
-  function openEditBooking(b){
-    selectedBookingId = b.id;
+  function openEditBooking(booking){
+    clearBookingForm();
+    selectedBookingId = booking.id;
     modalTitleEl.textContent = "Edit booking";
-    bookingErrorEl.textContent = "";
 
-    aircraftSelect.value = b.aircraft || "N78710";
-    titleSelect.value    = b.title || "Training";
-    startDateInput.value = b.startDate || dateKey(new Date());
-    endDateInput.value   = b.endDate || b.startDate || startDateInput.value;
-    startTimeInput.value = b.startTime || "";
-    endTimeInput.value   = b.endTime || "";
+    aircraftSelect.value = booking.aircraft || "N78710";
+    titleSelect.value = booking.title || "Training";
 
-    firstNameInput.value = b.member_first || "";
-    lastNameInput.value  = b.member_last || "";
-    emailInput.value     = b.member_email || "";
+    startDateInput.value = booking.startDate || "";
+    endDateInput.value = booking.endDate || booking.startDate || "";
 
-    instructorSelect.value = b.instructorEmail || "";
-    const inst = instructors.find(i => i.email === b.instructorEmail);
+    startTimeInput.value = booking.startTime || "";
+    endTimeInput.value   = booking.endTime || "";
+
+    firstNameInput.value = booking.firstName || firstNameInput.value;
+    lastNameInput.value  = booking.lastName || lastNameInput.value;
+    emailInput.value     = booking.email || emailInput.value;
+
+    instructorSelect.value = booking.instructorEmail || "";
+    const inst = instructors.find(i => i.email === booking.instructorEmail);
     instructorEmailDisplay.textContent = inst ? inst.email : "";
 
-    tachStartInput.value  = b.tach_start  || "";
-    tachEndInput.value    = b.tach_end    || "";
-    hobbsStartInput.value = b.hobbs_start || "";
-    hobbsEndInput.value   = b.hobbs_end   || "";
-    commentsInput.value   = b.comments    || "";
+    tachStartInput.value  = booking.tachStart || "";
+    tachEndInput.value    = booking.tachEnd || "";
+    commentsInput.value   = booking.comments || "";
 
-    const canDelete = isAdmin || (currentUser && b.uid === currentUser.uid && b.title !== "Maintenance");
+    const canDelete = currentUser && (isAdmin || booking.uid === currentUser.uid);
     deleteBookingBtn.style.display = canDelete ? "inline-flex" : "none";
 
+    bookingErrorEl.textContent = "";
+    saveBookingBtn.disabled = false;
     openModal();
   }
 
-  /* ================= SAVE / DELETE ================= */
-  function validateBooking(){
-    bookingErrorEl.textContent = "";
+  /* ========== SAVE / DELETE HANDLERS ========== */
 
-    const sDate = startDateInput.value;
-    const eDate = endDateInput.value || sDate;
-    if(!sDate){
-      bookingErrorEl.textContent = "Start date is required.";
-      return null;
-    }
-    const sd = parseDateStr(sDate);
-    const ed = parseDateStr(eDate);
-    if(!sd || !ed){
-      bookingErrorEl.textContent = "Invalid dates.";
-      return null;
-    }
-    if(ed < sd){
-      bookingErrorEl.textContent = "End date cannot be before start date.";
-      return null;
-    }
-
+  function collectBookingForm(){
+    const aircraft = aircraftSelect.value || "N78710";
     const title = titleSelect.value || "Training";
-    if(title === "Maintenance" && !isAdmin){
-      bookingErrorEl.textContent = "Only admins can create Maintenance bookings.";
-      return null;
+
+    const startDate = startDateInput.value;
+    let endDate = endDateInput.value || startDate;
+
+    if(!startDate){
+      throw new Error("Start date is required.");
     }
 
-    const member_first = firstNameInput.value.trim();
-    const member_last  = lastNameInput.value.trim();
-    if(!member_first || !member_last){
-      bookingErrorEl.textContent = "First and last name are required on your profile.";
-      return null;
+    const s = parseDateStr(startDate);
+    const e = parseDateStr(endDate);
+    if(!s || !e){
+      throw new Error("Invalid start or end date.");
     }
+    if(e < s){
+      endDate = startDate;
+    }
+
+    const startTime = startTimeInput.value || "";
+    const endTime = endTimeInput.value || "";
+
+    if(startTime && endTime && endDate === startDate && endTime < startTime){
+      throw new Error("End time cannot be earlier than start time.");
+    }
+
+    const tachStart = tachStartInput.value.trim();
+    const tachEnd   = tachEndInput.value.trim();
+
+    if((tachStart && !tachEnd) || (!tachStart && tachEnd)){
+      throw new Error("Please enter both Tach start and Tach end or leave both blank.");
+    }
+
+    const instructorEmail = instructorSelect.value || "";
 
     return {
-      aircraft: aircraftSelect.value || "N78710",
+      aircraft,
       title,
-      startDate: sDate,
-      endDate: eDate,
-      startTime: startTimeInput.value || "",
-      endTime:   endTimeInput.value   || "",
-      allDay: (!startTimeInput.value && !endTimeInput.value),
-      member_first,
-      member_last,
-      member_email: emailInput.value || currentUser?.email || "",
-      instructorName: (instructors.find(i => i.email === instructorSelect.value)?.name) || "",
-      instructorEmail: instructorSelect.value || "",
-      tach_start:  tachStartInput.value  || "",
-      tach_end:    tachEndInput.value    || "",
-      hobbs_start: hobbsStartInput.value || "",
-      hobbs_end:   hobbsEndInput.value   || "",
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      firstName: firstNameInput.value || "",
+      lastName: lastNameInput.value || "",
+      email: emailInput.value || (currentUser ? currentUser.email : ""),
+      uid: currentUser ? currentUser.uid : null,
+      instructorEmail,
+      tachStart: tachStart || null,
+      tachEnd: tachEnd || null,
       comments: commentsInput.value || ""
     };
   }
 
-  async function saveBooking(){
+  async function handleSaveBooking(){
     if(!currentUser){
-      bookingErrorEl.textContent = "Sign in required.";
+      bookingErrorEl.textContent = "You must be signed in to create or edit a booking.";
       return;
     }
-    const data = validateBooking();
-    if(!data) return;
 
     try{
-      if(!selectedBookingId){
-        const docRef = doc(collection(db,"bookings"));
-        await setDoc(docRef, {
+      bookingErrorEl.textContent = "";
+      saveBookingBtn.disabled = true;
+
+      const data = collectBookingForm();
+
+      if(selectedBookingId){
+        const ref = doc(db,"bookings",selectedBookingId);
+        await updateDoc(ref,{
           ...data,
-          uid: currentUser.uid,
-          createdAt: serverTimestamp()
+          updatedAt: serverTimestamp()
         });
       }else{
-        const existing = bookings.find(b => b.id === selectedBookingId);
-        const isMaint = existing && existing.title === "Maintenance";
-        if(isMaint && !isAdmin){
-          bookingErrorEl.textContent = "Only admins can update Maintenance bookings.";
-          return;
-        }
-        if(!isAdmin && existing && existing.uid !== currentUser.uid){
-          bookingErrorEl.textContent = "You can only edit your own bookings.";
-          return;
-        }
-        await updateDoc(doc(db,"bookings",selectedBookingId), data);
+        const ref = doc(collection(db,"bookings"));
+        await setDoc(ref,{
+          ...data,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
       }
+
       closeModal();
-    }catch(e){
-      console.error(e);
-      bookingErrorEl.textContent = e.message || "Failed to save booking.";
+    }catch(err){
+      console.error("Booking save error:", err);
+      bookingErrorEl.textContent = err?.message || "Failed to save booking. Please try again.";
+      saveBookingBtn.disabled = false;
     }
   }
 
-  async function deleteBooking(){
+  async function handleDeleteBooking(){
     if(!selectedBookingId) return;
-    const b = bookings.find(b=>b.id === selectedBookingId);
-    if(!b) return;
-    const isMaint = b.title === "Maintenance";
-    if(isMaint && !isAdmin){
-      alert("Only admins can delete Maintenance bookings.");
+    if(!currentUser){
+      bookingErrorEl.textContent = "You must be signed in to delete a booking.";
       return;
     }
-    if(!isAdmin && currentUser && b.uid !== currentUser.uid){
-      alert("You can only delete your own bookings.");
-      return;
-    }
-    if(!confirm("Delete this booking?")) return;
+
+    const confirmDelete = window.confirm("Delete this booking? This cannot be undone.");
+    if(!confirmDelete) return;
+
     try{
-      await deleteDoc(doc(db,"bookings",selectedBookingId));
+      bookingErrorEl.textContent = "";
+      deleteBookingBtn.disabled = true;
+      const ref = doc(db,"bookings",selectedBookingId);
+      await deleteDoc(ref);
       closeModal();
-    }catch(e){
-      alert(e.message || "Failed to delete booking.");
+    }catch(err){
+      console.error("Delete booking error:", err);
+      bookingErrorEl.textContent = err?.message || "Failed to delete booking. Check your permissions.";
+      deleteBookingBtn.disabled = false;
     }
   }
 
-  /* ================= EVENT WIRES ================= */
-  newBookingBtn.addEventListener('click', ()=> openNewBookingForDate());
+  /* ========== AUTH INIT + PAGE BOOTSTRAP ========== */
 
+  async function loadProfileNames(user){
+    try{
+      const profileRef = doc(db,"profiles",user.uid);
+      const profileSnap = await getDoc(profileRef);
+      if(profileSnap.exists()){
+        const p = profileSnap.data() || {};
+        if(p.firstName) firstNameInput.value = p.firstName;
+        if(p.lastName)  lastNameInput.value  = p.lastName;
+        if(p.email)     emailInput.value     = p.email;
+        return;
+      }
+    }catch(e){
+      console.warn("profile load error:", e);
+    }
+
+    const dn = user.displayName || "";
+    if(dn){
+      const [fn, ...rest] = dn.split(" ");
+      firstNameInput.value = fn || "";
+      lastNameInput.value  = rest.join(" ") || "";
+    }
+    emailInput.value = user.email || "";
+  }
+
+  onAuthChanged(async (user)=>{
+    if(!user){
+      window.location.href = "signin.html";
+      return;
+    }
+
+    currentUser = user;
+    await loadProfileNames(user);
+
+    try{
+      currentRole = await getMyRole(user.uid);
+      isAdmin = currentRole === "owner" || currentRole === "admin";
+    }catch(e){
+      console.warn("role load error:", e);
+    }
+
+    subscribeAircraftStatus();
+    loadInstructors();
+    subscribeBookings();
+    setViewToToday();
+  });
+
+  /* ========== EVENT WIRING ========== */
+
+  // Month nav
   prevMonthBtn.addEventListener('click', ()=>{
+    if(viewMonth == null) return;
     viewMonth--;
-    if(viewMonth < 0){viewMonth = 11; viewYear--;}
+    if(viewMonth < 0){
+      viewMonth = 11;
+      viewYear--;
+    }
     renderMonth();
   });
-  nextMonthBtn.addEventListener('click', ()=>{
-    viewMonth++;
-    if(viewMonth > 11){viewMonth = 0; viewYear++;}
-    renderMonth();
-  });
-  todayBtn.addEventListener('click', ()=> setViewToToday());
 
+  nextMonthBtn.addEventListener('click', ()=>{
+    if(viewMonth == null) return;
+    viewMonth++;
+    if(viewMonth > 11){
+      viewMonth = 0;
+      viewYear++;
+    }
+    renderMonth();
+  });
+
+  todayBtn.addEventListener('click', ()=>{
+    setViewToToday();
+  });
+
+  // Filters
   filterPills.forEach(pill=>{
     pill.addEventListener('click', ()=>{
-      filterPills.forEach(p=>p.classList.remove('active'));
+      filterPills.forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
-      aircraftFilter = pill.dataset.aircraft;
+      aircraftFilter = pill.dataset.aircraft || "all";
       renderMonth();
     });
   });
 
-  bookingCloseBtn.addEventListener('click', closeModal);
-  cancelBookingBtn.addEventListener('click', closeModal);
-  saveBookingBtn.addEventListener('click', saveBooking);
-  deleteBookingBtn.addEventListener('click', deleteBooking);
+  // New booking
+  newBookingBtn.addEventListener('click', ()=>{
+    const baseDate = new Date();
+    openNewBookingFromDay(baseDate);
+  });
+
+  // Date / time icon helpers
+  startDateIcon.addEventListener('click', ()=> startDateInput.focus());
+  endDateIcon.addEventListener('click', ()=> endDateInput.focus());
+  startTimeIcon.addEventListener('click', ()=> startTimeInput.focus());
+  endTimeIcon.addEventListener('click', ()=> endTimeInput.focus());
 
   startDateInput.addEventListener('change', ensureEndAfterStart);
   endDateInput.addEventListener('change', ensureEndAfterStart);
 
-  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.());
-  endDateIcon.addEventListener('click',   ()=> endDateInput.showPicker?.());
-  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.());
-  endTimeIcon.addEventListener('click',   ()=> endTimeInput.showPicker?.());
+  // Modal buttons
+  bookingCloseBtn.addEventListener('click', closeModal);
+  cancelBookingBtn.addEventListener('click', closeModal);
+  saveBookingBtn.addEventListener('click', handleSaveBooking);
+  deleteBookingBtn.addEventListener('click', handleDeleteBooking);
 
-  /* ================= AUTH / ROLE ================= */
-  onAuthChanged(async (user)=>{
-    currentUser = user || null;
-    if(!user){
-      currentRole = null;
-      isAdmin = false;
-      return;
-    }
-    try{
-      currentRole = await getMyRole();
-      isAdmin = !!currentRole?.isAdmin;
-    }catch(e){
-      console.warn("getMyRole error", e);
-      isAdmin = false;
+  modalBackdrop.addEventListener('click', (e)=>{
+    if(e.target === modalBackdrop){
+      closeModal();
     }
   });
-
-  /* ================= INIT ================= */
-  subscribeAircraftStatus();
-  subscribeBookings();
-  loadInstructors();
-  setViewToToday();
 </script>
 </body>
 </html>
