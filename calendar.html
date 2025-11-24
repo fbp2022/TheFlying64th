@@ -1333,18 +1333,52 @@ ${first} ${last}`;
     });
   }
 
-  function visibleBookingsForDate(d){
-    const key = dateKey(d);
-    return bookings.filter(b=>{
-      if(aircraftFilter !== 'all' && b.aircraft && b.aircraft !== aircraftFilter) return false;
+function visibleBookingsForDate(d){
+  const key = dateKey(d); // YYYY-MM-DD for the cell’s date
 
-      const s = b.startDate || b.date || "";
-      const e = b.endDate || b.startDate || b.date || "";
-      if(!s && !e) return false;
-      const ok = key >= (s || key) && key <= (e || key);
-      return !!ok;
-    });
-  }
+  return bookings.filter(b => {
+    // Aircraft filter
+    if (aircraftFilter !== 'all' && b.aircraft && b.aircraft !== aircraftFilter) {
+      return false;
+    }
+
+    // Prefer new fields, fall back to older shapes
+    let s = b.startDate ?? b.date ?? b.startTimestamp ?? b.start;
+    let e = b.endDate   ?? b.endTimestamp ?? b.end ?? s;
+
+    if (!s && !e) return false;
+
+    // Normalize everything into YYYY-MM-DD strings so we can safely compare
+    const toKey = (val) => {
+      if (!val) return null;
+
+      // already YYYY-MM-DD
+      if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        return val;
+      }
+
+      // Firestore Timestamp
+      if (val && typeof val.toDate === "function") {
+        return dateKey(val.toDate());
+      }
+
+      // JS Date
+      if (val instanceof Date) {
+        return dateKey(val);
+      }
+
+      // Anything else, just bail
+      return null;
+    };
+
+    const sKey = toKey(s);
+    const eKey = toKey(e) ?? sKey;
+
+    if (!sKey) return false;
+
+    return key >= sKey && key <= (eKey || sKey);
+  });
+}
 
   function renderCalendar(){
     if(!monthGridEl) return;
