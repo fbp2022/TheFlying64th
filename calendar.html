@@ -1462,7 +1462,7 @@ ${first} ${last}`;
     });
   }
 
-  function renderCalendar(){
+    function renderCalendar(){
     if(!monthGridEl) return;
 
     const year  = focusDate.getFullYear();
@@ -1488,6 +1488,36 @@ ${first} ${last}`;
 
     const todayKey = dateKey(new Date());
 
+    // Helper to build a pill and wire click to THAT booking only
+    function makeBookingPill(b){
+      const pill = document.createElement('div');
+      pill.className = "event-pill";
+      if(b.title === "Maintenance") pill.classList.add('event-maint');
+      else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
+      else pill.classList.add('event-other');
+
+      const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
+      const title = b.title || "Booking";
+      const times = (b.startTime || b.endTime)
+        ? ` (${b.startTime || '??'}–${b.endTime || '??'})`
+        : "";
+
+      // Month/week views don’t need times as much, but safe to include
+      pill.textContent = `${title} – ${who}${times}`;
+
+      // 🔒 IMPORTANT: clicking the pill opens *that* booking, not the first of the day
+      pill.addEventListener('click', (evt)=>{
+        evt.stopPropagation(); // don’t trigger cell click
+        if (!currentUser){
+          openAuth();
+          return;
+        }
+        openBookingForEdit(b);
+      });
+
+      return pill;
+    }
+
     if(viewMode === 'month'){
       // Build standard month grid
       const firstOfMonth = new Date(year, month, 1);
@@ -1510,29 +1540,21 @@ ${first} ${last}`;
 
         const dayBookings = visibleBookingsForDate(thisDate);
         dayBookings.forEach(b=>{
-          const pill = document.createElement('div');
-          pill.className = "event-pill";
-          if(b.title === "Maintenance") pill.classList.add('event-maint');
-          else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
-          else pill.classList.add('event-other');
-
-          const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
-          const title = b.title || "Booking";
-          pill.textContent = `${title} – ${who}`;
+          const pill = makeBookingPill(b);
           cell.appendChild(pill);
         });
 
+        // Clicking EMPTY space in the cell:
+        // - if signed out: open auth
+        // - if signed in:
+        //    - if no bookings: new booking for that date
+        //    - if bookings: new booking for that date (use pills to open specific)
         cell.addEventListener('click', ()=>{
           if(!currentUser){
             openAuth();
             return;
           }
-          const dayBookingsNow = visibleBookingsForDate(thisDate);
-          if (dayBookingsNow.length){
-            openBookingForEdit(dayBookingsNow[0]);
-          } else {
-            openBookingForDate(thisDate);
-          }
+          openBookingForDate(thisDate);
         });
 
         monthGridEl.appendChild(cell);
@@ -1556,16 +1578,8 @@ ${first} ${last}`;
 
         const dayBookings = visibleBookingsForDate(thisDate);
         dayBookings.forEach(b=>{
-          const pill = document.createElement('div');
-          pill.className = "event-pill";
-          if(b.title === "Maintenance") pill.classList.add('event-maint');
-          else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
-          else pill.classList.add('event-other');
-
-          const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
-          const title = b.title || "Booking";
+          const pill = makeBookingPill(b);
           cell.appendChild(pill);
-          pill.textContent = `${title} – ${who}`;
         });
 
         cell.addEventListener('click', ()=>{
@@ -1573,12 +1587,7 @@ ${first} ${last}`;
             openAuth();
             return;
           }
-          const dayBookingsNow = visibleBookingsForDate(thisDate);
-          if (dayBookingsNow.length){
-            openBookingForEdit(dayBookingsNow[0]);
-          } else {
-            openBookingForDate(thisDate);
-          }
+          openBookingForDate(thisDate);
         });
 
         monthGridEl.appendChild(cell);
@@ -1600,18 +1609,7 @@ ${first} ${last}`;
 
       const dayBookings = visibleBookingsForDate(focusDate);
       dayBookings.forEach(b=>{
-        const pill = document.createElement('div');
-        pill.className = "event-pill";
-        if(b.title === "Maintenance") pill.classList.add('event-maint');
-        else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
-        else pill.classList.add('event-other');
-
-        const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
-        const title = b.title || "Booking";
-        const times = (b.startTime || b.endTime)
-          ? ` (${b.startTime || '??'}–${b.endTime || '??'})`
-          : "";
-        pill.textContent = `${title} – ${who}${times}`;
+        const pill = makeBookingPill(b);
         cell.appendChild(pill);
       });
 
@@ -1620,12 +1618,8 @@ ${first} ${last}`;
           openAuth();
           return;
         }
-        const dayBookingsNow = visibleBookingsForDate(focusDate);
-        if (dayBookingsNow.length){
-          openBookingForEdit(dayBookingsNow[0]);
-        } else {
-          openBookingForDate(focusDate);
-        }
+        // Same behavior: click empty area ⇒ new booking for that day
+        openBookingForDate(focusDate);
       });
 
       monthGridEl.appendChild(cell);
