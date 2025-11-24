@@ -1633,21 +1633,27 @@ ${first} ${last}`;
   }
 
   /* ========== BOOKING MODAL: OPEN / SAVE / DELETE ========== */
+
   function openBookingForDate(d){
     // New booking prefilled with date
     selectedBookingId = null;
     bookingErrorEl.textContent = "";
     modalTitleEl.textContent = "New booking";
 
-    aircraftSelect.value  = aircraftSelect.value || "N78710";
-    titleSelect.value     = titleSelect.value || "Training";
-    startDateInput.value  = dateKey(d);
-    endDateInput.value    = dateKey(d);
-    startTimeInput.value  = "";
-    endTimeInput.value    = "";
-    tachStartInput.value  = "";
-    tachEndInput.value    = "";
-    commentsInput.value   = "";
+    // 🔐 Always use the CURRENT signed-in user's profile
+    firstNameInput.value = currentRole?.profile?.firstName || "";
+    lastNameInput.value  = currentRole?.profile?.lastName  || "";
+    emailInput.value     = currentRole?.email || "";
+
+    aircraftSelect.value   = aircraftSelect.value || "N78710";
+    titleSelect.value      = titleSelect.value || "Training";
+    startDateInput.value   = dateKey(d);
+    endDateInput.value     = dateKey(d);
+    startTimeInput.value   = "";
+    endTimeInput.value     = "";
+    tachStartInput.value   = "";
+    tachEndInput.value     = "";
+    commentsInput.value    = "";
     instructorSelect.value = "";
     instructorEmailDisplay.textContent = "";
 
@@ -1672,10 +1678,10 @@ ${first} ${last}`;
     commentsInput.value  = b.comments || "";
 
     firstNameInput.value = b.firstName || currentRole?.profile?.firstName || "";
-    lastNameInput.value  = b.lastName || currentRole?.profile?.lastName || "";
-    emailInput.value     = b.email || currentRole?.email || "";
+    lastNameInput.value  = b.lastName  || currentRole?.profile?.lastName  || "";
+    emailInput.value     = b.email     || currentRole?.email              || "";
 
-    if(b.instructorEmail){
+    if (b.instructorEmail){
       const inst = instructors.find(i => i.email === b.instructorEmail);
       instructorSelect.value = b.instructorEmail;
       instructorEmailDisplay.textContent = inst ? inst.email : b.instructorEmail;
@@ -1687,18 +1693,55 @@ ${first} ${last}`;
     const isOwner = b.uid && currentRole && b.uid === currentRole.uid;
     const isMaint = b.title === "Maintenance";
 
-    // UI for delete: admin can delete anything; member can delete own non-maintenance
-    if(currentRole?.isAdmin || (isOwner && !isMaint)){
+    // Admin can delete anything; member can delete own non-maintenance bookings
+    if (currentRole?.isAdmin || (isOwner && !isMaint)){
       deleteBookingBtn.style.display = "inline-block";
-    }else{
+    } else {
       deleteBookingBtn.style.display = "none";
     }
 
     openModal();
   }
 
+  // ===== Overlap helpers =====
+  function makeDateTime(dateStr, timeStr, isEnd){
+    if (!dateStr) return null;
+    let t = timeStr;
+    if (!t || !t.trim()){
+      t = isEnd ? "23:59" : "00:00";
+    }
+    // Safe enough for local comparisons
+    return new Date(`${dateStr}T${t}`);
+  }
+
+  function intervalsOverlap(aStart, aEnd, bStart, bEnd){
+    if (!aStart || !aEnd || !bStart || !bEnd) return false;
+    return aStart < bEnd && aEnd > bStart;
+  }
+
+  function findOverlapBooking({ aircraft, sDate, eDate, sTime, eTime, ignoreId }){
+    const startDT = makeDateTime(sDate, sTime, false);
+    const endDT   = makeDateTime(eDate || sDate, eTime, true);
+
+    if (!startDT || !endDT) return null;
+
+    for (const b of bookings){
+      if (b.aircraft !== aircraft) continue;
+      if (ignoreId && b.id === ignoreId) continue;
+
+      const bStartDT = makeDateTime(b.startDate || b.date, b.startTime, false);
+      const bEndDT   = makeDateTime(b.endDate || b.startDate || b.date, b.endTime, true);
+      if (!bStartDT || !bEndDT) continue;
+
+      if (intervalsOverlap(startDT, endDT, bStartDT, bEndDT)){
+        return b;
+      }
+    }
+    return null;
+  }
+
   async function saveBooking(){
-    if(!currentRole || !currentRole.uid){
+    if (!currentRole || !currentRole.uid){
       bookingErrorEl.textContent = "Please sign in first.";
       return;
     }
@@ -1713,61 +1756,50 @@ ${first} ${last}`;
     const tachE    = tachEndInput.value;
     const comments = commentsInput.value || "";
 
-    if(!aircraft || !sDate){
+    if (!aircraft || !sDate){
       bookingErrorEl.textContent = "Aircraft and start date are required.";
       return;
     }
 
-    // Enforce dates
+    // Enforce date ordering
     const sd = parseDateStr(sDate);
     const ed = parseDateStr(eDate);
-    if(sd && ed && ed < sd){
+    if (sd && ed && ed < sd){
       bookingErrorEl.textContent = "End date cannot be before start date.";
       return;
     }
 
-    // Maintenance bookings only by admin (UI side; rules also enforce)
-    if(title === "Maintenance" && !currentRole.isAdmin){
+    // Maintenance bookings only by admin (UI-side; rules enforce too)
+    if (title === "Maintenance" && !currentRole.isAdmin){
       bookingErrorEl.textContent = "Only admins can create Maintenance bookings.";
       return;
     }
 
-    // ==== OVERLAP PROTECTION ====
-    const newStartDate = sDate;
-    const newEndDate   = eDate;
-
-    const hasOverlap = bookings.some(b=>{
-      if(b.aircraft !== aircraft) return false;
-
-      // Skip self when editing
-      if(selectedBookingId && b.id === selectedBookingId) return false;
-
-      const bStart = b.startDate || b.date;
-      const bEnd   = b.endDate || bStart;
-      if(!bStart) return false;
-
-      // If date ranges don't intersect, no conflict
-      if (newEndDate < bStart || bEnd < newStartDate) return false;
-
-      // If either booking spans multiple days, treat as conflict
-      if (newStartDate !== newEndDate || bStart !== bEnd) return true;
-
-      // Same single-day → check time overlap
-      return timesOverlap(
-        sTime || "",
-        eTime || "",
-        b.startTime || "",
-        b.endTime || ""
-      );
+    // 🔒 Overlap protection: prevent double-booking same aircraft
+    const conflict = findOverlapBooking({
+      aircraft,
+      sDate,
+      eDate,
+      sTime,
+      eTime,
+      ignoreId: selectedBookingId || null
     });
 
-    if (hasOverlap){
-      bookingErrorEl.textContent = "This booking overlaps an existing reservation for this aircraft.";
+    if (conflict){
+      const who = `${conflict.firstName || ""} ${conflict.lastName || ""}`.trim() || "another member";
+      const conflictDates = conflict.startDate === conflict.endDate || !conflict.endDate
+        ? conflict.startDate
+        : `${conflict.startDate} to ${conflict.endDate}`;
+      const conflictTimes = (conflict.startTime || conflict.endTime)
+        ? ` (${conflict.startTime || "??"}–${conflict.endTime || "??"})`
+        : "";
+      bookingErrorEl.textContent =
+        `This aircraft is already booked by ${who} on ${conflictDates}${conflictTimes}.`;
       return;
     }
 
     const first = currentRole.profile?.firstName || "";
-    const last  = currentRole.profile?.lastName || "";
+    const last  = currentRole.profile?.lastName  || "";
     const email = currentRole.email || "";
 
     const base = {
@@ -1788,14 +1820,14 @@ ${first} ${last}`;
       updatedAt: serverTimestamp()
     };
 
-    try{
-      if(selectedBookingId){
+    try {
+      if (selectedBookingId){
         // Edit existing
-        const ref = doc(db,"bookings", selectedBookingId);
+        const ref = doc(db, "bookings", selectedBookingId);
         await updateDoc(ref, base);
       } else {
-        // New
-        const ref = await addDoc(collection(db,"bookings"), {
+        // New booking
+        const ref = await addDoc(collection(db, "bookings"), {
           ...base,
           createdAt: serverTimestamp()
         });
@@ -1804,31 +1836,32 @@ ${first} ${last}`;
 
       // AFTER successful save: if instructor selected, open native email app
       if (instructorSelect.value){
-        launchInstructorEmail(false);
+        launchInstructorEmail(false); // not cancelled
       }
 
       closeModal();
-    }catch(e){
+    } catch (e){
       console.error(e);
       bookingErrorEl.textContent = e.message || "Save failed.";
     }
   }
 
   async function deleteBooking(){
-    if(!selectedBookingId) return;
+    if (!selectedBookingId) return;
+    if (!confirm("Delete this booking?")) return;
 
-    const bookingToDelete = bookings.find(b => b.id === selectedBookingId) || null;
-    if(!confirm("Delete this booking?")) return;
+    // Capture whether this booking actually has an instructor before we clear anything
+    const hasInstructor = !!(instructorSelect.value && instructorSelect.value.trim());
 
-    // If there is an instructor on THIS booking, notify via email BEFORE deleting
-    if (bookingToDelete && bookingToDelete.instructorEmail){
-      launchInstructorEmail(true, bookingToDelete);
+    // If there is an instructor selected, notify via email BEFORE deleting
+    if (hasInstructor){
+      launchInstructorEmail(true); // cancelled
     }
 
-    try{
-      await deleteDoc(doc(db,"bookings", selectedBookingId));
+    try {
+      await deleteDoc(doc(db, "bookings", selectedBookingId));
       closeModal();
-    }catch(e){
+    } catch (e){
       alert(e.message);
     }
   }
@@ -1837,18 +1870,18 @@ ${first} ${last}`;
   function exportCurrentMonth(){
     const y = focusDate.getFullYear();
     const m = focusDate.getMonth(); // 0-based
-    const start = new Date(y,m,1);
-    const end   = new Date(y,m+1,0);
+    const start = new Date(y, m, 1);
+    const end   = new Date(y, m + 1, 0);
     const startStr = dateKey(start);
     const endStr   = dateKey(end);
 
-    const rows = bookings.filter(b=>{
+    const rows = bookings.filter(b => {
       const s = b.startDate || "";
-      if(!s) return false;
+      if (!s) return false;
       return s >= startStr && s <= endStr;
     });
 
-    if(!rows.length){
+    if (!rows.length){
       alert("No bookings for this month.");
       return;
     }
@@ -1860,7 +1893,7 @@ ${first} ${last}`;
     ];
 
     const lines = [header.join(",")];
-    rows.forEach(b=>{
+    rows.forEach(b => {
       const vals = [
         b.aircraft || "",
         b.title || "",
@@ -1874,17 +1907,17 @@ ${first} ${last}`;
         b.instructorEmail || "",
         b.tachStart || "",
         b.tachEnd || "",
-        (b.comments || "").replace(/\r?\n/g," ")
+        (b.comments || "").replace(/\r?\n/g, " ")
       ];
-      const escaped = vals.map(v => `"${String(v).replace(/"/g,'""')}"`);
+      const escaped = vals.map(v => `"${String(v).replace(/"/g, '""')}"`);
       lines.push(escaped.join(","));
     });
 
     const csv = lines.join("\r\n");
-    const blob = new Blob([csv], {type:"text/csv"});
+    const blob = new Blob([csv], { type: "text/csv" });
     const url  = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const mm = String(m+1).padStart(2,"0");
+    const mm = String(m + 1).padStart(2, "0");
     a.href = url;
     a.download = `flying64th-bookings-${y}-${mm}.csv`;
     document.body.appendChild(a);
@@ -1895,9 +1928,9 @@ ${first} ${last}`;
 
   /* ========== EVENTS & AUTH STATE ========== */
   // Filters
-  filterPills.forEach(p=>{
-    p.addEventListener('click', ()=>{
-      filterPills.forEach(x=>x.classList.remove('active'));
+  filterPills.forEach(p => {
+    p.addEventListener('click', () => {
+      filterPills.forEach(x => x.classList.remove('active'));
       p.classList.add('active');
       aircraftFilter = p.getAttribute('data-aircraft') || 'all';
       renderCalendar();
@@ -1907,33 +1940,33 @@ ${first} ${last}`;
   // View mode
   function setViewMode(mode){
     viewMode = mode;
-    [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn=>btn.classList.remove('active'));
-    if(mode === 'month') viewMonthBtn.classList.add('active');
-    if(mode === 'week')  viewWeekBtn.classList.add('active');
-    if(mode === 'day')   viewDayBtn.classList.add('active');
+    [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn => btn.classList.remove('active'));
+    if (mode === 'month') viewMonthBtn.classList.add('active');
+    if (mode === 'week')  viewWeekBtn.classList.add('active');
+    if (mode === 'day')   viewDayBtn.classList.add('active');
     renderCalendar();
   }
-  viewMonthBtn.addEventListener('click', ()=>setViewMode('month'));
-  viewWeekBtn.addEventListener('click', ()=>setViewMode('week'));
-  viewDayBtn.addEventListener('click', ()=>setViewMode('day'));
+  viewMonthBtn.addEventListener('click', () => setViewMode('month'));
+  viewWeekBtn.addEventListener('click', () => setViewMode('week'));
+  viewDayBtn.addEventListener('click', () => setViewMode('day'));
 
   // Nav period
-  prevPeriodBtn.addEventListener('click', ()=>{
-    if(viewMode === 'month'){
-      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth()-1, 1);
-    }else if(viewMode === 'week'){
+  prevPeriodBtn.addEventListener('click', () => {
+    if (viewMode === 'month'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth() - 1, 1);
+    } else if (viewMode === 'week'){
       focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() - 7);
-    }else{
+    } else {
       focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() - 1);
     }
     renderCalendar();
   });
-  nextPeriodBtn.addEventListener('click', ()=>{
-    if(viewMode === 'month'){
-      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth()+1, 1);
-    }else if(viewMode === 'week'){
+  nextPeriodBtn.addEventListener('click', () => {
+    if (viewMode === 'month'){
+      focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth() + 1, 1);
+    } else if (viewMode === 'week'){
       focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() + 7);
-    }else{
+    } else {
       focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth(), focusDate.getDate() + 1);
     }
     renderCalendar();
@@ -1950,13 +1983,13 @@ ${first} ${last}`;
 
   startDateInput.addEventListener('change', ensureEndAfterStart);
   endDateInput.addEventListener('change', ensureEndAfterStart);
-  startDateIcon.addEventListener('click', ()=> startDateInput.showPicker?.());
-  endDateIcon.addEventListener('click', ()=> endDateInput.showPicker?.());
-  startTimeIcon.addEventListener('click', ()=> startTimeInput.showPicker?.());
-  endTimeIcon.addEventListener('click', ()=> endTimeInput.showPicker?.());
+  startDateIcon.addEventListener('click', () => startDateInput.showPicker?.());
+  endDateIcon.addEventListener('click', () => endDateInput.showPicker?.());
+  startTimeIcon.addEventListener('click', () => startTimeInput.showPicker?.());
+  endTimeIcon.addEventListener('click', () => endTimeInput.showPicker?.());
 
-  newBookingBtn.addEventListener('click', ()=>{
-    if(!currentUser){
+  newBookingBtn.addEventListener('click', () => {
+    if (!currentUser){
       openAuth();
       return;
     }
@@ -1964,50 +1997,50 @@ ${first} ${last}`;
   });
 
   // Auth state
-  onAuthChanged(async (user)=>{
+  onAuthChanged(async (user) => {
     currentUser = user || null;
-    if(!user){
+    if (!user){
       signinBtn.textContent = "Sign In";
       currentRole = null;
       isAdmin = false;
       bookings = [];
       statusCardsEl.innerHTML = "";
-      if(unsubStatus){ unsubStatus(); unsubStatus = null; }
-      if(unsubBookings){ unsubBookings(); unsubBookings = null; }
+      if (unsubStatus){   unsubStatus();   unsubStatus = null; }
+      if (unsubBookings){ unsubBookings(); unsubBookings = null; }
       renderCalendar();
       return;
     }
 
-    try{
+    try {
       currentRole = await getMyRole();
       isAdmin = !!currentRole.isAdmin;
       const email = currentRole.email || user.email || "";
-      const shortEmail = email.length > 25 ? email.slice(0,25) + "…" : email;
+      const shortEmail = email.length > 25 ? email.slice(0, 25) + "…" : email;
       signinBtn.textContent = shortEmail ? `Account – ${shortEmail}` : "Account";
 
       // Fill readonly name/email on form from profile
       firstNameInput.value = currentRole.profile?.firstName || "";
-      lastNameInput.value  = currentRole.profile?.lastName || "";
+      lastNameInput.value  = currentRole.profile?.lastName  || "";
       emailInput.value     = currentRole.email || "";
 
       // Maintenance option only for admins
       const maintOpt = [...titleSelect.options].find(o => o.value === "Maintenance");
-      if(maintOpt){
-        if(!currentRole.isAdmin){
+      if (maintOpt){
+        if (!currentRole.isAdmin){
           maintOpt.disabled = true;
-        }else{
+        } else {
           maintOpt.disabled = false;
         }
       }
 
       // Subscribe to status + bookings only when signed in
-      if(!unsubStatus)   unsubStatus   = subscribeAircraftStatus();
-      if(!unsubBookings) unsubBookings = subscribeBookings();
+      if (!unsubStatus)   unsubStatus   = subscribeAircraftStatus();
+      if (!unsubBookings) unsubBookings = subscribeBookings();
 
       // Load instructors once
-      if(!instructors.length) loadInstructors();
+      if (!instructors.length) loadInstructors();
 
-    }catch(e){
+    } catch (e){
       console.warn("getMyRole error:", e);
     }
   });
