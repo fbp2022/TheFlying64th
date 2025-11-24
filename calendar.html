@@ -895,7 +895,6 @@
 </script>
 
 <script type="module">
- <script type="module">
   /* ========== IMPORTS ========== */
   import {
     auth,
@@ -911,7 +910,6 @@
   import {
     collection,
     query,
-    where,
     onSnapshot,
     getDocs,
     doc,
@@ -1060,6 +1058,38 @@
     const day = res.getDay();
     res.setDate(res.getDate() - day);
     return res;
+  }
+
+  // ---- time helpers for overlap detection ----
+  function timeToMinutes(t){
+    if(!t) return null;
+    const parts = t.split(':');
+    if(parts.length !== 2) return null;
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    if(Number.isNaN(h) || Number.isNaN(m)) return null;
+    return h*60 + m;
+  }
+
+  function timesOverlap(aStart, aEnd, bStart, bEnd){
+    // aStart/aEnd/bStart/bEnd are "HH:MM" or ""
+    const aS = timeToMinutes(aStart);
+    const aE = timeToMinutes(aEnd);
+    const bS = timeToMinutes(bStart);
+    const bE = timeToMinutes(bEnd);
+
+    const aAllDay = aS === null && aE === null;
+    const bAllDay = bS === null && bE === null;
+
+    // any all-day vs anything = overlap
+    if(aAllDay || bAllDay) return true;
+
+    const aStartMin = aS ?? 0;
+    const aEndMin   = aE ?? (24*60);
+    const bStartMin = bS ?? 0;
+    const bEndMin   = bE ?? (24*60);
+
+    return aStartMin < bEndMin && bStartMin < aEndMin;
   }
 
   /* ========== QUICK TIME CHIPS ========== */
@@ -1238,12 +1268,16 @@
       title,
       dateRange,
       sDate,
+      eDate,
+      sTime,
+      eTime,
       timeRange,
       comments
     };
   }
 
-  function buildInstructorEmailBody(inst, { cancelled = false } = {}){
+  function buildInstructorEmailBody(inst, { cancelled = false } = {}, detailsOverride = null){
+    const details = detailsOverride || collectReservationDetails();
     const {
       first,
       last,
@@ -1253,35 +1287,112 @@
       dateRange,
       timeRange,
       comments
-    } = collectReservationDetails();
+    } = details;
 
     if (cancelled){
-      return `Hi ${inst.name || 'Instructor'},\n\nThis is ${first} ${last} (${memberEmail}).\n\nI need to cancel the following reservation:\n\nAircraft: ${aircraft || 'N/A'}\nType: ${title || 'N/A'}\nDate(s): ${dateRange || 'N/A'}\nTime window: ${timeRange || 'N/A'}\n\nAdditional notes:\n${comments || '(none)'}\n\nThank you,\n${first} ${last}`;
+      return `Hi ${inst.name || 'Instructor'},
+
+This is ${first} ${last} (${memberEmail}).
+
+I need to cancel the following reservation:
+
+Aircraft: ${aircraft || 'N/A'}
+Type: ${title || 'N/A'}
+Date(s): ${dateRange || 'N/A'}
+Time window: ${timeRange || 'N/A'}
+
+Additional notes:
+${comments || '(none)'}
+
+Thank you,
+${first} ${last}`;
     }
 
-    return `Hi ${inst.name || 'Instructor'},\n\nThis is ${first} ${last} (${memberEmail}).\n\nI'd like to schedule a ${title || 'flight'} in ${aircraft || 'aircraft'}.\n\nRequested date(s):\n  ${dateRange || 'N/A'}\n\nRequested time window:\n  ${timeRange || 'N/A'}\n\nAdditional notes:\n${comments || '(none)'}\n\nPlease let me know if this works or what other times are available.\n\nThank you,\n${first} ${last}`;
+    return `Hi ${inst.name || 'Instructor'},
+
+This is ${first} ${last} (${memberEmail}).
+
+I'd like to schedule a ${title || 'flight'} in ${aircraft || 'aircraft'}.
+
+Requested date(s):
+  ${dateRange || 'N/A'}
+
+Requested time window:
+  ${timeRange || 'N/A'}
+
+Additional notes:
+${comments || '(none)'}
+
+Please let me know if this works or what other times are available.
+
+Thank you,
+${first} ${last}`;
   }
 
-  function launchInstructorEmail(cancelled = false){
-    const raw = instructorSelect.value || "";
-    const email = raw.trim();
+  function launchInstructorEmail(cancelled = false, booking = null){
+    // If we pass a booking, build from that. Otherwise use current modal fields.
+    if (booking){
+      const instructorEmail = booking.instructorEmail || "";
+      if (!instructorEmail) return;
+
+      const inst = instructors.find(i => i.email === instructorEmail) || {
+        name: 'Instructor',
+        email: instructorEmail
+      };
+
+      const sDate = booking.startDate || "";
+      const eDate = booking.endDate || booking.startDate || "";
+      const dateRange = sDate && eDate && sDate !== eDate
+        ? `${sDate} to ${eDate}`
+        : (sDate || eDate || "");
+
+      const sTime = booking.startTime || "";
+      const eTime = booking.endTime || "";
+      const timeRange = (sTime || eTime)
+        ? `${sTime || 'N/A'} – ${eTime || 'N/A'}`
+        : "All-day / flexible";
+
+      const details = {
+        first: booking.firstName || "",
+        last: booking.lastName || "",
+        memberEmail: booking.email || "",
+        aircraft: booking.aircraft || "",
+        title: booking.title || "",
+        dateRange,
+        timeRange,
+        comments: booking.comments || ""
+      };
+
+      const subject = (cancelled
+        ? `Cancelled Reservation – ${details.aircraft || ''} ${sDate || ''}`
+        : `Flight Reservation Request – ${details.aircraft || ''} ${sDate || ''}`
+      ).trim();
+
+      const body = buildInstructorEmailBody(inst, { cancelled }, details);
+      const mailto = `mailto:${encodeURIComponent(inst.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+      return;
+    }
+
+    // Fallback: use current modal selection + fields
+    const email = instructorSelect.value || "";
     if (!email) return;
 
     const inst = instructors.find(i => i.email === email) || { name: 'Instructor', email };
     const details = collectReservationDetails();
-    const subject = cancelled
-      ? `Cancelled Reservation – ${details.aircraft || ''} ${details.sDate || ''}`.trim()
-      : `Flight Reservation Request – ${details.aircraft || ''} ${details.sDate || ''}`.trim();
+    const subject = (cancelled
+      ? `Cancelled Reservation – ${details.aircraft || ''} ${details.sDate || ''}`
+      : `Flight Reservation Request – ${details.aircraft || ''} ${details.sDate || ''}`
+    ).trim();
 
-    const body = buildInstructorEmailBody(inst, { cancelled });
+    const body = buildInstructorEmailBody(inst, { cancelled }, details);
     const mailto = `mailto:${encodeURIComponent(inst.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   }
 
-  // Only show instructor email in hint text when changed
+  // Only show instructor email in hint text when changed, no email yet
   instructorSelect.addEventListener('change', ()=>{
-    const raw = instructorSelect.value || "";
-    const email = raw.trim();
+    const email = instructorSelect.value || "";
     const inst = instructors.find(i => i.email === email);
     instructorEmailDisplay.textContent = inst ? inst.email : "";
   });
@@ -1338,6 +1449,7 @@
           return dateKey(val);
         }
 
+        // Anything else, just bail
         return null;
       };
 
@@ -1383,20 +1495,20 @@
       const temp = new Date(start);
 
       for(let i=0;i<42;i++){
-        const cellDate = new Date(temp); // capture for closures
+        const thisDate = new Date(temp);
         const cell = document.createElement('div');
         cell.className = "day-cell";
 
-        const cellKey = dateKey(cellDate);
-        if(cellDate.getMonth() !== month) cell.classList.add('other-month');
+        const cellKey = dateKey(thisDate);
+        if(thisDate.getMonth() !== month) cell.classList.add('other-month');
         if(cellKey === todayKey) cell.classList.add('today');
 
         const num = document.createElement('div');
         num.className = 'day-num';
-        num.textContent = cellDate.getDate();
+        num.textContent = thisDate.getDate();
         cell.appendChild(num);
 
-        const dayBookings = visibleBookingsForDate(cellDate);
+        const dayBookings = visibleBookingsForDate(thisDate);
         dayBookings.forEach(b=>{
           const pill = document.createElement('div');
           pill.className = "event-pill";
@@ -1407,27 +1519,20 @@
           const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
           const title = b.title || "Booking";
           pill.textContent = `${title} – ${who}`;
-
-          // ✏️ PILL CLICK: open this booking for edit, do NOT trigger day click
-          pill.addEventListener('click', (evt)=>{
-            evt.stopPropagation();
-            if(!currentUser){
-              openAuth();
-              return;
-            }
-            openBookingForEdit(b);
-          });
-
           cell.appendChild(pill);
         });
 
-        // ✏️ DAY CLICK: always create a new booking on that date
         cell.addEventListener('click', ()=>{
           if(!currentUser){
             openAuth();
             return;
           }
-          openBookingForDate(cellDate);
+          const dayBookingsNow = visibleBookingsForDate(thisDate);
+          if (dayBookingsNow.length){
+            openBookingForEdit(dayBookingsNow[0]);
+          } else {
+            openBookingForDate(thisDate);
+          }
         });
 
         monthGridEl.appendChild(cell);
@@ -1437,19 +1542,19 @@
       const start = startOfWeek(focusDate);
       const temp = new Date(start);
       for(let i=0;i<7;i++){
-        const cellDate = new Date(temp);
+        const thisDate = new Date(temp);
         const cell = document.createElement('div');
         cell.className = "day-cell";
 
-        const cellKey = dateKey(cellDate);
+        const cellKey = dateKey(thisDate);
         if(cellKey === todayKey) cell.classList.add('today');
 
         const num = document.createElement('div');
         num.className = 'day-num';
-        num.textContent = `${cellDate.getMonth()+1}/${cellDate.getDate()}`;
+        num.textContent = `${thisDate.getMonth()+1}/${thisDate.getDate()}`;
         cell.appendChild(num);
 
-        const dayBookings = visibleBookingsForDate(cellDate);
+        const dayBookings = visibleBookingsForDate(thisDate);
         dayBookings.forEach(b=>{
           const pill = document.createElement('div');
           pill.className = "event-pill";
@@ -1459,18 +1564,8 @@
 
           const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
           const title = b.title || "Booking";
-          pill.textContent = `${title} – ${who}`;
-
-          pill.addEventListener('click', (evt)=>{
-            evt.stopPropagation();
-            if(!currentUser){
-              openAuth();
-              return;
-            }
-            openBookingForEdit(b);
-          });
-
           cell.appendChild(pill);
+          pill.textContent = `${title} – ${who}`;
         });
 
         cell.addEventListener('click', ()=>{
@@ -1478,7 +1573,12 @@
             openAuth();
             return;
           }
-          openBookingForDate(cellDate);
+          const dayBookingsNow = visibleBookingsForDate(thisDate);
+          if (dayBookingsNow.length){
+            openBookingForEdit(dayBookingsNow[0]);
+          } else {
+            openBookingForDate(thisDate);
+          }
         });
 
         monthGridEl.appendChild(cell);
@@ -1486,20 +1586,19 @@
       }
     } else {
       // Day view: single full-width cell
-      const cellDate = new Date(focusDate);
       const cell = document.createElement('div');
       cell.className = "day-cell";
       cell.style.gridColumn = "1 / -1";
 
-      const cellKey = dateKey(cellDate);
+      const cellKey = dateKey(focusDate);
       if(cellKey === todayKey) cell.classList.add('today');
 
       const num = document.createElement('div');
       num.className = 'day-num';
-      num.textContent = `${cellDate.getMonth()+1}/${cellDate.getDate()}`;
+      num.textContent = `${focusDate.getMonth()+1}/${focusDate.getDate()}`;
       cell.appendChild(num);
 
-      const dayBookings = visibleBookingsForDate(cellDate);
+      const dayBookings = visibleBookingsForDate(focusDate);
       dayBookings.forEach(b=>{
         const pill = document.createElement('div');
         pill.className = "event-pill";
@@ -1513,16 +1612,6 @@
           ? ` (${b.startTime || '??'}–${b.endTime || '??'})`
           : "";
         pill.textContent = `${title} – ${who}${times}`;
-
-        pill.addEventListener('click', (evt)=>{
-          evt.stopPropagation();
-          if(!currentUser){
-            openAuth();
-            return;
-          }
-          openBookingForEdit(b);
-        });
-
         cell.appendChild(pill);
       });
 
@@ -1531,7 +1620,12 @@
           openAuth();
           return;
         }
-        openBookingForDate(cellDate);
+        const dayBookingsNow = visibleBookingsForDate(focusDate);
+        if (dayBookingsNow.length){
+          openBookingForEdit(dayBookingsNow[0]);
+        } else {
+          openBookingForDate(focusDate);
+        }
       });
 
       monthGridEl.appendChild(cell);
@@ -1539,7 +1633,6 @@
   }
 
   /* ========== BOOKING MODAL: OPEN / SAVE / DELETE ========== */
-
   function openBookingForDate(d){
     // New booking prefilled with date
     selectedBookingId = null;
@@ -1548,9 +1641,8 @@
 
     aircraftSelect.value  = aircraftSelect.value || "N78710";
     titleSelect.value     = titleSelect.value || "Training";
-    const key = dateKey(d);
-    startDateInput.value  = key;
-    endDateInput.value    = key;
+    startDateInput.value  = dateKey(d);
+    endDateInput.value    = dateKey(d);
     startTimeInput.value  = "";
     endTimeInput.value    = "";
     tachStartInput.value  = "";
@@ -1558,11 +1650,6 @@
     commentsInput.value   = "";
     instructorSelect.value = "";
     instructorEmailDisplay.textContent = "";
-
-    // Fill readonly from profile if available
-    firstNameInput.value = currentRole?.profile?.firstName || "";
-    lastNameInput.value  = currentRole?.profile?.lastName || "";
-    emailInput.value     = currentRole?.email || "";
 
     deleteBookingBtn.style.display = "none";
 
@@ -1610,47 +1697,6 @@
     openModal();
   }
 
-  // 🔒 Overlap protection helpers
-  function parseDateTime(dateStr, timeStr, asEnd){
-    if(!dateStr) return null;
-    const [y,m,d] = dateStr.split('-').map(Number);
-    if(!y || !m || !d) return null;
-
-    let hh = 0, mm = 0;
-    if(timeStr){
-      const parts = timeStr.split(':').map(Number);
-      if(parts.length >= 2){
-        hh = parts[0] ?? 0;
-        mm = parts[1] ?? 0;
-      }
-    }else{
-      if(asEnd){
-        hh = 23; mm = 59;
-      }else{
-        hh = 0; mm = 0;
-      }
-    }
-    return new Date(y, m-1, d, hh, mm, 0, 0);
-  }
-
-  function hasOverlapLocal(aircraft, sDate, eDate, sTime, eTime, excludeId){
-    const start = parseDateTime(sDate, sTime, false);
-    const end   = parseDateTime(eDate || sDate, eTime, true);
-    if(!start || !end) return false;
-
-    return bookings.some(b=>{
-      if(b.aircraft !== aircraft) return false;
-      if(b.id === excludeId) return false;
-
-      const bStart = parseDateTime(b.startDate || sDate, b.startTime || "", false);
-      const bEnd   = parseDateTime(b.endDate || b.startDate || sDate, b.endTime || "", true);
-      if(!bStart || !bEnd) return false;
-
-      // Overlap if intervals intersect
-      return (start < bEnd) && (end > bStart);
-    });
-  }
-
   async function saveBooking(){
     if(!currentRole || !currentRole.uid){
       bookingErrorEl.textContent = "Please sign in first.";
@@ -1686,10 +1732,37 @@
       return;
     }
 
-    // 🔒 Overlap protection (local check against loaded bookings)
-    const excludeId = selectedBookingId || null;
-    if(hasOverlapLocal(aircraft, sDate, eDate, sTime, eTime, excludeId)){
-      bookingErrorEl.textContent = "This aircraft already has a booking that overlaps this date/time range.";
+    // ==== OVERLAP PROTECTION ====
+    const newStartDate = sDate;
+    const newEndDate   = eDate;
+
+    const hasOverlap = bookings.some(b=>{
+      if(b.aircraft !== aircraft) return false;
+
+      // Skip self when editing
+      if(selectedBookingId && b.id === selectedBookingId) return false;
+
+      const bStart = b.startDate || b.date;
+      const bEnd   = b.endDate || bStart;
+      if(!bStart) return false;
+
+      // If date ranges don't intersect, no conflict
+      if (newEndDate < bStart || bEnd < newStartDate) return false;
+
+      // If either booking spans multiple days, treat as conflict
+      if (newStartDate !== newEndDate || bStart !== bEnd) return true;
+
+      // Same single-day → check time overlap
+      return timesOverlap(
+        sTime || "",
+        eTime || "",
+        b.startTime || "",
+        b.endTime || ""
+      );
+    });
+
+    if (hasOverlap){
+      bookingErrorEl.textContent = "This booking overlaps an existing reservation for this aircraft.";
       return;
     }
 
@@ -1707,7 +1780,7 @@
       firstName: first,
       lastName:  last,
       email,
-      instructorEmail: (instructorSelect.value || "").trim(),
+      instructorEmail: instructorSelect.value || "",
       tachStart: tachS || "",
       tachEnd:   tachE || "",
       comments,
@@ -1730,9 +1803,8 @@
       }
 
       // AFTER successful save: if instructor selected, open native email app
-      const raw = instructorSelect.value || "";
-      if (raw.trim()){
-        launchInstructorEmail(false); // not cancelled
+      if (instructorSelect.value){
+        launchInstructorEmail(false);
       }
 
       closeModal();
@@ -1744,12 +1816,13 @@
 
   async function deleteBooking(){
     if(!selectedBookingId) return;
+
+    const bookingToDelete = bookings.find(b => b.id === selectedBookingId) || null;
     if(!confirm("Delete this booking?")) return;
 
-    // If there is an instructor selected, notify via email BEFORE deleting
-    const raw = instructorSelect.value || "";
-    if (raw.trim()){
-      launchInstructorEmail(true); // cancelled
+    // If there is an instructor on THIS booking, notify via email BEFORE deleting
+    if (bookingToDelete && bookingToDelete.instructorEmail){
+      launchInstructorEmail(true, bookingToDelete);
     }
 
     try{
@@ -1942,5 +2015,5 @@
   // Initial render
   renderCalendar();
 </script>
-
-
+</body>
+</html>
