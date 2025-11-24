@@ -1182,7 +1182,7 @@
     });
   }
 
-  /* ========== INSTRUCTORS ========== */
+  /* ========== INSTRUCTORS + EMAIL HELPERS ========== */
   async function loadInstructors(){
     instructors = [];
     try{
@@ -1206,7 +1206,8 @@
     });
   }
 
-  function buildInstructorEmailBody(inst){
+  // Collect current modal fields as a "booking" snapshot
+  function collectReservationDetails(){
     const first = firstNameInput.value || (currentRole?.profile?.firstName || "");
     const last  = lastNameInput.value || (currentRole?.profile?.lastName || "");
     const memberEmail = emailInput.value || (currentRole?.email || "");
@@ -1217,8 +1218,6 @@
     const eDate    = endDateInput.value || "";
     const sTime    = startTimeInput.value || "";
     const eTime    = endTimeInput.value || "";
-    const tachS    = tachStartInput.value || "";
-    const tachE    = tachEndInput.value || "";
     const comments = commentsInput.value || "";
 
     const dateRange = sDate && eDate && sDate !== eDate
@@ -1228,6 +1227,50 @@
     const timeRange = (sTime || eTime)
       ? `${sTime || 'N/A'} – ${eTime || 'N/A'}`
       : "All-day / flexible";
+
+    return {
+      first,
+      last,
+      memberEmail,
+      aircraft,
+      title,
+      dateRange,
+      sDate,
+      timeRange,
+      comments
+    };
+  }
+
+  function buildInstructorEmailBody(inst, { cancelled = false } = {}){
+    const {
+      first,
+      last,
+      memberEmail,
+      aircraft,
+      title,
+      dateRange,
+      timeRange,
+      comments
+    } = collectReservationDetails();
+
+    if (cancelled){
+      return `Hi ${inst.name || 'Instructor'},
+
+This is ${first} ${last} (${memberEmail}).
+
+I need to cancel the following reservation:
+
+Aircraft: ${aircraft || 'N/A'}
+Type: ${title || 'N/A'}
+Date(s): ${dateRange || 'N/A'}
+Time window: ${timeRange || 'N/A'}
+
+Additional notes:
+${comments || '(none)'}
+
+Thank you,
+${first} ${last}`;
+    }
 
     return `Hi ${inst.name || 'Instructor'},
 
@@ -1239,11 +1282,7 @@ Requested date(s):
   ${dateRange || 'N/A'}
 
 Requested time window:
-  ${timeRange}
-
-Tach (planned or last known):
-  Start: ${tachS || 'N/A'}
-  End:   ${tachE || 'N/A'}
+  ${timeRange || 'N/A'}
 
 Additional notes:
 ${comments || '(none)'}
@@ -1254,18 +1293,26 @@ Thank you,
 ${first} ${last}`;
   }
 
+  function launchInstructorEmail(cancelled = false){
+    const email = instructorSelect.value || "";
+    if (!email) return;
+
+    const inst = instructors.find(i => i.email === email) || { name: 'Instructor', email };
+    const details = collectReservationDetails();
+    const subject = cancelled
+      ? `Cancelled Reservation – ${details.aircraft || ''} ${details.sDate || ''}`.trim()
+      : `Flight Reservation Request – ${details.aircraft || ''} ${details.sDate || ''}`.trim();
+
+    const body = buildInstructorEmailBody(inst, { cancelled });
+    const mailto = `mailto:${encodeURIComponent(inst.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  }
+
+  // Only show instructor email in hint text when changed, no email yet
   instructorSelect.addEventListener('change', ()=>{
     const email = instructorSelect.value || "";
     const inst = instructors.find(i => i.email === email);
     instructorEmailDisplay.textContent = inst ? inst.email : "";
-
-    // If an instructor is chosen, launch the native email app with prefilled info
-    if(inst && email){
-      const subject = `Flight Reservation Request – ${aircraftSelect.value || ''} ${startDateInput.value || ''}`.trim();
-      const body    = buildInstructorEmailBody(inst);
-      const mailto  = `mailto:${encodeURIComponent(inst.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailto;
-    }
   });
 
   /* ========== BOOKINGS LOAD / RENDER ========== */
@@ -1363,7 +1410,14 @@ ${first} ${last}`;
             openAuth();
             return;
           }
-          openBookingForDate(temp);
+          // If clicking on a day that already has bookings, open the first one for edit,
+          // otherwise open a new booking on that date
+          const dayBookingsNow = visibleBookingsForDate(temp);
+          if (dayBookingsNow.length){
+            openBookingForEdit(dayBookingsNow[0]);
+          } else {
+            openBookingForDate(temp);
+          }
         });
 
         monthGridEl.appendChild(cell);
@@ -1403,7 +1457,12 @@ ${first} ${last}`;
             openAuth();
             return;
           }
-          openBookingForDate(temp);
+          const dayBookingsNow = visibleBookingsForDate(temp);
+          if (dayBookingsNow.length){
+            openBookingForEdit(dayBookingsNow[0]);
+          } else {
+            openBookingForDate(temp);
+          }
         });
 
         monthGridEl.appendChild(cell);
@@ -1445,7 +1504,12 @@ ${first} ${last}`;
           openAuth();
           return;
         }
-        openBookingForDate(focusDate);
+        const dayBookingsNow = visibleBookingsForDate(focusDate);
+        if (dayBookingsNow.length){
+          openBookingForEdit(dayBookingsNow[0]);
+        } else {
+          openBookingForDate(focusDate);
+        }
       });
 
       monthGridEl.appendChild(cell);
@@ -1459,13 +1523,15 @@ ${first} ${last}`;
     bookingErrorEl.textContent = "";
     modalTitleEl.textContent = "New booking";
 
-    startDateInput.value = dateKey(d);
-    endDateInput.value   = dateKey(d);
-    startTimeInput.value = "";
-    endTimeInput.value   = "";
-    tachStartInput.value = "";
-    tachEndInput.value   = "";
-    commentsInput.value  = "";
+    aircraftSelect.value  = aircraftSelect.value || "N78710";
+    titleSelect.value     = titleSelect.value || "Training";
+    startDateInput.value  = dateKey(d);
+    endDateInput.value    = dateKey(d);
+    startTimeInput.value  = "";
+    endTimeInput.value    = "";
+    tachStartInput.value  = "";
+    tachEndInput.value    = "";
+    commentsInput.value   = "";
     instructorSelect.value = "";
     instructorEmailDisplay.textContent = "";
 
@@ -1585,6 +1651,12 @@ ${first} ${last}`;
         });
         selectedBookingId = ref.id;
       }
+
+      // AFTER successful save: if instructor selected, open native email app
+      if (instructorSelect.value){
+        launchInstructorEmail(false); // not cancelled
+      }
+
       closeModal();
     }catch(e){
       console.error(e);
@@ -1595,6 +1667,12 @@ ${first} ${last}`;
   async function deleteBooking(){
     if(!selectedBookingId) return;
     if(!confirm("Delete this booking?")) return;
+
+    // If there is an instructor selected, notify via email BEFORE deleting
+    if (instructorSelect.value){
+      launchInstructorEmail(true); // cancelled
+    }
+
     try{
       await deleteDoc(doc(db,"bookings", selectedBookingId));
       closeModal();
@@ -1785,5 +1863,4 @@ ${first} ${last}`;
   // Initial render
   renderCalendar();
 </script>
-</body>
-</html>
+
