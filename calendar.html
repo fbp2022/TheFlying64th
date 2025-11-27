@@ -26,6 +26,7 @@
       --your:#22c55e;
       --other:#3b82f6;
       --maint:#ef4444;
+      --board:#a855f7;
     }
 
     *{box-sizing:border-box}
@@ -206,6 +207,7 @@
     .dot.your{background:var(--your);}
     .dot.other{background:var(--other);}
     .dot.maint{background:var(--maint);}
+    .dot.board{background:var(--board);}
 
     /* ===== FILTERS BAR ===== */
     .filters{
@@ -372,6 +374,10 @@
     .event-maint{
       background:var(--maint);
       color:#1f0202;
+    }
+    .event-board{
+      background:var(--board);
+      color:#1f0a2b;
     }
 
     /* ===== BOOKING MODAL ===== */
@@ -658,6 +664,7 @@
       <span><span class="dot your"></span>Your bookings</span>
       <span><span class="dot other"></span>Other members</span>
       <span><span class="dot maint"></span>Maintenance</span>
+      <span><span class="dot board"></span>Board meeting</span>
     </div>
   </section>
 
@@ -937,6 +944,8 @@
   let unsubStatus = null;
   let unsubBookings = null;
 
+  let aircraftStatusMap = {};
+
   /* DOM refs */
   const statusCardsEl   = document.getElementById('statusCards');
   const monthLabelEl    = document.getElementById('monthLabel');
@@ -1072,7 +1081,6 @@
   }
 
   function timesOverlap(aStart, aEnd, bStart, bEnd){
-    // aStart/aEnd/bStart/bEnd are "HH:MM" or ""
     const aS = timeToMinutes(aStart);
     const aE = timeToMinutes(aEnd);
     const bS = timeToMinutes(bStart);
@@ -1081,7 +1089,6 @@
     const aAllDay = aS === null && aE === null;
     const bAllDay = bS === null && bE === null;
 
-    // any all-day vs anything = overlap
     if(aAllDay || bAllDay) return true;
 
     const aStartMin = aS ?? 0;
@@ -1198,19 +1205,38 @@
     const qStatus = query(collection(db,"aircraftStatus"));
     return onSnapshot(qStatus, (snap)=>{
       statusCardsEl.innerHTML = "";
+      aircraftStatusMap = {};
+
       snap.forEach(docSnap=>{
-        const d = docSnap.data();
+        const d = docSnap.data() || {};
+        const currentTachNum = (typeof d.currentTach === "number")
+          ? d.currentTach
+          : (d.currentTach ? Number(d.currentTach) : null);
+
+        aircraftStatusMap[docSnap.id] = { currentTach: currentTachNum };
+
         const div = document.createElement('div');
         div.className = "tach-card";
         div.innerHTML = `
           <div class="tach-title">${escapeHtml(docSnap.id)}</div>
-          <div class="tach-row"><span>Tach:</span><span>${d.currentTach ?? '—'}</span></div>
+          <div class="tach-row"><span>Tach:</span><span>${currentTachNum ?? '—'}</span></div>
           <div style="margin-top:4px;font-size:.75rem;color:var(--muted);">
             Last updated: ${d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : '—'}
           </div>
         `;
         statusCardsEl.appendChild(div);
       });
+
+      const boardDiv = document.createElement('div');
+      boardDiv.className = "tach-card";
+      boardDiv.innerHTML = `
+        <div class="tach-title">Board Meeting</div>
+        <div class="tach-row"><span>When:</span><span>1st Thursday of every month</span></div>
+        <div style="margin-top:4px;font-size:.75rem;color:var(--muted);">
+          Appears on the calendar as a purple event.
+        </div>
+      `;
+      statusCardsEl.appendChild(boardDiv);
     });
   }
 
@@ -1238,7 +1264,6 @@
     });
   }
 
-  // Collect current modal fields as a "booking" snapshot
   function collectReservationDetails(){
     const first = firstNameInput.value || (currentRole?.profile?.firstName || "");
     const last  = lastNameInput.value || (currentRole?.profile?.lastName || "");
@@ -1330,7 +1355,6 @@ ${first} ${last}`;
   }
 
   function launchInstructorEmail(cancelled = false, booking = null){
-    // If we pass a booking, build from that. Otherwise use current modal fields.
     if (booking){
       const instructorEmail = booking.instructorEmail || "";
       if (!instructorEmail) return;
@@ -1374,7 +1398,6 @@ ${first} ${last}`;
       return;
     }
 
-    // Fallback: use current modal selection + fields
     const email = instructorSelect.value || "";
     if (!email) return;
 
@@ -1390,7 +1413,6 @@ ${first} ${last}`;
     window.location.href = mailto;
   }
 
-  // Only show instructor email in hint text when changed, no email yet
   instructorSelect.addEventListener('change', ()=>{
     const email = instructorSelect.value || "";
     const inst = instructors.find(i => i.email === email);
@@ -1416,40 +1438,33 @@ ${first} ${last}`;
   }
 
   function visibleBookingsForDate(d){
-    const key = dateKey(d); // YYYY-MM-DD for the cell’s date
+    const key = dateKey(d);
 
     return bookings.filter(b => {
-      // Aircraft filter
       if (aircraftFilter !== 'all' && b.aircraft && b.aircraft !== aircraftFilter) {
         return false;
       }
 
-      // Prefer new fields, fall back to older shapes
       let s = b.startDate ?? b.date ?? b.startTimestamp ?? b.start;
       let e = b.endDate   ?? b.endTimestamp ?? b.end ?? s;
 
       if (!s && !e) return false;
 
-      // Normalize everything into YYYY-MM-DD strings so we can safely compare
       const toKey = (val) => {
         if (!val) return null;
 
-        // already YYYY-MM-DD
         if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
           return val;
         }
 
-        // Firestore Timestamp
         if (val && typeof val.toDate === "function") {
           return dateKey(val.toDate());
         }
 
-        // JS Date
         if (val instanceof Date) {
           return dateKey(val);
         }
 
-        // Anything else, just bail
         return null;
       };
 
@@ -1462,7 +1477,25 @@ ${first} ${last}`;
     });
   }
 
-    function renderCalendar(){
+  function boardMeetingsForDate(d){
+    const isThursday = d.getDay() === 4;
+    const isFirstWeek = d.getDate() <= 7;
+    if (!isThursday || !isFirstWeek) return [];
+
+    return [{
+      id: `board-${dateKey(d)}`,
+      title: "Board Meeting",
+      startDate: dateKey(d),
+      endDate: dateKey(d),
+      startTime: "",
+      endTime: "",
+      firstName: "",
+      lastName: "",
+      isBoardMeeting: true
+    }];
+  }
+
+  function renderCalendar(){
     if(!monthGridEl) return;
 
     const year  = focusDate.getFullYear();
@@ -1471,7 +1504,6 @@ ${first} ${last}`;
     const monthNames = ["January","February","March","April","May","June",
                         "July","August","September","October","November","December"];
 
-    // Label depends on view mode
     if(viewMode === 'month'){
       monthLabelEl.textContent = `${monthNames[month]} ${year}`;
     } else if(viewMode === 'week'){
@@ -1483,43 +1515,49 @@ ${first} ${last}`;
       monthLabelEl.textContent = `Day – ${monthNames[month]} ${focusDate.getDate()}, ${year}`;
     }
 
-    // Clear grid
     monthGridEl.innerHTML = "";
 
     const todayKey = dateKey(new Date());
 
-    // Helper to build a pill and wire click to THAT booking only
     function makeBookingPill(b){
       const pill = document.createElement('div');
       pill.className = "event-pill";
-      if(b.title === "Maintenance") pill.classList.add('event-maint');
-      else if(b.uid === currentRole?.uid) pill.classList.add('event-your');
-      else pill.classList.add('event-other');
 
-      const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || "Member";
+      if (b.isBoardMeeting){
+        pill.classList.add('event-board');
+      } else if(b.title === "Maintenance"){
+        pill.classList.add('event-maint');
+      } else if(b.uid === currentRole?.uid){
+        pill.classList.add('event-your');
+      } else {
+        pill.classList.add('event-other');
+      }
+
+      const who = `${b.firstName || ''} ${(b.lastName || '')}`.trim() || (b.isBoardMeeting ? "" : "Member");
       const title = b.title || "Booking";
       const times = (b.startTime || b.endTime)
         ? ` (${b.startTime || '??'}–${b.endTime || '??'})`
         : "";
 
-      // Month/week views don’t need times as much, but safe to include
-      pill.textContent = `${title} – ${who}${times}`;
+      pill.textContent = b.isBoardMeeting
+        ? `${title}${times}`
+        : `${title} – ${who}${times}`;
 
-      // 🔒 IMPORTANT: clicking the pill opens *that* booking, not the first of the day
-      pill.addEventListener('click', (evt)=>{
-        evt.stopPropagation(); // don’t trigger cell click
-        if (!currentUser){
-          openAuth();
-          return;
-        }
-        openBookingForEdit(b);
-      });
+      if (!b.isBoardMeeting){
+        pill.addEventListener('click', (evt)=>{
+          evt.stopPropagation();
+          if (!currentUser){
+            openAuth();
+            return;
+          }
+          openBookingForEdit(b);
+        });
+      }
 
       return pill;
     }
 
     if(viewMode === 'month'){
-      // Build standard month grid
       const firstOfMonth = new Date(year, month, 1);
       const start = startOfWeek(firstOfMonth);
       const temp = new Date(start);
@@ -1538,17 +1576,16 @@ ${first} ${last}`;
         num.textContent = thisDate.getDate();
         cell.appendChild(num);
 
-        const dayBookings = visibleBookingsForDate(thisDate);
+        const dayBookings = [
+          ...visibleBookingsForDate(thisDate),
+          ...boardMeetingsForDate(thisDate)
+        ];
+
         dayBookings.forEach(b=>{
           const pill = makeBookingPill(b);
           cell.appendChild(pill);
         });
 
-        // Clicking EMPTY space in the cell:
-        // - if signed out: open auth
-        // - if signed in:
-        //    - if no bookings: new booking for that date
-        //    - if bookings: new booking for that date (use pills to open specific)
         cell.addEventListener('click', ()=>{
           if(!currentUser){
             openAuth();
@@ -1576,7 +1613,11 @@ ${first} ${last}`;
         num.textContent = `${thisDate.getMonth()+1}/${thisDate.getDate()}`;
         cell.appendChild(num);
 
-        const dayBookings = visibleBookingsForDate(thisDate);
+        const dayBookings = [
+          ...visibleBookingsForDate(thisDate),
+          ...boardMeetingsForDate(thisDate)
+        ];
+
         dayBookings.forEach(b=>{
           const pill = makeBookingPill(b);
           cell.appendChild(pill);
@@ -1594,7 +1635,6 @@ ${first} ${last}`;
         temp.setDate(temp.getDate() + 1);
       }
     } else {
-      // Day view: single full-width cell
       const cell = document.createElement('div');
       cell.className = "day-cell";
       cell.style.gridColumn = "1 / -1";
@@ -1607,7 +1647,11 @@ ${first} ${last}`;
       num.textContent = `${focusDate.getMonth()+1}/${focusDate.getDate()}`;
       cell.appendChild(num);
 
-      const dayBookings = visibleBookingsForDate(focusDate);
+      const dayBookings = [
+        ...visibleBookingsForDate(focusDate),
+        ...boardMeetingsForDate(focusDate)
+      ];
+
       dayBookings.forEach(b=>{
         const pill = makeBookingPill(b);
         cell.appendChild(pill);
@@ -1618,7 +1662,6 @@ ${first} ${last}`;
           openAuth();
           return;
         }
-        // Same behavior: click empty area ⇒ new booking for that day
         openBookingForDate(focusDate);
       });
 
@@ -1629,12 +1672,10 @@ ${first} ${last}`;
   /* ========== BOOKING MODAL: OPEN / SAVE / DELETE ========== */
 
   function openBookingForDate(d){
-    // New booking prefilled with date
     selectedBookingId = null;
     bookingErrorEl.textContent = "";
     modalTitleEl.textContent = "New booking";
 
-    // 🔐 Always use the CURRENT signed-in user's profile
     firstNameInput.value = currentRole?.profile?.firstName || "";
     lastNameInput.value  = currentRole?.profile?.lastName  || "";
     emailInput.value     = currentRole?.email || "";
@@ -1687,7 +1728,6 @@ ${first} ${last}`;
     const isOwner = b.uid && currentRole && b.uid === currentRole.uid;
     const isMaint = b.title === "Maintenance";
 
-    // Admin can delete anything; member can delete own non-maintenance bookings
     if (currentRole?.isAdmin || (isOwner && !isMaint)){
       deleteBookingBtn.style.display = "inline-block";
     } else {
@@ -1697,14 +1737,12 @@ ${first} ${last}`;
     openModal();
   }
 
-  // ===== Overlap helpers =====
   function makeDateTime(dateStr, timeStr, isEnd){
     if (!dateStr) return null;
     let t = timeStr;
     if (!t || !t.trim()){
       t = isEnd ? "23:59" : "00:00";
     }
-    // Safe enough for local comparisons
     return new Date(`${dateStr}T${t}`);
   }
 
@@ -1746,8 +1784,8 @@ ${first} ${last}`;
     const eDate    = endDateInput.value || sDate;
     const sTime    = startTimeInput.value;
     const eTime    = endTimeInput.value;
-    const tachS    = tachStartInput.value;
-    const tachE    = tachEndInput.value;
+    const tachS    = tachStartInput.value.trim();
+    const tachE    = tachEndInput.value.trim();
     const comments = commentsInput.value || "";
 
     if (!aircraft || !sDate){
@@ -1755,7 +1793,6 @@ ${first} ${last}`;
       return;
     }
 
-    // Enforce date ordering
     const sd = parseDateStr(sDate);
     const ed = parseDateStr(eDate);
     if (sd && ed && ed < sd){
@@ -1763,13 +1800,35 @@ ${first} ${last}`;
       return;
     }
 
-    // Maintenance bookings only by admin (UI-side; rules enforce too)
+    let tachSNum = null;
+    let tachENum = null;
+
+    if (tachS){
+      tachSNum = parseFloat(tachS);
+      if (Number.isNaN(tachSNum)){
+        bookingErrorEl.textContent = "Tach start must be a number.";
+        return;
+      }
+    }
+
+    if (tachE){
+      tachENum = parseFloat(tachE);
+      if (Number.isNaN(tachENum)){
+        bookingErrorEl.textContent = "Tach end must be a number.";
+        return;
+      }
+    }
+
+    if (tachSNum !== null && tachENum !== null && tachENum < tachSNum){
+      bookingErrorEl.textContent = "Tach end cannot be less than tach start.";
+      return;
+    }
+
     if (title === "Maintenance" && !currentRole.isAdmin){
       bookingErrorEl.textContent = "Only admins can create Maintenance bookings.";
       return;
     }
 
-    // 🔒 Overlap protection: prevent double-booking same aircraft
     const conflict = findOverlapBooking({
       aircraft,
       sDate,
@@ -1816,11 +1875,9 @@ ${first} ${last}`;
 
     try {
       if (selectedBookingId){
-        // Edit existing
         const ref = doc(db, "bookings", selectedBookingId);
         await updateDoc(ref, base);
       } else {
-        // New booking
         const ref = await addDoc(collection(db, "bookings"), {
           ...base,
           createdAt: serverTimestamp()
@@ -1828,9 +1885,19 @@ ${first} ${last}`;
         selectedBookingId = ref.id;
       }
 
-      // AFTER successful save: if instructor selected, open native email app
+      if (tachENum !== null){
+        try{
+          await updateDoc(doc(db, "aircraftStatus", aircraft), {
+            currentTach: tachENum,
+            updatedAt: serverTimestamp()
+          });
+        } catch (e){
+          console.warn("Failed to update aircraftStatus tach:", e);
+        }
+      }
+
       if (instructorSelect.value){
-        launchInstructorEmail(false); // not cancelled
+        launchInstructorEmail(false);
       }
 
       closeModal();
@@ -1844,12 +1911,10 @@ ${first} ${last}`;
     if (!selectedBookingId) return;
     if (!confirm("Delete this booking?")) return;
 
-    // Capture whether this booking actually has an instructor before we clear anything
     const hasInstructor = !!(instructorSelect.value && instructorSelect.value.trim());
 
-    // If there is an instructor selected, notify via email BEFORE deleting
     if (hasInstructor){
-      launchInstructorEmail(true); // cancelled
+      launchInstructorEmail(true);
     }
 
     try {
@@ -1863,7 +1928,7 @@ ${first} ${last}`;
   /* ========== EXPORT (CURRENT MONTH) ========== */
   function exportCurrentMonth(){
     const y = focusDate.getFullYear();
-    const m = focusDate.getMonth(); // 0-based
+    const m = focusDate.getMonth();
     const start = new Date(y, m, 1);
     const end   = new Date(y, m + 1, 0);
     const startStr = dateKey(start);
@@ -1921,7 +1986,6 @@ ${first} ${last}`;
   }
 
   /* ========== EVENTS & AUTH STATE ========== */
-  // Filters
   filterPills.forEach(p => {
     p.addEventListener('click', () => {
       filterPills.forEach(x => x.classList.remove('active'));
@@ -1931,7 +1995,6 @@ ${first} ${last}`;
     });
   });
 
-  // View mode
   function setViewMode(mode){
     viewMode = mode;
     [viewMonthBtn, viewWeekBtn, viewDayBtn].forEach(btn => btn.classList.remove('active'));
@@ -1944,7 +2007,6 @@ ${first} ${last}`;
   viewWeekBtn.addEventListener('click', () => setViewMode('week'));
   viewDayBtn.addEventListener('click', () => setViewMode('day'));
 
-  // Nav period
   prevPeriodBtn.addEventListener('click', () => {
     if (viewMode === 'month'){
       focusDate = new Date(focusDate.getFullYear(), focusDate.getMonth() - 1, 1);
@@ -1969,7 +2031,6 @@ ${first} ${last}`;
 
   exportMonthBtn.addEventListener('click', exportCurrentMonth);
 
-  // Modal buttons
   bookingCloseBtn.addEventListener('click', closeModal);
   cancelBookingBtn.addEventListener('click', closeModal);
   saveBookingBtn.addEventListener('click', saveBooking);
@@ -1990,7 +2051,6 @@ ${first} ${last}`;
     openBookingForDate(focusDate);
   });
 
-  // Auth state
   onAuthChanged(async (user) => {
     currentUser = user || null;
     if (!user){
@@ -2012,12 +2072,10 @@ ${first} ${last}`;
       const shortEmail = email.length > 25 ? email.slice(0, 25) + "…" : email;
       signinBtn.textContent = shortEmail ? `Account – ${shortEmail}` : "Account";
 
-      // Fill readonly name/email on form from profile
       firstNameInput.value = currentRole.profile?.firstName || "";
       lastNameInput.value  = currentRole.profile?.lastName  || "";
       emailInput.value     = currentRole.email || "";
 
-      // Maintenance option only for admins
       const maintOpt = [...titleSelect.options].find(o => o.value === "Maintenance");
       if (maintOpt){
         if (!currentRole.isAdmin){
@@ -2027,11 +2085,9 @@ ${first} ${last}`;
         }
       }
 
-      // Subscribe to status + bookings only when signed in
       if (!unsubStatus)   unsubStatus   = subscribeAircraftStatus();
       if (!unsubBookings) unsubBookings = subscribeBookings();
 
-      // Load instructors once
       if (!instructors.length) loadInstructors();
 
     } catch (e){
@@ -2039,7 +2095,6 @@ ${first} ${last}`;
     }
   });
 
-  // Initial render
   renderCalendar();
 </script>
 </body>
