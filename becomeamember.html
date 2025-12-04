@@ -243,46 +243,34 @@
 </footer>
 
 <script>
+  // Set year in footer
   document.getElementById("y").textContent = new Date().getFullYear();
 
-  const agree = document.getElementById('agree');
-  const submitBtn = document.getElementById('submitBtn');
-  if (agree) agree.addEventListener('change', () => submitBtn.disabled = !agree.checked);
-
   const form = document.getElementById('appForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const agree = document.getElementById('agree');
   const status = document.getElementById('formStatus');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    submitBtn.disabled = true;
-    status.textContent = "Sending…";
+  // Enable/disable submit based on the bylaws checkbox
+  if (agree && submitBtn) {
+    agree.addEventListener('change', () => {
+      submitBtn.disabled = !agree.checked;
+    });
+  }
 
-    const data = new FormData(form);
-    const endpoint = form.action + "?json=true";
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        body: data,
-        headers: { "Accept": "application/json" }
-      });
-
-      if (res.ok) {
-        form.reset();
-        if (agree) submitBtn.disabled = true;
-        status.textContent = "✅ Your application has been sent successfully.";
-        status.style.color = "#4ade80";
-      } else {
-        status.textContent = "❌ There was a problem sending your application. Please try again.";
-        status.style.color = "#f87171";
-        submitBtn.disabled = false;
+  // On submit, allow browser to POST directly to FormSubmit
+  if (form && submitBtn) {
+    form.addEventListener('submit', () => {
+      // Do NOT prevent default, do NOT use fetch.
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
+      if (status) {
+        status.textContent = "";
+        status.style.color = "";
       }
-    } catch {
-      status.textContent = "⚠️ Network error. Please try again.";
-      status.style.color = "#fbbf24";
-      submitBtn.disabled = false;
-    }
-  });
+      // FormSubmit takes over from here.
+    });
+  }
 </script>
 </body>
 </html>
